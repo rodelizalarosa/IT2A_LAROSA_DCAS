@@ -16,6 +16,11 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
     public Admin_Internal() {
         initComponents();
         
+        Session sess = Session.getInstance();
+        String username = Session.getInstance().getUsername();
+        username = sess.getUsername();
+        dashboard.setText(username + "'s Dashboard");
+        
         //remove border
         this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0,0,0,0));
         BasicInternalFrameUI bi = (BasicInternalFrameUI)this.getUI();
@@ -59,6 +64,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         jPanel1.add(dashboard, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 0, 730, 50));
 
         dashboard_header.setBackground(new java.awt.Color(55, 162, 153));
+        dashboard_header.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
         jPanel1.add(dashboard_header, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 50));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));

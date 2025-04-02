@@ -144,7 +144,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         profile = new javax.swing.JLabel();
-        username1 = new javax.swing.JLabel();
+        username = new javax.swing.JLabel();
         userName = new javax.swing.JTextField();
         email2 = new javax.swing.JLabel();
         Email = new javax.swing.JTextField();
@@ -166,6 +166,12 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         del_prof1 = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         add_prof1 = new javax.swing.JLabel();
+        firstname = new javax.swing.JLabel();
+        firstName = new javax.swing.JTextField();
+        errorFirst = new javax.swing.JLabel();
+        lastname = new javax.swing.JLabel();
+        lastName = new javax.swing.JTextField();
+        errorLast = new javax.swing.JLabel();
 
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -173,6 +179,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         profile_header.setBackground(new java.awt.Color(55, 162, 153));
+        profile_header.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
         profile_header.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         account.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
@@ -197,10 +204,10 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
         jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 860, 50));
 
-        username1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        username1.setForeground(new java.awt.Color(51, 51, 51));
-        username1.setText("Username");
-        jPanel2.add(username1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 160, 80, 30));
+        username.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        username.setForeground(new java.awt.Color(51, 51, 51));
+        username.setText("Username");
+        jPanel2.add(username, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 160, 80, 30));
 
         userName.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
         userName.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -213,12 +220,12 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 userNameActionPerformed(evt);
             }
         });
-        jPanel2.add(userName, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 190, 270, 40));
+        jPanel2.add(userName, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 190, 230, 40));
 
         email2.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         email2.setForeground(new java.awt.Color(51, 51, 51));
         email2.setText("Email");
-        jPanel2.add(email2, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 160, 80, 30));
+        jPanel2.add(email2, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 160, 80, 30));
 
         Email.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
         Email.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -231,9 +238,9 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 EmailActionPerformed(evt);
             }
         });
-        jPanel2.add(Email, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 190, 270, 40));
+        jPanel2.add(Email, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 290, 230, 40));
 
-        password1.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        password1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         password1.setForeground(new java.awt.Color(51, 51, 51));
         password1.setText("Password");
         jPanel2.add(password1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 260, 120, 30));
@@ -244,12 +251,12 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 PasswordFocusLost(evt);
             }
         });
-        jPanel2.add(Password, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 290, 240, 40));
+        jPanel2.add(Password, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 190, 230, 40));
 
-        confirmPassword.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        confirmPassword.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         confirmPassword.setForeground(new java.awt.Color(51, 51, 51));
         confirmPassword.setText("Confirm Password");
-        jPanel2.add(confirmPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 260, 150, 30));
+        jPanel2.add(confirmPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 260, 150, 30));
 
         ConfirmPass.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
         ConfirmPass.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -257,7 +264,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 ConfirmPassFocusLost(evt);
             }
         });
-        jPanel2.add(ConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 290, 250, 40));
+        jPanel2.add(ConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 290, 230, 40));
 
         create_button.setBackground(new java.awt.Color(0, 153, 153));
         create_button.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
@@ -270,7 +277,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 create_buttonMouseClicked(evt);
             }
         });
-        jPanel2.add(create_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 360, 210, 40));
+        jPanel2.add(create_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 320, 200, 30));
 
         showCon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         showCon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/show_bl.png"))); // NOI18N
@@ -279,7 +286,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 showConMousePressed(evt);
             }
         });
-        jPanel2.add(showCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 290, 40, 40));
+        jPanel2.add(showCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 290, 40, 40));
 
         hideCon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         hideCon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/hide_bl.png"))); // NOI18N
@@ -288,7 +295,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 hideConMousePressed(evt);
             }
         });
-        jPanel2.add(hideCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 290, 40, 40));
+        jPanel2.add(hideCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 290, 40, 40));
 
         show.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         show.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/show_bl.png"))); // NOI18N
@@ -297,7 +304,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 showMousePressed(evt);
             }
         });
-        jPanel2.add(show, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 290, 40, 40));
+        jPanel2.add(show, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 290, 40, 40));
 
         hide.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         hide.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/hide_bl.png"))); // NOI18N
@@ -306,9 +313,9 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 hideMousePressed(evt);
             }
         });
-        jPanel2.add(hide, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 290, 40, 40));
+        jPanel2.add(hide, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 290, 40, 40));
         jPanel2.add(errorUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 230, 210, 20));
-        jPanel2.add(errorEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 230, 220, 20));
+        jPanel2.add(errorEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 230, 220, 20));
         jPanel2.add(errorPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 330, 210, 20));
         jPanel2.add(errorConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 330, 170, 20));
 
@@ -339,7 +346,45 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
         jPanel2.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 250, 100, 40));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 860, 430));
+        firstname.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        firstname.setForeground(new java.awt.Color(51, 51, 51));
+        firstname.setText("First Name");
+        jPanel2.add(firstname, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 70, 80, 30));
+
+        firstName.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
+        firstName.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                firstNameFocusLost(evt);
+            }
+        });
+        firstName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                firstNameActionPerformed(evt);
+            }
+        });
+        jPanel2.add(firstName, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 100, 230, 40));
+        jPanel2.add(errorFirst, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 140, 210, 20));
+
+        lastname.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        lastname.setForeground(new java.awt.Color(51, 51, 51));
+        lastname.setText("Last Name");
+        jPanel2.add(lastname, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 70, 80, 30));
+
+        lastName.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
+        lastName.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                lastNameFocusLost(evt);
+            }
+        });
+        lastName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lastNameActionPerformed(evt);
+            }
+        });
+        jPanel2.add(lastName, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 100, 230, 40));
+        jPanel2.add(errorLast, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 140, 210, 20));
+
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 90, 830, 430));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
@@ -483,6 +528,22 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         Password.setEchoChar((char) 0);
     }//GEN-LAST:event_hideMousePressed
 
+    private void firstNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_firstNameFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_firstNameFocusLost
+
+    private void firstNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_firstNameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_firstNameActionPerformed
+
+    private void lastNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_lastNameFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_lastNameFocusLost
+
+    private void lastNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lastNameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_lastNameActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPasswordField ConfirmPass;
@@ -497,8 +558,12 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
     private javax.swing.JLabel email2;
     private javax.swing.JLabel errorConfirmPass;
     private javax.swing.JLabel errorEmail;
+    private javax.swing.JLabel errorFirst;
+    private javax.swing.JLabel errorLast;
     private javax.swing.JLabel errorPassword;
     private javax.swing.JLabel errorUser;
+    private javax.swing.JTextField firstName;
+    private javax.swing.JLabel firstname;
     private javax.swing.JLabel hide;
     private javax.swing.JLabel hideCon;
     private javax.swing.JLabel image;
@@ -506,12 +571,14 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JTextField lastName;
+    private javax.swing.JLabel lastname;
     private javax.swing.JLabel password1;
     private javax.swing.JLabel profile;
     private javax.swing.JPanel profile_header;
     private javax.swing.JLabel show;
     private javax.swing.JLabel showCon;
     private javax.swing.JTextField userName;
-    private javax.swing.JLabel username1;
+    private javax.swing.JLabel username;
     // End of variables declaration//GEN-END:variables
 }

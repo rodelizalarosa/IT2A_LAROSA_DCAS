@@ -29,6 +29,7 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         doctor_header.setBackground(new java.awt.Color(55, 162, 153));
+        doctor_header.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
         doctor_header.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         doctor.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
