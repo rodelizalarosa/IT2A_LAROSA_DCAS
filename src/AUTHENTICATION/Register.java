@@ -169,6 +169,8 @@ public class Register extends javax.swing.JFrame {
                 && Password.getPassword().length == 0;
     }
     
+    public String destination = "src/default/u_blank.jpg";
+    
    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
