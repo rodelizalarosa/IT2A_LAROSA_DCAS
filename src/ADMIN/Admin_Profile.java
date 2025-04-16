@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,9 +26,11 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 public class Admin_Profile extends javax.swing.JInternalFrame {
 
-   
+    private JDesktopPane mainDesktop;
+     
     public Admin_Profile() {
         initComponents();
+        this.mainDesktop = Session.getInstance().getDesktopPane();
         
         //remove border
         this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0,0,0,0));
@@ -94,6 +97,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
    
     private void showProfile(){
          Admin_Profile_Edit edit = new Admin_Profile_Edit();
+         mainDesktop.add(edit);
          edit.setVisible(true);
     }
    
@@ -104,18 +108,14 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
 
         jPanel1 = new javax.swing.JPanel();
         profile_header = new javax.swing.JPanel();
-        account = new javax.swing.JLabel();
+        account1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        profile = new javax.swing.JLabel();
+        account = new javax.swing.JLabel();
         username1 = new javax.swing.JLabel();
         Role = new javax.swing.JLabel();
         edit_profile = new javax.swing.JLabel();
         image = new javax.swing.JLabel();
-        delPanel = new javax.swing.JPanel();
-        del_prof1 = new javax.swing.JLabel();
-        jPanel4 = new javax.swing.JPanel();
-        add_prof1 = new javax.swing.JLabel();
         email3 = new javax.swing.JLabel();
         email4 = new javax.swing.JLabel();
         email5 = new javax.swing.JLabel();
@@ -148,10 +148,10 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         profile_header.setBackground(new java.awt.Color(55, 162, 153));
         profile_header.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        account.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        account.setForeground(new java.awt.Color(255, 255, 255));
-        account.setText("Admin Account");
-        profile_header.add(account, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 0, 150, 50));
+        account1.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        account1.setForeground(new java.awt.Color(255, 255, 255));
+        account1.setText("Admin Account");
+        profile_header.add(account1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 0, 150, 50));
 
         jPanel1.add(profile_header, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, 900, 50));
 
@@ -162,12 +162,13 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         jPanel3.setBackground(new java.awt.Color(55, 162, 153));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        profile.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        profile.setForeground(new java.awt.Color(255, 255, 255));
-        profile.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jPanel3.add(profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 810, 50));
+        account.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        account.setForeground(new java.awt.Color(255, 255, 255));
+        account.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        account.setText("Admin Personal Details");
+        jPanel3.add(account, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 0, 410, 50));
 
-        jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 860, 50));
+        jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 830, 50));
 
         username1.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         username1.setForeground(new java.awt.Color(51, 51, 51));
@@ -190,34 +191,10 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
                 edit_profileMouseClicked(evt);
             }
         });
-        jPanel2.add(edit_profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 310, 140, 40));
+        jPanel2.add(edit_profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 320, 170, 40));
 
         image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
         jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 200, 160));
-
-        delPanel.setBackground(new java.awt.Color(255, 255, 255));
-        delPanel.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
-        delPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        del_prof1.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        del_prof1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        del_prof1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/del_profile.png"))); // NOI18N
-        del_prof1.setText("  Delete");
-        delPanel.add(del_prof1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 40));
-
-        jPanel2.add(delPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, 100, 40));
-
-        jPanel4.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel4.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
-        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        add_prof1.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
-        add_prof1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        add_prof1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/upload.png"))); // NOI18N
-        add_prof1.setText("  Add");
-        jPanel4.add(add_prof1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 40));
-
-        jPanel2.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 250, 100, 40));
 
         email3.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         email3.setForeground(new java.awt.Color(51, 51, 51));
@@ -249,7 +226,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         Email.setText("email");
         jPanel2.add(Email, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 240, 460, 30));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 850, 380));
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, 830, 380));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
@@ -257,9 +234,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void edit_profileMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_edit_profileMouseClicked
- 
         showProfile();
-    
     }//GEN-LAST:event_edit_profileMouseClicked
 
     private void formInternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameActivated
@@ -323,9 +298,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
     private javax.swing.JLabel Role;
     private javax.swing.JLabel User;
     private javax.swing.JLabel account;
-    private javax.swing.JLabel add_prof1;
-    private javax.swing.JPanel delPanel;
-    private javax.swing.JLabel del_prof1;
+    private javax.swing.JLabel account1;
     private javax.swing.JLabel edit_profile;
     private javax.swing.JLabel email3;
     private javax.swing.JLabel email4;
@@ -335,8 +308,6 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
-    private javax.swing.JLabel profile;
     private javax.swing.JPanel profile_header;
     private javax.swing.JLabel username1;
     // End of variables declaration//GEN-END:variables

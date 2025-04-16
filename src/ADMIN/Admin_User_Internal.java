@@ -164,9 +164,9 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         users.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(users);
 
-        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 50, 840, 370));
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 50, 840, 380));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 860, 430));
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 860, 440));
 
         activatePanel.setBackground(new java.awt.Color(0, 51, 51));
         activatePanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -278,7 +278,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
 
         jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 70, 80, -1));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 550));
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -321,25 +321,8 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
 
     private void addPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_addPanelMouseClicked
 
-        Add_User ad = new Add_User();
-
-        JDesktopPane desktopPane = this.getDesktopPane(); // Get the parent JDesktopPane
-
-        if (desktopPane != null) {
-
-            desktopPane.add(ad);
-            ad.setVisible(true);
-
-
-            try {
-                ad.setSelected(true);
-            } catch (java.beans.PropertyVetoException e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("Error: JDesktopPane is null!"); // Debugging output
-        }
-
+        Admin_Add_User ad = new Admin_Add_User();
+        ad.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_addPanelMouseClicked
 

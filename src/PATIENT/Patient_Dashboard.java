@@ -29,7 +29,11 @@ public class Patient_Dashboard extends javax.swing.JFrame {
     
     
     Color hoverColor = new Color (0,153,153);
-    Color navColor = new Color (55,162,153);
+    Color navColor = new Color (55,162,153); 
+    
+    Color logoutHover = new Color (55,162,153);
+    Color logoutNav = new Color (0,51,51);
+    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -199,11 +203,11 @@ public class Patient_Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_logoutPanelMouseClicked
 
     private void logoutPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutPanelMouseEntered
-        logoutPanel.setBackground(hoverColor);
+        logoutPanel.setBackground(logoutHover);
     }//GEN-LAST:event_logoutPanelMouseEntered
 
     private void logoutPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutPanelMouseExited
-        logoutPanel.setBackground(navColor);
+        logoutPanel.setBackground(logoutNav);
     }//GEN-LAST:event_logoutPanelMouseExited
 
     public static void main(String args[]) {

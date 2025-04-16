@@ -2,29 +2,88 @@
 package ADMIN;
 
 import AUTHENTICATION.Register;
-import Config.ConnectDB;
-import Config.Session;
+import Config.*;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.border.LineBorder;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
     public Admin_Profile_Edit() {
         initComponents();
+        borderField();
         
          //remove border
         this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0,0,0,0));
         BasicInternalFrameUI bi = (BasicInternalFrameUI)this.getUI();
         bi.setNorthPane(null);
+    }
+    
+    private void borderField(){
+          // Make username transparent with a border
+        userName.setBackground(new Color(0, 0, 0, 0));
+        userName.setBorder(new LineBorder(Color.BLACK, 1));
+        
+        // Make email transparent with a border
+        Email.setBackground(new Color(0, 0, 0, 0));
+        Email.setBorder(new LineBorder(Color.BLACK, 1));
+        
+        // Make role transparent with a border
+        Gender.setBackground(new Color(0, 0, 0, 0));
+        Gender.setBorder(new LineBorder(Color.BLACK, 1));
+        
+        // Make password transparent with a border
+        Password.setBackground(new Color(0, 0, 0, 0));
+        Password.setBorder(new LineBorder(Color.BLACK, 1));
+        
+        // Make confirm password transparent with a border
+        ConfirmPass.setBackground(new Color(0, 0, 0, 0));
+        ConfirmPass.setBorder(new LineBorder(Color.BLACK, 1));
+        
+         Gender.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                Component component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                if (isSelected) {
+                    component.setBackground(new Color(0, 153, 153)); // Background when selected
+                    component.setForeground(Color.BLACK); // Text color when selected
+                } else {
+                    component.setBackground(new Color(0,51,51)); // Background when not selected
+                    component.setForeground(Color.BLACK); // Text color when not selected
+                }
+
+                return component;
+            }
+        });
+        
     }
 
     private boolean isValidEmail(String email) {
@@ -130,8 +189,97 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
     }
     
     private boolean isAllFieldsEmpty() {
-        return userName.getText().trim().isEmpty() && Email.getText().trim().isEmpty()
+        return middleName.getText().trim().isEmpty() && Email.getText().trim().isEmpty()
                 && Password.getPassword().length == 0;
+    }
+    
+   public String destination = "";
+   File selectedFile;
+   public String path;
+   public String oldpath;
+    
+   public int FileExistenceChecker(String path){
+        File file = new File(path);
+        String fileName = file.getName();
+        
+        Path filePath = Paths.get("src/u_images", fileName);
+        boolean fileExists = Files.exists(filePath);
+        
+        if (fileExists) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+   public static int getHeightFromWidth(String imagePath, int desiredWidth) {
+        try {
+           
+            File imageFile = new File(imagePath);
+            BufferedImage image = ImageIO.read(imageFile);
+            
+            int originalWidth = image.getWidth();
+            int originalHeight = image.getHeight();
+            
+            int newHeight = (int) ((double) desiredWidth / originalWidth * originalHeight);
+            
+            return newHeight;
+        } catch (IOException ex) {
+            System.out.println("No image found!");
+        }
+        
+        return -1;
+    }
+   
+    public  ImageIcon ResizeImage(String ImagePath, byte[] pic, JLabel label) {
+        ImageIcon MyImage = null;
+            if(ImagePath !=null){
+                MyImage = new ImageIcon(ImagePath);
+            }else{
+                MyImage = new ImageIcon(pic);
+            }
+
+        int newHeight = getHeightFromWidth(ImagePath, label.getWidth());
+
+        Image img = MyImage.getImage();
+        Image newImg = img.getScaledInstance(label.getWidth(), newHeight, Image.SCALE_SMOOTH);
+        ImageIcon image = new ImageIcon(newImg);
+        return image;
+    }
+    
+    public void imageUpdater(String existingFilePath, String newFilePath) {
+      File existingFile = new File(existingFilePath); // Path of the currently used image
+      File newFile = new File(newFilePath); // Path of the new image
+      String destinationFolder = "src/u_images/";
+      File destinationFile = new File(destinationFolder, newFile.getName()); // Final destination for the new image
+
+      try {
+          // Ensure the u_images folder exists
+          File destinationDir = new File(destinationFolder);
+          if (!destinationDir.exists()) {
+              destinationDir.mkdirs();
+          }
+
+          // Check if existingFile is from u_default
+          if (existingFile.getPath().contains("u_default")) {
+              // Do not delete; simply copy the new file to u_images
+              Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+              System.out.println("New image added successfully to u_images.");
+          } else {
+              // For files in u_images, replace the existing image
+              if (existingFile.exists()) {
+                  Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                  existingFile.delete(); // Clean up the old image if necessary
+                  System.out.println("Image updated successfully in u_images.");
+              } else {
+                  // If no file exists, simply copy the new one
+                  Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                  System.out.println("Image added to u_images.");
+              }
+          }
+      } catch (IOException e) {
+          System.out.println("Error while updating the image: " + e.getMessage());
+      }
     }
    
     @SuppressWarnings("unchecked")
@@ -144,9 +292,9 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         profile = new javax.swing.JLabel();
-        username1 = new javax.swing.JLabel();
-        userName = new javax.swing.JTextField();
-        email2 = new javax.swing.JLabel();
+        middlename = new javax.swing.JLabel();
+        middleName = new javax.swing.JTextField();
+        gender = new javax.swing.JLabel();
         Email = new javax.swing.JTextField();
         password1 = new javax.swing.JLabel();
         Password = new javax.swing.JPasswordField();
@@ -157,15 +305,26 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         hideCon = new javax.swing.JLabel();
         show = new javax.swing.JLabel();
         hide = new javax.swing.JLabel();
-        errorUser = new javax.swing.JLabel();
-        errorEmail = new javax.swing.JLabel();
+        errorGender = new javax.swing.JLabel();
         errorPassword = new javax.swing.JLabel();
-        errorConfirmPass = new javax.swing.JLabel();
+        errorConfirm = new javax.swing.JLabel();
         image = new javax.swing.JLabel();
         delPanel = new javax.swing.JPanel();
         del_prof1 = new javax.swing.JLabel();
-        jPanel4 = new javax.swing.JPanel();
-        add_prof1 = new javax.swing.JLabel();
+        addProf = new javax.swing.JPanel();
+        add_prof = new javax.swing.JLabel();
+        username2 = new javax.swing.JLabel();
+        firstName = new javax.swing.JTextField();
+        errorFirst = new javax.swing.JLabel();
+        email3 = new javax.swing.JLabel();
+        userName = new javax.swing.JTextField();
+        errorUser = new javax.swing.JLabel();
+        lastname = new javax.swing.JLabel();
+        lastName = new javax.swing.JTextField();
+        errorLast = new javax.swing.JLabel();
+        Gender = new javax.swing.JComboBox<>();
+        email = new javax.swing.JLabel();
+        errorEmail = new javax.swing.JLabel();
 
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -173,6 +332,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         profile_header.setBackground(new java.awt.Color(55, 162, 153));
+        profile_header.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
         profile_header.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         account.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
@@ -197,28 +357,28 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
         jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 860, 50));
 
-        username1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        username1.setForeground(new java.awt.Color(51, 51, 51));
-        username1.setText("Username");
-        jPanel2.add(username1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 160, 80, 30));
+        middlename.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        middlename.setForeground(new java.awt.Color(51, 51, 51));
+        middlename.setText("Middle Name");
+        jPanel2.add(middlename, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 160, 100, 30));
 
-        userName.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        userName.addFocusListener(new java.awt.event.FocusAdapter() {
+        middleName.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
+        middleName.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
-                userNameFocusLost(evt);
+                middleNameFocusLost(evt);
             }
         });
-        userName.addActionListener(new java.awt.event.ActionListener() {
+        middleName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                userNameActionPerformed(evt);
+                middleNameActionPerformed(evt);
             }
         });
-        jPanel2.add(userName, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 190, 270, 40));
+        jPanel2.add(middleName, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 190, 270, 40));
 
-        email2.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        email2.setForeground(new java.awt.Color(51, 51, 51));
-        email2.setText("Email");
-        jPanel2.add(email2, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 160, 80, 30));
+        gender.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        gender.setForeground(new java.awt.Color(51, 51, 51));
+        gender.setText("Gender");
+        jPanel2.add(gender, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 250, 80, 30));
 
         Email.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
         Email.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -233,10 +393,10 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         });
         jPanel2.add(Email, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 190, 270, 40));
 
-        password1.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        password1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         password1.setForeground(new java.awt.Color(51, 51, 51));
         password1.setText("Password");
-        jPanel2.add(password1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 260, 120, 30));
+        jPanel2.add(password1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 340, 120, 30));
 
         Password.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
         Password.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -244,12 +404,12 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 PasswordFocusLost(evt);
             }
         });
-        jPanel2.add(Password, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 290, 240, 40));
+        jPanel2.add(Password, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 370, 240, 40));
 
-        confirmPassword.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        confirmPassword.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         confirmPassword.setForeground(new java.awt.Color(51, 51, 51));
         confirmPassword.setText("Confirm Password");
-        jPanel2.add(confirmPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 260, 150, 30));
+        jPanel2.add(confirmPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 340, 150, 30));
 
         ConfirmPass.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
         ConfirmPass.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -257,7 +417,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 ConfirmPassFocusLost(evt);
             }
         });
-        jPanel2.add(ConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 290, 250, 40));
+        jPanel2.add(ConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 370, 250, 40));
 
         create_button.setBackground(new java.awt.Color(0, 153, 153));
         create_button.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
@@ -270,7 +430,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 create_buttonMouseClicked(evt);
             }
         });
-        jPanel2.add(create_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 360, 210, 40));
+        jPanel2.add(create_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 370, 210, 40));
 
         showCon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         showCon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/show_bl.png"))); // NOI18N
@@ -279,7 +439,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 showConMousePressed(evt);
             }
         });
-        jPanel2.add(showCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 290, 40, 40));
+        jPanel2.add(showCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 370, 40, 40));
 
         hideCon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         hideCon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/hide_bl.png"))); // NOI18N
@@ -288,7 +448,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 hideConMousePressed(evt);
             }
         });
-        jPanel2.add(hideCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 290, 40, 40));
+        jPanel2.add(hideCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 370, 40, 40));
 
         show.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         show.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/show_bl.png"))); // NOI18N
@@ -297,7 +457,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 showMousePressed(evt);
             }
         });
-        jPanel2.add(show, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 290, 40, 40));
+        jPanel2.add(show, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 370, 40, 40));
 
         hide.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         hide.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/hide_bl.png"))); // NOI18N
@@ -306,11 +466,10 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 hideMousePressed(evt);
             }
         });
-        jPanel2.add(hide, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 290, 40, 40));
-        jPanel2.add(errorUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 230, 210, 20));
-        jPanel2.add(errorEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 230, 220, 20));
-        jPanel2.add(errorPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 330, 210, 20));
-        jPanel2.add(errorConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 330, 170, 20));
+        jPanel2.add(hide, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 370, 40, 40));
+        jPanel2.add(errorGender, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 320, 220, 20));
+        jPanel2.add(errorPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 410, 210, 20));
+        jPanel2.add(errorConfirm, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 410, 210, 20));
 
         image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
         jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 200, 160));
@@ -327,56 +486,126 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
         jPanel2.add(delPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, 100, 40));
 
-        jPanel4.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel4.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
-        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        addProf.setBackground(new java.awt.Color(255, 255, 255));
+        addProf.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
+        addProf.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        add_prof1.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
-        add_prof1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        add_prof1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/upload.png"))); // NOI18N
-        add_prof1.setText("  Add");
-        jPanel4.add(add_prof1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 40));
+        add_prof.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
+        add_prof.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        add_prof.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/upload.png"))); // NOI18N
+        add_prof.setText("  Add");
+        add_prof.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                add_profMouseClicked(evt);
+            }
+        });
+        addProf.add(add_prof, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 40));
 
-        jPanel2.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 250, 100, 40));
+        jPanel2.add(addProf, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 250, 100, 40));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 860, 430));
+        username2.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        username2.setForeground(new java.awt.Color(51, 51, 51));
+        username2.setText("First Name");
+        jPanel2.add(username2, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 70, 80, 30));
+
+        firstName.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
+        firstName.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                firstNameFocusLost(evt);
+            }
+        });
+        firstName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                firstNameActionPerformed(evt);
+            }
+        });
+        jPanel2.add(firstName, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 100, 270, 40));
+        jPanel2.add(errorFirst, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 140, 210, 20));
+
+        email3.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        email3.setForeground(new java.awt.Color(51, 51, 51));
+        email3.setText("Username");
+        jPanel2.add(email3, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 70, 80, 30));
+
+        userName.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
+        userName.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                userNameFocusLost(evt);
+            }
+        });
+        userName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                userNameActionPerformed(evt);
+            }
+        });
+        jPanel2.add(userName, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 100, 270, 40));
+        jPanel2.add(errorUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 140, 220, 20));
+
+        lastname.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        lastname.setForeground(new java.awt.Color(51, 51, 51));
+        lastname.setText("Last Name");
+        jPanel2.add(lastname, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 250, 80, 30));
+
+        lastName.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
+        lastName.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                lastNameFocusLost(evt);
+            }
+        });
+        lastName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lastNameActionPerformed(evt);
+            }
+        });
+        jPanel2.add(lastName, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 280, 270, 40));
+        jPanel2.add(errorLast, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 320, 220, 20));
+
+        Gender.setFont(new java.awt.Font("Tw Cen MT", 0, 15)); // NOI18N
+        Gender.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select gender", "Male", "Female" }));
+        Gender.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                GenderFocusLost(evt);
+            }
+        });
+        Gender.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GenderActionPerformed(evt);
+            }
+        });
+        jPanel2.add(Gender, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 280, 270, 40));
+
+        email.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        email.setForeground(new java.awt.Color(51, 51, 51));
+        email.setText("Email");
+        jPanel2.add(email, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 160, 80, 30));
+        jPanel2.add(errorEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 230, 220, 20));
+
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 860, 460));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void userNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_userNameFocusLost
+    private void middleNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_middleNameFocusLost
 
-        String user = userName.getText();
+    }//GEN-LAST:event_middleNameFocusLost
 
-        if (user.isEmpty()) {
-            errorUser.setForeground(Color.RED);
-            errorUser.setText("Username is required");
-            errorUser.setForeground(Color.RED);
-        } else {
-            errorUser.setForeground(Color.BLACK);
-            errorUser.setText("");
-        }
-
-        userName.repaint();
-    }//GEN-LAST:event_userNameFocusLost
-
-    private void userNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userNameActionPerformed
+    private void middleNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_middleNameActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_userNameActionPerformed
+    }//GEN-LAST:event_middleNameActionPerformed
 
     private void EmailFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_EmailFocusLost
 
         String em = Email.getText();
 
         if (em.isEmpty()) {
-            errorEmail.setForeground(Color.RED);
-            errorEmail.setText("Email is required");
-            errorEmail.setForeground(Color.RED);
+            errorGender.setForeground(Color.RED);
+            errorGender.setText("Email is required");
+            errorGender.setForeground(Color.RED);
         } else {
-            errorEmail.setForeground(Color.BLACK);
-            errorEmail.setText("");
+            errorGender.setForeground(Color.BLACK);
+            errorGender.setText("");
         }
 
         Email.repaint();
@@ -402,14 +631,24 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_PasswordFocusLost
 
     private void ConfirmPassFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ConfirmPassFocusLost
-        // TODO add your handling code here:
+        String pass = ConfirmPass.getText();
+
+        if (pass.isEmpty()) {
+            errorConfirm.setForeground(Color.RED);
+            errorConfirm.setText("Confirm Password is required");
+            errorConfirm.setForeground(Color.RED);
+        } else {
+            errorConfirm.setForeground(Color.BLACK);
+            errorConfirm.setText("");
+        }
+        ConfirmPass.repaint();
     }//GEN-LAST:event_ConfirmPassFocusLost
 
     private void create_buttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_create_buttonMouseClicked
 
         ConnectDB connect = new ConnectDB();
 
-        String usernameText = userName.getText().trim();
+        String usernameText = middleName.getText().trim();
         String emailText = Email.getText().trim();
         char[] passwordChars = Password.getPassword();
         StringBuilder errorMessage = new StringBuilder();
@@ -450,7 +689,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
             sess.logEvent("EDITED ADMIN PROFILE", "Admin edited its account.");
             JOptionPane.showMessageDialog(this, "Added User Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
-            userName.setText("");
+            middleName.setText("");
             Email.setText("");
             Password.setText("");
 
@@ -483,35 +722,140 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         Password.setEchoChar((char) 0);
     }//GEN-LAST:event_hideMousePressed
 
+    private void firstNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_firstNameFocusLost
+        String pass = firstName.getText();
+
+        if (pass.isEmpty()) {
+            errorFirst.setForeground(Color.RED);
+            errorFirst.setText("First Name is required");
+            errorFirst.setForeground(Color.RED);
+        } else {
+            errorFirst.setForeground(Color.BLACK);
+            errorFirst.setText("");
+        }
+        firstName.repaint();
+    }//GEN-LAST:event_firstNameFocusLost
+
+    private void firstNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_firstNameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_firstNameActionPerformed
+
+    private void userNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_userNameFocusLost
+         String user = userName.getText();
+
+        if (user.isEmpty()) {
+            errorUser.setForeground(Color.RED);
+            errorUser.setText("Username is required");
+            errorUser.setForeground(Color.RED);
+        } else {
+            errorUser.setForeground(Color.BLACK);
+            errorUser.setText("");
+        }
+
+        userName.repaint();
+    }//GEN-LAST:event_userNameFocusLost
+
+    private void userNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userNameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_userNameActionPerformed
+
+    private void lastNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_lastNameFocusLost
+        String pass = lastName.getText();
+
+        if (pass.isEmpty()) {
+            errorLast.setForeground(Color.RED);
+            errorLast.setText("Last Name is required");
+            errorLast.setForeground(Color.RED);
+        } else {
+            errorLast.setForeground(Color.BLACK);
+            errorLast.setText("");
+        }
+        lastName.repaint();
+    }//GEN-LAST:event_lastNameFocusLost
+
+    private void lastNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lastNameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_lastNameActionPerformed
+
+    private void add_profMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_add_profMouseClicked
+      JFileChooser fileChooser = new JFileChooser();
+        int returnValue = fileChooser.showOpenDialog(null);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            try {
+                selectedFile = fileChooser.getSelectedFile();
+                destination = "src/u_images/" + selectedFile.getName();
+                path  = selectedFile.getAbsolutePath();
+
+                if(FileExistenceChecker(path) == 1){
+                    JOptionPane.showMessageDialog(null, "File Already Exist, Rename or Choose another!");
+                    destination = "";
+                    path="";
+                }
+            } catch (Exception ex) {
+                System.out.println("File Error!");
+            }
+        }
+    }//GEN-LAST:event_add_profMouseClicked
+
+    private void GenderFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_GenderFocusLost
+
+        String selectedGenderString = (String) Gender.getSelectedItem();
+
+        if (selectedGenderString == null || selectedGenderString.isEmpty() || selectedGenderString.equals("Select gender")) {
+            errorGender.setForeground(Color.RED);
+            errorGender.setText("Please select a valid gender");
+        } else {
+            errorGender.setForeground(Color.BLACK);
+            errorGender.setText("");
+        }
+
+        Gender.repaint();
+    }//GEN-LAST:event_GenderFocusLost
+
+    private void GenderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GenderActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_GenderActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPasswordField ConfirmPass;
     private javax.swing.JTextField Email;
+    private javax.swing.JComboBox<String> Gender;
     private javax.swing.JPasswordField Password;
     private javax.swing.JLabel account;
-    private javax.swing.JLabel add_prof1;
+    private javax.swing.JPanel addProf;
+    private javax.swing.JLabel add_prof;
     private javax.swing.JLabel confirmPassword;
     private javax.swing.JLabel create_button;
     private javax.swing.JPanel delPanel;
     private javax.swing.JLabel del_prof1;
-    private javax.swing.JLabel email2;
-    private javax.swing.JLabel errorConfirmPass;
+    private javax.swing.JLabel email;
+    private javax.swing.JLabel email3;
+    private javax.swing.JLabel errorConfirm;
     private javax.swing.JLabel errorEmail;
+    private javax.swing.JLabel errorFirst;
+    private javax.swing.JLabel errorGender;
+    private javax.swing.JLabel errorLast;
     private javax.swing.JLabel errorPassword;
     private javax.swing.JLabel errorUser;
+    private javax.swing.JTextField firstName;
+    private javax.swing.JLabel gender;
     private javax.swing.JLabel hide;
     private javax.swing.JLabel hideCon;
     private javax.swing.JLabel image;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
+    private javax.swing.JTextField lastName;
+    private javax.swing.JLabel lastname;
+    private javax.swing.JTextField middleName;
+    private javax.swing.JLabel middlename;
     private javax.swing.JLabel password1;
     private javax.swing.JLabel profile;
     private javax.swing.JPanel profile_header;
     private javax.swing.JLabel show;
     private javax.swing.JLabel showCon;
     private javax.swing.JTextField userName;
-    private javax.swing.JLabel username1;
+    private javax.swing.JLabel username2;
     // End of variables declaration//GEN-END:variables
 }

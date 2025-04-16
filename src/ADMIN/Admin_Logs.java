@@ -46,10 +46,9 @@ public class Admin_Logs extends javax.swing.JInternalFrame {
     
     private void loadLogs() {
         ConnectDB connect = new ConnectDB();
-
         DefaultTableModel model = new DefaultTableModel();
         model.addColumn("Log ID");
-        model.addColumn("User ID");
+        model.addColumn("User Info");
         model.addColumn("Event");
         model.addColumn("Description");
         model.addColumn("Timestamp");
@@ -61,24 +60,28 @@ public class Admin_Logs extends javax.swing.JInternalFrame {
                 return;
             }
 
-           String query = "SELECT l.log_id, " +
-               "CONCAT(u.user_id, ' - ', u.u_role) AS user_info, " +
-               "l.log_event, l.log_description, l.log_timestamp " +
-               "FROM logs l " +
-               "JOIN users u ON l.user_id = u.user_id " +
-               "ORDER BY l.log_timestamp DESC";
-
+            String query = "SELECT l.log_id, " +
+                           "CONCAT(u.user_id, ' - ', u.u_role) AS user_info, " +
+                           "l.log_event, l.log_description, l.log_timestamp " +
+                           "FROM logs l " +
+                           "JOIN users u ON l.user_id = u.user_id " +
+                           "ORDER BY l.log_timestamp DESC";
 
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
 
             while (rs.next()) {
+                String userInfo = rs.getString("user_info");
+                if (userInfo == null) {
+                    userInfo = "Unknown User";  // Handle null user info
+                }
+
                 model.addRow(new Object[]{
-                    rs.getInt("log_id"),          // Log ID
-                    rs.getInt("user_id"),         // User ID
-                    rs.getString("log_event"),    // Log event
-                    rs.getString("log_description"), // Description
-                    rs.getTimestamp("log_timestamp") // Timestamp
+                    rs.getInt("log_id"),
+                    userInfo,  // Updated user info column
+                    rs.getString("log_event"),
+                    rs.getString("log_description"),
+                    rs.getTimestamp("log_timestamp")
                 });
             }
 
@@ -94,6 +97,7 @@ public class Admin_Logs extends javax.swing.JInternalFrame {
             ex.printStackTrace();
         }
     }
+
 
     
     public int getSelectedUserId() {

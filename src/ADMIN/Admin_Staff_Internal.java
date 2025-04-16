@@ -21,6 +21,7 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
         jPanel1 = new javax.swing.JPanel();
         staff_header = new javax.swing.JPanel();
         staff = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
 
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -28,12 +29,18 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         staff_header.setBackground(new java.awt.Color(55, 162, 153));
+        staff_header.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
         staff_header.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         staff.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         staff.setForeground(new java.awt.Color(255, 255, 255));
         staff.setText("Staff Information");
         staff_header.add(staff, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 0, 180, 50));
+
+        jLabel1.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(204, 204, 204));
+        jLabel1.setText("Manage admin accounts");
+        staff_header.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 0, 190, 50));
 
         jPanel1.add(staff_header, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 50));
 
@@ -44,6 +51,7 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel staff;
     private javax.swing.JPanel staff_header;

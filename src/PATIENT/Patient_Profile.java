@@ -38,6 +38,7 @@ public class Patient_Profile extends javax.swing.JInternalFrame {
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         profile_header.setBackground(new java.awt.Color(55, 162, 153));
+        profile_header.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
         profile_header.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         account.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
