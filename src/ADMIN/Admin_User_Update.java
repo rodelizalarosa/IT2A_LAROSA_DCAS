@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import javax.swing.JOptionPane;
 
 
-public class Update_User extends javax.swing.JInternalFrame {
+public class Admin_User_Update extends javax.swing.JInternalFrame {
 
 
     private int userId;
@@ -20,7 +20,7 @@ public class Update_User extends javax.swing.JInternalFrame {
     private String originalEmail;
     private String originalRole;
     
-    public Update_User(int id, String username, String email, String role) {
+    public Admin_User_Update (int id, String username, String email, String role) {
         initComponents(); // Initialize GUI components
         borderField();
 

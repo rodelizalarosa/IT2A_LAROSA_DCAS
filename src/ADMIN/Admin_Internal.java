@@ -128,7 +128,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         refresh.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         refresh.setForeground(new java.awt.Color(255, 255, 255));
         refresh.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        refresh.setText("System Summary");
+        refresh.setText("System Logs");
         logsPanel.add(refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 140, 30));
 
         jPanel2.add(logsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 140, 160, 30));
@@ -158,7 +158,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         refresh1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         refresh1.setForeground(new java.awt.Color(255, 255, 255));
         refresh1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        refresh1.setText("View Appointments");
+        refresh1.setText("Profile");
         appointmentPanel.add(refresh1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 140, 30));
 
         jPanel2.add(appointmentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 160, 30));
@@ -196,7 +196,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         jLabel1.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(204, 204, 204));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Keep track of patient data and other information.");
+        jLabel1.setText("Keep track of patient data and appointment status.");
         jPanel3.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 30, 420, 20));
 
         jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, 840, 50));
