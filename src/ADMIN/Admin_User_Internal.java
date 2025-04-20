@@ -273,10 +273,10 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         refresh.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         refresh.setForeground(new java.awt.Color(255, 255, 255));
         refresh.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        refresh.setText("Refresh");
-        refreshPanel.add(refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 60, 30));
+        refresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh (2).png"))); // NOI18N
+        refreshPanel.add(refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 40, 30));
 
-        jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 70, 80, -1));
+        jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 70, 60, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
@@ -360,7 +360,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
                     String role = rs.getString("u_role");
 
                     // Pass data to userUPDATE form (without password)
-                    Update_User updateForm = new Update_User(selectedUserId, username, email, role);
+                    Admin_User_Update updateForm = new Admin_User_Update(selectedUserId, username, email, role);
                     Session.getInstance().getDesktopPane().add(updateForm);
                     updateForm.setUserData(selectedUserId, username, email, role);
                     updateForm.setVisible(true);

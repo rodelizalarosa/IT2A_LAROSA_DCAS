@@ -47,11 +47,50 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         admin1 = new javax.swing.JLabel();
         appointmentPanel = new javax.swing.JPanel();
         refresh1 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jPanel5 = new javax.swing.JPanel();
+        activeUsers = new javax.swing.JLabel();
+        jPanel6 = new javax.swing.JPanel();
+        account1 = new javax.swing.JLabel();
+        jPanel7 = new javax.swing.JPanel();
+        account3 = new javax.swing.JLabel();
+        jPanel8 = new javax.swing.JPanel();
+        activePatients = new javax.swing.JLabel();
+        jPanel11 = new javax.swing.JPanel();
+        totalAppointments = new javax.swing.JLabel();
+        jPanel12 = new javax.swing.JPanel();
+        account5 = new javax.swing.JLabel();
+        jPanel9 = new javax.swing.JPanel();
+        account2 = new javax.swing.JLabel();
+        jPanel10 = new javax.swing.JPanel();
+        pendingUsers = new javax.swing.JLabel();
+        jPanel13 = new javax.swing.JPanel();
+        account6 = new javax.swing.JLabel();
+        jPanel14 = new javax.swing.JPanel();
+        activeDoctors = new javax.swing.JLabel();
+        jPanel15 = new javax.swing.JPanel();
+        account7 = new javax.swing.JLabel();
+        jPanel16 = new javax.swing.JPanel();
+        totalServices = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
-        account = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        jPanel19 = new javax.swing.JPanel();
+        jPanel20 = new javax.swing.JPanel();
+        jPanel21 = new javax.swing.JPanel();
+        jPanel22 = new javax.swing.JPanel();
+        jPanel23 = new javax.swing.JPanel();
+        jPanel24 = new javax.swing.JPanel();
+        jPanel25 = new javax.swing.JPanel();
+        account4 = new javax.swing.JLabel();
+        account10 = new javax.swing.JLabel();
+        account11 = new javax.swing.JLabel();
+        account12 = new javax.swing.JLabel();
+        account13 = new javax.swing.JLabel();
+        account14 = new javax.swing.JLabel();
+        account15 = new javax.swing.JLabel();
+        jPanel17 = new javax.swing.JPanel();
+        account9 = new javax.swing.JLabel();
+        jPanel18 = new javax.swing.JPanel();
+        account8 = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(255, 255, 255));
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
@@ -128,14 +167,14 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         refresh.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         refresh.setForeground(new java.awt.Color(255, 255, 255));
         refresh.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        refresh.setText("System Summary");
+        refresh.setText("System Logs");
         logsPanel.add(refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 140, 30));
 
         jPanel2.add(logsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 140, 160, 30));
 
         picture.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         picture.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/mother.png"))); // NOI18N
-        jPanel2.add(picture, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 0, 380, 190));
+        jPanel2.add(picture, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 0, 380, 190));
 
         admin1.setFont(new java.awt.Font("Tahoma", 0, 15)); // NOI18N
         admin1.setText("Admin");
@@ -158,48 +197,236 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         refresh1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         refresh1.setForeground(new java.awt.Color(255, 255, 255));
         refresh1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        refresh1.setText("View Appointments");
+        refresh1.setText("View Profile");
         appointmentPanel.add(refresh1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 140, 30));
 
         jPanel2.add(appointmentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 160, 30));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 840, 190));
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 850, 190));
 
-        jScrollPane1.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
+        jPanel5.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {},
-                {},
-                {},
-                {}
-            },
-            new String [] {
+        activeUsers.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        activeUsers.setForeground(new java.awt.Color(255, 255, 255));
+        activeUsers.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        activeUsers.setText("0");
+        jPanel5.add(activeUsers, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 0, 90, 40));
 
-            }
-        ));
-        jTable1.getTableHeader().setReorderingAllowed(false);
-        jScrollPane1.setViewportView(jTable1);
+        jPanel1.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 310, 170, 40));
 
-        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 320, 840, 220));
+        jPanel6.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel3.setBackground(new java.awt.Color(55, 162, 153));
-        jPanel3.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
+        account1.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account1.setForeground(new java.awt.Color(255, 255, 255));
+        account1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        account1.setText("ACTIVE USERS");
+        jPanel6.add(account1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 150, 40));
+
+        jPanel1.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, 170, 40));
+
+        jPanel7.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel7.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        account3.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account3.setForeground(new java.awt.Color(255, 255, 255));
+        account3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        account3.setText("PATIENTS");
+        jPanel7.add(account3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 150, 40));
+
+        jPanel1.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 360, 170, 40));
+
+        jPanel8.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel8.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel8.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        activePatients.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        activePatients.setForeground(new java.awt.Color(255, 255, 255));
+        activePatients.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        activePatients.setText("0");
+        jPanel8.add(activePatients, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 0, 90, 40));
+
+        jPanel1.add(jPanel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 400, 170, 40));
+
+        jPanel11.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel11.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel11.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        totalAppointments.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        totalAppointments.setForeground(new java.awt.Color(255, 255, 255));
+        totalAppointments.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        totalAppointments.setText("0");
+        jPanel11.add(totalAppointments, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 0, 90, 40));
+
+        jPanel1.add(jPanel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 490, 170, 40));
+
+        jPanel12.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel12.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel12.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        account5.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account5.setForeground(new java.awt.Color(255, 255, 255));
+        account5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        account5.setText("TOTAL APPOINTMENTS");
+        jPanel12.add(account5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 150, 40));
+
+        jPanel1.add(jPanel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 450, 170, 40));
+
+        jPanel9.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel9.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel9.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        account2.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        account2.setForeground(new java.awt.Color(255, 255, 255));
+        account2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        account2.setText("DENTAL SERVICES CLASSIFICATIONS");
+        jPanel9.add(account2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 470, 40));
+
+        jPanel1.add(jPanel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 270, 490, 40));
+
+        jPanel10.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel10.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel10.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        pendingUsers.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        pendingUsers.setForeground(new java.awt.Color(255, 255, 255));
+        pendingUsers.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        pendingUsers.setText("0");
+        jPanel10.add(pendingUsers, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 0, 90, 40));
+
+        jPanel1.add(jPanel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 310, 170, 40));
+
+        jPanel13.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel13.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel13.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        account6.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account6.setForeground(new java.awt.Color(255, 255, 255));
+        account6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        account6.setText("DOCTORS");
+        jPanel13.add(account6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 150, 40));
+
+        jPanel1.add(jPanel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 360, 170, 40));
+
+        jPanel14.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel14.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel14.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        activeDoctors.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        activeDoctors.setForeground(new java.awt.Color(255, 255, 255));
+        activeDoctors.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        activeDoctors.setText("0");
+        jPanel14.add(activeDoctors, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 0, 90, 40));
+
+        jPanel1.add(jPanel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 400, 170, 40));
+
+        jPanel15.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel15.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel15.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        account7.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account7.setForeground(new java.awt.Color(255, 255, 255));
+        account7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        account7.setText("TOTAL SERVICES");
+        jPanel15.add(account7, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 150, 40));
+
+        jPanel1.add(jPanel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 450, 170, 40));
+
+        jPanel16.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel16.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel16.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        totalServices.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        totalServices.setForeground(new java.awt.Color(255, 255, 255));
+        totalServices.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        totalServices.setText("0");
+        jPanel16.add(totalServices, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 0, 90, 40));
+
+        jPanel1.add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 490, 170, 40));
+
+        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 260, 210));
 
-        account.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        account.setForeground(new java.awt.Color(255, 255, 255));
-        account.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        account.setText("Recent Patient Appointment");
-        jPanel3.add(account, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 0, 560, 40));
+        jPanel19.setBackground(java.awt.Color.cyan);
+        jPanel3.add(jPanel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 190, 40, 20));
 
-        jLabel1.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(204, 204, 204));
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Keep track of patient data and other information.");
-        jPanel3.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 30, 420, 20));
+        jPanel20.setBackground(java.awt.Color.pink);
+        jPanel3.add(jPanel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 10, 40, 20));
 
-        jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, 840, 50));
+        jPanel21.setBackground(java.awt.Color.orange);
+        jPanel3.add(jPanel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 40, 40, 20));
+
+        jPanel22.setBackground(java.awt.Color.yellow);
+        jPanel3.add(jPanel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 70, 40, 20));
+
+        jPanel23.setBackground(java.awt.Color.green);
+        jPanel3.add(jPanel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 100, 40, 20));
+
+        jPanel24.setBackground(java.awt.Color.magenta);
+        jPanel3.add(jPanel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 130, 40, 20));
+
+        jPanel25.setBackground(java.awt.Color.blue);
+        jPanel3.add(jPanel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 160, 40, 20));
+
+        account4.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account4.setText("Wisdom Tooth Removal");
+        jPanel3.add(account4, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 130, 150, 20));
+
+        account10.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account10.setText("Consultations");
+        jPanel3.add(account10, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 10, 150, 20));
+
+        account11.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account11.setText("Cleanings");
+        jPanel3.add(account11, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 40, 150, 20));
+
+        account12.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account12.setText("Tooth Extractions");
+        jPanel3.add(account12, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 70, 150, 20));
+
+        account13.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account13.setText("Root Canals");
+        jPanel3.add(account13, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 100, 150, 20));
+
+        account14.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account14.setText("Braces");
+        jPanel3.add(account14, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 160, 150, 20));
+
+        account15.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account15.setText("Retainers");
+        jPanel3.add(account15, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 190, 150, 20));
+
+        jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 310, 490, 230));
+
+        jPanel17.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel17.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel17.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        account9.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account9.setForeground(new java.awt.Color(255, 255, 255));
+        account9.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        account9.setText("PENDING USERS");
+        jPanel17.add(account9, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 150, 40));
+
+        jPanel1.add(jPanel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 270, 170, 40));
+
+        jPanel18.setBackground(new java.awt.Color(55, 162, 153));
+        jPanel18.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        jPanel18.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        account8.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        account8.setForeground(new java.awt.Color(255, 255, 255));
+        account8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        account8.setText("PENDING USERS");
+        jPanel18.add(account8, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 150, 40));
+
+        jPanel1.add(jPanel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 270, 170, 40));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
@@ -282,22 +509,61 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel account;
+    private javax.swing.JLabel account1;
+    private javax.swing.JLabel account10;
+    private javax.swing.JLabel account11;
+    private javax.swing.JLabel account12;
+    private javax.swing.JLabel account13;
+    private javax.swing.JLabel account14;
+    private javax.swing.JLabel account15;
+    private javax.swing.JLabel account2;
+    private javax.swing.JLabel account3;
+    private javax.swing.JLabel account4;
+    private javax.swing.JLabel account5;
+    private javax.swing.JLabel account6;
+    private javax.swing.JLabel account7;
+    private javax.swing.JLabel account8;
+    private javax.swing.JLabel account9;
+    private javax.swing.JLabel activeDoctors;
+    private javax.swing.JLabel activePatients;
+    private javax.swing.JLabel activeUsers;
     private javax.swing.JLabel admin;
     private javax.swing.JLabel admin1;
     private javax.swing.JPanel appointmentPanel;
     private javax.swing.JLabel dashboard;
     private javax.swing.JPanel dashboard_header;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel12;
+    private javax.swing.JPanel jPanel13;
+    private javax.swing.JPanel jPanel14;
+    private javax.swing.JPanel jPanel15;
+    private javax.swing.JPanel jPanel16;
+    private javax.swing.JPanel jPanel17;
+    private javax.swing.JPanel jPanel18;
+    private javax.swing.JPanel jPanel19;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel20;
+    private javax.swing.JPanel jPanel21;
+    private javax.swing.JPanel jPanel22;
+    private javax.swing.JPanel jPanel23;
+    private javax.swing.JPanel jPanel24;
+    private javax.swing.JPanel jPanel25;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
     private javax.swing.JPanel logsPanel;
+    private javax.swing.JLabel pendingUsers;
     private javax.swing.JLabel picture;
     private javax.swing.JLabel refresh;
     private javax.swing.JLabel refresh1;
+    private javax.swing.JLabel totalAppointments;
+    private javax.swing.JLabel totalServices;
     private javax.swing.JTextField username;
     // End of variables declaration//GEN-END:variables
 }

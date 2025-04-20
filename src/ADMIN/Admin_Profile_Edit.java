@@ -337,8 +337,8 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
         account.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         account.setForeground(new java.awt.Color(255, 255, 255));
-        account.setText("Admin Account");
-        profile_header.add(account, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 0, 150, 50));
+        account.setText("Edit Admin Details");
+        profile_header.add(account, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 0, 210, 50));
 
         jPanel1.add(profile_header, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, 900, 50));
 
@@ -423,7 +423,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         create_button.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         create_button.setForeground(new java.awt.Color(255, 255, 255));
         create_button.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        create_button.setText("CREATE USER ACCOUNT");
+        create_button.setText("SAVE CHANGES");
         create_button.setOpaque(true);
         create_button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -580,7 +580,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         jPanel2.add(email, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 160, 80, 30));
         jPanel2.add(errorEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 230, 220, 20));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 860, 460));
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 860, 440));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 

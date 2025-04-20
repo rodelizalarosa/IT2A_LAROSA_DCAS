@@ -300,7 +300,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
         role1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         role1.setForeground(new java.awt.Color(51, 51, 51));
         role1.setText("Role");
-        jPanel2.add(role1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 170, 60, 30));
+        jPanel2.add(role1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 160, 60, 30));
 
         Role.setFont(new java.awt.Font("Tw Cen MT", 0, 15)); // NOI18N
         Role.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select a role", "Admin", "Patient", "Dentist" }));
@@ -314,12 +314,12 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 RoleActionPerformed(evt);
             }
         });
-        jPanel2.add(Role, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 200, 270, 40));
+        jPanel2.add(Role, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 190, 270, 40));
 
         password1.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         password1.setForeground(new java.awt.Color(51, 51, 51));
         password1.setText("Password");
-        jPanel2.add(password1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 260, 120, 30));
+        jPanel2.add(password1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 250, 120, 30));
 
         Password.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
         Password.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -327,12 +327,12 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 PasswordFocusLost(evt);
             }
         });
-        jPanel2.add(Password, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 290, 240, 40));
+        jPanel2.add(Password, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 280, 240, 40));
 
         confirmPassword.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         confirmPassword.setForeground(new java.awt.Color(51, 51, 51));
         confirmPassword.setText("Confirm Password");
-        jPanel2.add(confirmPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 260, 150, 30));
+        jPanel2.add(confirmPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 250, 150, 30));
 
         ConfirmPass.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
         ConfirmPass.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -340,7 +340,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 ConfirmPassFocusLost(evt);
             }
         });
-        jPanel2.add(ConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 290, 250, 40));
+        jPanel2.add(ConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 280, 250, 40));
 
         create_button.setBackground(new java.awt.Color(0, 153, 153));
         create_button.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
@@ -362,7 +362,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 showConMousePressed(evt);
             }
         });
-        jPanel2.add(showCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 290, 40, 40));
+        jPanel2.add(showCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 280, 40, 40));
 
         hideCon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         hideCon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/hide_bl.png"))); // NOI18N
@@ -371,7 +371,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 hideConMousePressed(evt);
             }
         });
-        jPanel2.add(hideCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 290, 40, 40));
+        jPanel2.add(hideCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 280, 40, 40));
 
         show.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         show.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/show_bl.png"))); // NOI18N
@@ -380,7 +380,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 showMousePressed(evt);
             }
         });
-        jPanel2.add(show, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 290, 40, 40));
+        jPanel2.add(show, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 280, 40, 40));
 
         hide.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         hide.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/hide_bl.png"))); // NOI18N
@@ -389,10 +389,10 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 hideMousePressed(evt);
             }
         });
-        jPanel2.add(hide, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 290, 40, 40));
+        jPanel2.add(hide, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 280, 40, 40));
         jPanel2.add(errorUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 140, 210, 20));
         jPanel2.add(errorEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 140, 220, 20));
-        jPanel2.add(errorRole, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 240, 200, 20));
+        jPanel2.add(errorRole, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 230, 200, 20));
         jPanel2.add(errorPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 330, 210, 20));
         jPanel2.add(errorConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 330, 170, 20));
 
@@ -423,7 +423,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
 
         jPanel2.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 250, 100, 40));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, 860, 430));
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 860, 420));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 510));
 

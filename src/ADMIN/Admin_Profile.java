@@ -26,16 +26,20 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 public class Admin_Profile extends javax.swing.JInternalFrame {
 
-    private JDesktopPane mainDesktop;
      
     public Admin_Profile() {
         initComponents();
-        this.mainDesktop = Session.getInstance().getDesktopPane();
         
         //remove border
         this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0,0,0,0));
         BasicInternalFrameUI bi = (BasicInternalFrameUI)this.getUI();
         bi.setNorthPane(null);
+    }
+    
+    private void editProfile(){
+        Admin_Profile_Edit edit = new Admin_Profile_Edit();
+       // desktopSettings.add(edit);
+        edit.setVisible(true);
     }
     
     public String destination = "";
@@ -95,13 +99,6 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         return image;
     }
    
-    private void showProfile(){
-         Admin_Profile_Edit edit = new Admin_Profile_Edit();
-         mainDesktop.add(edit);
-         edit.setVisible(true);
-    }
-   
-
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -112,6 +109,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         account = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
         username1 = new javax.swing.JLabel();
         Role = new javax.swing.JLabel();
         edit_profile = new javax.swing.JLabel();
@@ -122,6 +120,10 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         fullname = new javax.swing.JLabel();
         User = new javax.swing.JLabel();
         Email = new javax.swing.JLabel();
+        email6 = new javax.swing.JLabel();
+        Gender = new javax.swing.JLabel();
+        userID = new javax.swing.JLabel();
+        email7 = new javax.swing.JLabel();
 
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
             public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
@@ -150,7 +152,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
 
         account1.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         account1.setForeground(new java.awt.Color(255, 255, 255));
-        account1.setText("Admin Account");
+        account1.setText("Admin Profile");
         profile_header.add(account1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 0, 150, 50));
 
         jPanel1.add(profile_header, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, 900, 50));
@@ -166,19 +168,25 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         account.setForeground(new java.awt.Color(255, 255, 255));
         account.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         account.setText("Admin Personal Details");
-        jPanel3.add(account, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 0, 410, 50));
+        jPanel3.add(account, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 0, 410, 40));
 
-        jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 830, 50));
+        jLabel2.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(204, 204, 204));
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("See and manage your personal information.");
+        jPanel3.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 30, 490, 30));
+
+        jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 830, 60));
 
         username1.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         username1.setForeground(new java.awt.Color(51, 51, 51));
         username1.setText("Username:");
-        jPanel2.add(username1, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 140, 110, 30));
+        jPanel2.add(username1, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 230, 110, 30));
 
         Role.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
         Role.setForeground(new java.awt.Color(51, 51, 51));
         Role.setText("role");
-        jPanel2.add(Role, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 310, 460, 30));
+        jPanel2.add(Role, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 260, 250, 30));
 
         edit_profile.setBackground(new java.awt.Color(0, 153, 153));
         edit_profile.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
@@ -191,42 +199,60 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
                 edit_profileMouseClicked(evt);
             }
         });
-        jPanel2.add(edit_profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 320, 170, 40));
+        jPanel2.add(edit_profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, 200, 40));
 
         image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
-        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 200, 160));
+        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 200, 180));
 
         email3.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         email3.setForeground(new java.awt.Color(51, 51, 51));
-        email3.setText("Full Name:");
-        jPanel2.add(email3, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 70, 100, 30));
+        email3.setText("Gender:");
+        jPanel2.add(email3, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 190, 100, 30));
 
         email4.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         email4.setForeground(new java.awt.Color(51, 51, 51));
         email4.setText("Email:");
-        jPanel2.add(email4, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 210, 80, 30));
+        jPanel2.add(email4, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 300, 80, 30));
 
         email5.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         email5.setForeground(new java.awt.Color(51, 51, 51));
         email5.setText("Role:");
-        jPanel2.add(email5, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 280, 80, 30));
+        jPanel2.add(email5, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 230, -1, 30));
 
         fullname.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
         fullname.setForeground(new java.awt.Color(51, 51, 51));
         fullname.setText("full name");
-        jPanel2.add(fullname, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 100, 460, 30));
+        jPanel2.add(fullname, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 150, 460, 30));
 
         User.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
         User.setForeground(new java.awt.Color(51, 51, 51));
         User.setText("username");
-        jPanel2.add(User, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 170, 460, 30));
+        jPanel2.add(User, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 260, 220, 30));
 
         Email.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
         Email.setForeground(new java.awt.Color(51, 51, 51));
         Email.setText("email");
-        jPanel2.add(Email, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 240, 460, 30));
+        jPanel2.add(Email, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 330, 460, 30));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, 830, 380));
+        email6.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        email6.setForeground(new java.awt.Color(51, 51, 51));
+        email6.setText("Full Name:");
+        jPanel2.add(email6, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 120, 100, 30));
+
+        Gender.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
+        Gender.setText("gender");
+        jPanel2.add(Gender, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 190, 90, 30));
+
+        userID.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
+        userID.setText("ID");
+        jPanel2.add(userID, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 80, 90, 30));
+
+        email7.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        email7.setForeground(new java.awt.Color(51, 51, 51));
+        email7.setText("Account ID:");
+        jPanel2.add(email7, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 80, 100, 30));
+
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 830, 380));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
@@ -234,7 +260,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void edit_profileMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_edit_profileMouseClicked
-        showProfile();
+        editProfile();
     }//GEN-LAST:event_edit_profileMouseClicked
 
     private void formInternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameActivated
@@ -295,6 +321,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel Email;
+    private javax.swing.JLabel Gender;
     private javax.swing.JLabel Role;
     private javax.swing.JLabel User;
     private javax.swing.JLabel account;
@@ -303,12 +330,16 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
     private javax.swing.JLabel email3;
     private javax.swing.JLabel email4;
     private javax.swing.JLabel email5;
+    private javax.swing.JLabel email6;
+    private javax.swing.JLabel email7;
     private javax.swing.JLabel fullname;
     private javax.swing.JLabel image;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel profile_header;
+    private javax.swing.JLabel userID;
     private javax.swing.JLabel username1;
     // End of variables declaration//GEN-END:variables
 }

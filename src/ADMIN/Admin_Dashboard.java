@@ -24,10 +24,9 @@ public class Admin_Dashboard extends javax.swing.JFrame {
         adm.setVisible(true);
     }
     
-    private void showProfile() {
-        Admin_Profile prof = new Admin_Profile();
-        mainDesktop.add(prof);
-        prof.setVisible(true);
+    private void showSettings() {
+        Admin_Settings set = new Admin_Settings();
+        set.setVisible(true);
     }
     
     private void showLogs(){
@@ -39,6 +38,12 @@ public class Admin_Dashboard extends javax.swing.JFrame {
     private void showManage(){
         Admin_Manage mng = new Admin_Manage();
         mng.setVisible(true);
+    }
+    
+    private void showAppointment(){
+        Admin_Appointment app = new Admin_Appointment();
+        mainDesktop.add(app);
+        app.setVisible(true);
     }
     
     
@@ -59,7 +64,7 @@ public class Admin_Dashboard extends javax.swing.JFrame {
         dashboard = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        profilePanel = new javax.swing.JPanel();
+        settingsPanel = new javax.swing.JPanel();
         profile = new javax.swing.JLabel();
         managePanel = new javax.swing.JPanel();
         manage = new javax.swing.JLabel();
@@ -68,6 +73,8 @@ public class Admin_Dashboard extends javax.swing.JFrame {
         logoutPanel = new javax.swing.JPanel();
         logout = new javax.swing.JLabel();
         logoutLogo = new javax.swing.JLabel();
+        appointPanel = new javax.swing.JPanel();
+        appointment = new javax.swing.JLabel();
         mainDesktop = new javax.swing.JDesktopPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -116,27 +123,27 @@ public class Admin_Dashboard extends javax.swing.JFrame {
 
         navigation.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 220, 50));
 
-        profilePanel.setBackground(new java.awt.Color(55, 162, 153));
-        profilePanel.addMouseListener(new java.awt.event.MouseAdapter() {
+        settingsPanel.setBackground(new java.awt.Color(55, 162, 153));
+        settingsPanel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                profilePanelMouseClicked(evt);
+                settingsPanelMouseClicked(evt);
             }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                profilePanelMouseEntered(evt);
+                settingsPanelMouseEntered(evt);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                profilePanelMouseExited(evt);
+                settingsPanelMouseExited(evt);
             }
         });
-        profilePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        settingsPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         profile.setFont(new java.awt.Font("Arial", 1, 15)); // NOI18N
         profile.setForeground(new java.awt.Color(255, 255, 255));
-        profile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/user!.png"))); // NOI18N
-        profile.setText("  Profile");
-        profilePanel.add(profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 130, 40));
+        profile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/settings.png"))); // NOI18N
+        profile.setText("  Settings");
+        settingsPanel.add(profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 130, 40));
 
-        navigation.add(profilePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 160, -1));
+        navigation.add(settingsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 440, 160, -1));
 
         managePanel.setBackground(new java.awt.Color(55, 162, 153));
         managePanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -158,7 +165,7 @@ public class Admin_Dashboard extends javax.swing.JFrame {
         manage.setText("  Manage");
         managePanel.add(manage, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 130, 40));
 
-        navigation.add(managePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 220, 160, -1));
+        navigation.add(managePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 160, -1));
 
         logsPanel.setBackground(new java.awt.Color(55, 162, 153));
         logsPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -176,11 +183,11 @@ public class Admin_Dashboard extends javax.swing.JFrame {
 
         logs.setFont(new java.awt.Font("Arial", 1, 15)); // NOI18N
         logs.setForeground(new java.awt.Color(255, 255, 255));
-        logs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/logs!.png"))); // NOI18N
+        logs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/logs.png"))); // NOI18N
         logs.setText("  Logs");
         logsPanel.add(logs, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 130, 40));
 
-        navigation.add(logsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 170, 160, -1));
+        navigation.add(logsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 390, 160, -1));
 
         logoutPanel.setBackground(new java.awt.Color(0, 51, 51));
         logoutPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -204,6 +211,28 @@ public class Admin_Dashboard extends javax.swing.JFrame {
         logoutPanel.add(logoutLogo, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 30, 30));
 
         navigation.add(logoutPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 510, 140, 30));
+
+        appointPanel.setBackground(new java.awt.Color(55, 162, 153));
+        appointPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                appointPanelMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                appointPanelMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                appointPanelMouseExited(evt);
+            }
+        });
+        appointPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        appointment.setFont(new java.awt.Font("Arial", 1, 15)); // NOI18N
+        appointment.setForeground(new java.awt.Color(255, 255, 255));
+        appointment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/appointments.png"))); // NOI18N
+        appointment.setText("  Appointment");
+        appointPanel.add(appointment, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 130, 40));
+
+        navigation.add(appointPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 170, 160, -1));
 
         jPanel1.add(navigation, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 220, 560));
 
@@ -229,17 +258,17 @@ public class Admin_Dashboard extends javax.swing.JFrame {
         dashPanel.setBackground(navColor);
     }//GEN-LAST:event_dashPanelMouseExited
 
-    private void profilePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseClicked
-        showProfile();
-    }//GEN-LAST:event_profilePanelMouseClicked
+    private void settingsPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_settingsPanelMouseClicked
+        showSettings();
+    }//GEN-LAST:event_settingsPanelMouseClicked
 
-    private void profilePanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseEntered
-        profilePanel.setBackground(hoverColor);
-    }//GEN-LAST:event_profilePanelMouseEntered
+    private void settingsPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_settingsPanelMouseEntered
+        settingsPanel.setBackground(hoverColor);
+    }//GEN-LAST:event_settingsPanelMouseEntered
 
-    private void profilePanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseExited
-        profilePanel.setBackground(navColor);
-    }//GEN-LAST:event_profilePanelMouseExited
+    private void settingsPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_settingsPanelMouseExited
+        settingsPanel.setBackground(navColor);
+    }//GEN-LAST:event_settingsPanelMouseExited
 
     private void managePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_managePanelMouseClicked
         showManage();
@@ -296,6 +325,18 @@ public class Admin_Dashboard extends javax.swing.JFrame {
         logoutPanel.setBackground(logoutNav);
     }//GEN-LAST:event_logoutPanelMouseExited
 
+    private void appointPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_appointPanelMouseClicked
+        showAppointment();
+    }//GEN-LAST:event_appointPanelMouseClicked
+
+    private void appointPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_appointPanelMouseEntered
+         appointPanel.setBackground(hoverColor);
+    }//GEN-LAST:event_appointPanelMouseEntered
+
+    private void appointPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_appointPanelMouseExited
+         appointPanel.setBackground(navColor);
+    }//GEN-LAST:event_appointPanelMouseExited
+
  
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -330,6 +371,8 @@ public class Admin_Dashboard extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel appointPanel;
+    private javax.swing.JLabel appointment;
     private javax.swing.JPanel dashPanel;
     private javax.swing.JLabel dashboard;
     private javax.swing.JLabel jLabel1;
@@ -345,6 +388,6 @@ public class Admin_Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel managePanel;
     private javax.swing.JPanel navigation;
     private javax.swing.JLabel profile;
-    private javax.swing.JPanel profilePanel;
+    private javax.swing.JPanel settingsPanel;
     // End of variables declaration//GEN-END:variables
 }
