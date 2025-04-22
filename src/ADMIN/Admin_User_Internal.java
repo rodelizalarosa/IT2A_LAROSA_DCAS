@@ -229,7 +229,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         edit.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         edit.setForeground(new java.awt.Color(255, 255, 255));
         edit.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        edit.setText("EDIT");
+        edit.setText("UPDATE");
         editPanel.add(edit, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
         jPanel1.add(editPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 70, 110, -1));
@@ -251,7 +251,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         delete.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         delete.setForeground(new java.awt.Color(255, 255, 255));
         delete.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        delete.setText("DELETE");
+        delete.setText("ARCHIVE");
         deletePanel.add(delete, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
         jPanel1.add(deletePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 70, 110, -1));
@@ -278,7 +278,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
 
         jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 70, 60, -1));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 570));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -362,7 +362,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
                     // Pass data to userUPDATE form (without password)
                     Admin_User_Update updateForm = new Admin_User_Update(selectedUserId, username, email, role);
                     Session.getInstance().getDesktopPane().add(updateForm);
-                    updateForm.setUserData(selectedUserId, username, email, role);
+                    //updateForm.setUserData(selectedUserId, username, email, role);
                     updateForm.setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(this, "User not found.");

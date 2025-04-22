@@ -5,8 +5,11 @@ import AUTHENTICATION.LogIn;
 import Config.ConnectDB;
 import Config.Session;
 import java.awt.Color;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import javax.swing.JDesktopPane;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
@@ -16,6 +19,8 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
 
     public Admin_Internal() {
         initComponents();
+        loadDashboardStats();
+        
         
         Session sess = Session.getInstance();
         String username = Session.getInstance().getUsername();
@@ -27,6 +32,76 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         BasicInternalFrameUI bi = (BasicInternalFrameUI)this.getUI();
         bi.setNorthPane(null);
     }
+    
+    private void loadDashboardStats() {
+        ConnectDB connect = new ConnectDB();
+
+        try {
+            Connection conn = connect.getConnection();
+            if (conn == null) {
+                System.out.println("Database connection failed!");
+                return;
+            }
+
+            // Active Users
+            String activeUserQuery = "SELECT COUNT(*) FROM users WHERE u_status = 'Active'";
+            String pendingUserQuery = "SELECT COUNT(*) FROM users WHERE u_status = 'Pending'";
+
+            // Patients with linked accounts
+            String patientQuery = "SELECT COUNT(*) FROM patients WHERE user_id IS NOT NULL";
+
+            // Doctors with linked accounts
+            String doctorQuery = "SELECT COUNT(*) FROM dentist WHERE user_id IS NOT NULL";
+
+            // Total Appointments
+            String appointmentQuery = "SELECT COUNT(*) FROM appointments";
+
+            // Total Services Availed in Appointments
+            String servicesQuery = "SELECT COUNT(*) FROM treatment_services";
+
+            // Helper method to run a single count query
+            int activeUsersCount = getCount(conn, activeUserQuery);
+            int pendingUsersCount = getCount(conn, pendingUserQuery);
+            int patientCount = getCount(conn, patientQuery);
+            int doctorCount = getCount(conn, doctorQuery);
+            int appointmentCount = getCount(conn, appointmentQuery);
+            int servicesCount = getCount(conn, servicesQuery);
+
+            // Update labels (replace these with your actual component names)
+            activeUsers.setText(String.valueOf(activeUsersCount));
+            pendingUsers.setText(String.valueOf(pendingUsersCount));
+            activePatients.setText(String.valueOf(patientCount));
+            activeDoctors.setText(String.valueOf(doctorCount));
+            totalAppointments.setText(String.valueOf(appointmentCount));
+            totalServices.setText(String.valueOf(servicesCount));
+
+            conn.close();
+        } catch (SQLException ex) {
+            System.out.println("Error loading dashboard stats: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        
+    }
+    
+    private int getCount(Connection conn, String query) throws SQLException {
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+        int count = 0;
+        if (rs.next()) {
+            count = rs.getInt(1);
+        }
+        rs.close();
+        stmt.close();
+        return count;
+    }
+    
+    private void showProfile() {
+        Admin_Profile prof = new Admin_Profile();
+        JDesktopPane desktop = Session.getInstance().getDesktopPane();
+        desktop.add(prof);
+        prof.setVisible(true);
+    }
+
     
     Color hoverColor = new Color (55,162,153);
     Color navColor = new Color (0,51,51);
@@ -45,7 +120,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         refresh = new javax.swing.JLabel();
         picture = new javax.swing.JLabel();
         admin1 = new javax.swing.JLabel();
-        appointmentPanel = new javax.swing.JPanel();
+        profilePanel = new javax.swing.JPanel();
         refresh1 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         activeUsers = new javax.swing.JLabel();
@@ -180,27 +255,27 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         admin1.setText("Admin");
         jPanel2.add(admin1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 150, 30));
 
-        appointmentPanel.setBackground(new java.awt.Color(0, 51, 51));
-        appointmentPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+        profilePanel.setBackground(new java.awt.Color(0, 51, 51));
+        profilePanel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                appointmentPanelMouseClicked(evt);
+                profilePanelMouseClicked(evt);
             }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                appointmentPanelMouseEntered(evt);
+                profilePanelMouseEntered(evt);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                appointmentPanelMouseExited(evt);
+                profilePanelMouseExited(evt);
             }
         });
-        appointmentPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        profilePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         refresh1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         refresh1.setForeground(new java.awt.Color(255, 255, 255));
         refresh1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         refresh1.setText("View Profile");
-        appointmentPanel.add(refresh1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 140, 30));
+        profilePanel.add(refresh1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 140, 30));
 
-        jPanel2.add(appointmentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 160, 30));
+        jPanel2.add(profilePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 160, 30));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 850, 190));
 
@@ -495,17 +570,17 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         logsPanel.setBackground(navColor);
     }//GEN-LAST:event_logsPanelMouseExited
 
-    private void appointmentPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_appointmentPanelMouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_appointmentPanelMouseClicked
+    private void profilePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseClicked
+        showProfile();
+    }//GEN-LAST:event_profilePanelMouseClicked
 
-    private void appointmentPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_appointmentPanelMouseEntered
-        // TODO add your handling code here:
-    }//GEN-LAST:event_appointmentPanelMouseEntered
+    private void profilePanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseEntered
+        profilePanel.setBackground(hoverColor);
+    }//GEN-LAST:event_profilePanelMouseEntered
 
-    private void appointmentPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_appointmentPanelMouseExited
-        // TODO add your handling code here:
-    }//GEN-LAST:event_appointmentPanelMouseExited
+    private void profilePanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseExited
+       profilePanel.setBackground(navColor);
+    }//GEN-LAST:event_profilePanelMouseExited
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -529,7 +604,6 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
     private javax.swing.JLabel activeUsers;
     private javax.swing.JLabel admin;
     private javax.swing.JLabel admin1;
-    private javax.swing.JPanel appointmentPanel;
     private javax.swing.JLabel dashboard;
     private javax.swing.JPanel dashboard_header;
     private javax.swing.JPanel jPanel1;
@@ -560,6 +634,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
     private javax.swing.JPanel logsPanel;
     private javax.swing.JLabel pendingUsers;
     private javax.swing.JLabel picture;
+    private javax.swing.JPanel profilePanel;
     private javax.swing.JLabel refresh;
     private javax.swing.JLabel refresh1;
     private javax.swing.JLabel totalAppointments;

@@ -14,7 +14,8 @@ public class Admin_Settings extends javax.swing.JFrame {
         initComponents();
         showProfile();
         
-        
+        Session.getInstance().setDesktopSettings(desktopSettings);
+
     }
     
      private void showProfile() {
@@ -23,9 +24,19 @@ public class Admin_Settings extends javax.swing.JFrame {
         prof.setVisible(true);
     }
      
+    private void showSecurity() {
+        Admin_Security sec = new Admin_Security();
+        desktopSettings.add(sec);
+        sec.setVisible(true);
+        this.dispose();
+    }
+     
 
     Color hoverColor = new Color (0,153,153);
     Color navColor = new Color (55,162,153);
+    
+    Color logoutHover = new Color (55,162,153);
+    Color logoutNav = new Color (0,51,51);
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -144,6 +155,7 @@ public class Admin_Settings extends javax.swing.JFrame {
     private void backMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_backMouseClicked
         Admin_Dashboard dash = new Admin_Dashboard();
         dash.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_backMouseClicked
 
     private void logoutPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutPanelMouseClicked
@@ -170,15 +182,15 @@ public class Admin_Settings extends javax.swing.JFrame {
     }//GEN-LAST:event_logoutPanelMouseClicked
 
     private void logoutPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutPanelMouseEntered
-        logoutPanel.setBackground(hoverColor);
+        logoutPanel.setBackground(logoutHover);
     }//GEN-LAST:event_logoutPanelMouseEntered
 
     private void logoutPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutPanelMouseExited
-        logoutPanel.setBackground(navColor);
+        logoutPanel.setBackground(logoutNav);
     }//GEN-LAST:event_logoutPanelMouseExited
 
     private void securityPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_securityPanelMouseClicked
-        showProfile();
+        showSecurity();
     }//GEN-LAST:event_securityPanelMouseClicked
 
     private void securityPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_securityPanelMouseEntered
@@ -190,7 +202,7 @@ public class Admin_Settings extends javax.swing.JFrame {
     }//GEN-LAST:event_securityPanelMouseExited
 
     private void profilePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseClicked
-        // TODO add your handling code here:
+        showProfile();
     }//GEN-LAST:event_profilePanelMouseClicked
 
     private void profilePanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseEntered

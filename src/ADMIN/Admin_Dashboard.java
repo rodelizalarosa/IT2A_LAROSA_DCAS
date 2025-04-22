@@ -22,28 +22,33 @@ public class Admin_Dashboard extends javax.swing.JFrame {
         Admin_Internal adm = new Admin_Internal();
         mainDesktop.add(adm);
         adm.setVisible(true);
+        this.dispose();
     }
     
     private void showSettings() {
         Admin_Settings set = new Admin_Settings();
         set.setVisible(true);
+        this.dispose();
     }
     
     private void showLogs(){
         Admin_Logs logs = new Admin_Logs();
         mainDesktop.add(logs);
         logs.setVisible(true);
+        this.dispose();
     }
     
     private void showManage(){
         Admin_Manage mng = new Admin_Manage();
         mng.setVisible(true);
+        this.dispose();
     }
     
     private void showAppointment(){
         Admin_Appointment app = new Admin_Appointment();
         mainDesktop.add(app);
         app.setVisible(true);
+        this.dispose();
     }
     
     

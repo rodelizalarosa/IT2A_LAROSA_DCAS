@@ -11,6 +11,7 @@ public class Session {
     private String username;
     private String email;
     private JDesktopPane mainDesktop;
+    private JDesktopPane desktopSettings;
 
     // Private constructor to enforce Singleton pattern
     private Session() {}
@@ -50,6 +51,14 @@ public class Session {
 
     public JDesktopPane getDesktopPane() {
         return mainDesktop;
+    }
+    
+    public void setDesktopSettings(JDesktopPane desktopPane) {
+        this.desktopSettings = desktopPane;
+    }
+
+    public JDesktopPane getDesktopSettings() {
+        return desktopSettings;
     }
 
     public void logEvent(String event, String description) {

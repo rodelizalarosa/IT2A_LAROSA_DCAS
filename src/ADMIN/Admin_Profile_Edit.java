@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,6 +40,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
     public Admin_Profile_Edit() {
         initComponents();
         borderField();
+        loadAdminProfile();
         
          //remove border
         this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0,0,0,0));
@@ -47,7 +49,20 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
     }
     
     private void borderField(){
+        
           // Make username transparent with a border
+        firstName.setBackground(new Color(0, 0, 0, 0));
+        firstName.setBorder(new LineBorder(Color.BLACK, 1));
+        
+          // Make username transparent with a border
+        middleName.setBackground(new Color(0, 0, 0, 0));
+        middleName.setBorder(new LineBorder(Color.BLACK, 1));
+        
+          // Make username transparent with a border
+        lastName.setBackground(new Color(0, 0, 0, 0));
+        lastName.setBorder(new LineBorder(Color.BLACK, 1));
+
+        // Make username transparent with a border
         userName.setBackground(new Color(0, 0, 0, 0));
         userName.setBorder(new LineBorder(Color.BLACK, 1));
         
@@ -59,15 +74,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         Gender.setBackground(new Color(0, 0, 0, 0));
         Gender.setBorder(new LineBorder(Color.BLACK, 1));
         
-        // Make password transparent with a border
-        Password.setBackground(new Color(0, 0, 0, 0));
-        Password.setBorder(new LineBorder(Color.BLACK, 1));
-        
-        // Make confirm password transparent with a border
-        ConfirmPass.setBackground(new Color(0, 0, 0, 0));
-        ConfirmPass.setBorder(new LineBorder(Color.BLACK, 1));
-        
-         Gender.setRenderer(new DefaultListCellRenderer() {
+        Gender.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 Component component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -85,6 +92,49 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         });
         
     }
+    
+    private void loadAdminProfile() {
+        int userId = Session.getInstance().getUserId();
+
+        try (Connection con = ConnectDB.getConnection()) {
+
+            // --- Get from users table ---
+            String userSql = "SELECT u_username, u_email, u_image FROM users WHERE user_id = ?";
+            try (PreparedStatement pst = con.prepareStatement(userSql)) {
+                pst.setInt(1, userId);
+                ResultSet rs = pst.executeQuery();
+                if (rs.next()) {
+                    userName.setText(rs.getString("u_username"));
+                    Email.setText(rs.getString("u_email"));
+
+                    // Handle image
+                    String img = rs.getString("u_image");
+                    if (img == null || img.isEmpty()) {
+                        image.setIcon(new ImageIcon("src/default/u_blank.jpg"));
+                    } else {
+                        image.setIcon(new ImageIcon("src/u_images/" + img));
+                    }
+                }
+            }
+
+            // --- Get from staff table ---
+            String staffSql = "SELECT s_fname, s_mname, s_lname, s_gender FROM staff WHERE user_id = ?";
+            try (PreparedStatement pst = con.prepareStatement(staffSql)) {
+                pst.setInt(1, userId);
+                ResultSet rs = pst.executeQuery();
+                if (rs.next()) {
+                    firstName.setText(rs.getString("s_fname"));
+                    middleName.setText(rs.getString("s_mname"));
+                    lastName.setText(rs.getString("s_lname"));
+                    Gender.setSelectedItem(rs.getString("s_gender"));
+                }
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "❌ Error loading admin profile: " + e.getMessage());
+        }
+    }
+
 
     private boolean isValidEmail(String email) {
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
@@ -93,12 +143,13 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
     
     private boolean isEmailTaken(String email) {
         ConnectDB connect = new ConnectDB();
-        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
+        String sql = "SELECT COUNT(*) FROM users WHERE u_email = ?";
         try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
             pst.setString(1, email);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1) > 0;
+                    // Check if the count is greater than 0 AND if the email is NOT the current user's email
+                    return rs.getInt(1) > 0 && !email.equalsIgnoreCase(Session.getInstance().getEmail());
                 }
             }
         } catch (SQLException ex) {
@@ -109,88 +160,24 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
     private boolean isUsernameTaken(String username) {
         ConnectDB connect = new ConnectDB();
-        
-        String sql = "SELECT COUNT(*) FROM users WHERE username = ?"; 
+        String sql = "SELECT COUNT(*) FROM users WHERE u_username = ?";
         try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
             pst.setString(1, username);
-            try (ResultSet rs = pst.executeQuery()) { 
+            try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1) > 0;
+                    return rs.getInt(1) > 0 && !username.equalsIgnoreCase(Session.getInstance().getUsername());
                 }
             }
         } catch (SQLException ex) {
-            ex.printStackTrace(); 
+            ex.printStackTrace();
         }
         return false;
     }
     
-    
-    private boolean validatePassword(javax.swing.JPasswordField passwordField) {
-        String password = new String(passwordField.getPassword());
-        StringBuilder errorMessage = new StringBuilder();
-        boolean isValid = true;
-
-        if (password.isEmpty()) {
-            errorMessage.append("Password cannot be empty.\n");
-            isValid = false;
-        }
-        if (password.length() < 8) {
-            errorMessage.append("Password must be at least 8 characters long.\n");
-            isValid = false;
-        }
-        if (!password.matches(".*[A-Z].*")) {
-            errorMessage.append("Password must contain at least one uppercase letter.\n");
-            isValid = false;
-        }
-        if (!password.matches(".*[a-z].*")) {
-            errorMessage.append("Password must contain at least one lowercase letter.\n");
-            isValid = false;
-        }
-        if (!password.matches(".*\\d.*")) {
-            errorMessage.append("Password must contain at least one digit.\n");
-            isValid = false;
-        }
-        if (!password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
-            errorMessage.append("Password must contain at least one special character.\n");
-            isValid = false;
-        }
-
-        if (!isValid) {
-        try {
-            ImageIcon icon = new ImageIcon(getClass().getResource("/imgs/error.png"));
-            if (icon == null) {
-                System.err.println("Error: Image not found at /imgs/error.png");
-            }
-            JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE, icon);
-        } catch (Exception e) {
-            System.err.println("Error loading image: " + e.getMessage());
-            JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
-        }
-        }
-        return isValid;
- }
-    
-    
-    
-    private String hashPassword(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = md.digest(password.getBytes());
-
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hashedBytes) {
-                hexString.append(String.format("%02x", b));
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            JOptionPane.showMessageDialog(this, "Hashing error", "Error", JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-    }
-    
     private boolean isAllFieldsEmpty() {
-        return middleName.getText().trim().isEmpty() && Email.getText().trim().isEmpty()
-                && Password.getPassword().length == 0;
+        return firstName.getText().trim().isEmpty() &&
+                lastName.getText().trim().isEmpty() && userName.getText().trim().isEmpty() &&
+                Email.getText().trim().isEmpty() && Gender.getSelectedIndex() == 0;
     }
     
    public String destination = "";
@@ -214,6 +201,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
    public static int getHeightFromWidth(String imagePath, int desiredWidth) {
         try {
+
            
             File imageFile = new File(imagePath);
             BufferedImage image = ImageIO.read(imageFile);
@@ -231,20 +219,48 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         return -1;
     }
    
-    public  ImageIcon ResizeImage(String ImagePath, byte[] pic, JLabel label) {
-        ImageIcon MyImage = null;
-            if(ImagePath !=null){
-                MyImage = new ImageIcon(ImagePath);
-            }else{
-                MyImage = new ImageIcon(pic);
+    public ImageIcon ResizeImage(String ImagePath, byte[] pic, JLabel label) {
+        ImageIcon myImage = null;
+        BufferedImage img = null;
+
+        try {
+            if (ImagePath != null) {
+                img = ImageIO.read(new File(ImagePath));
+            } else if (pic != null) {
+                img = ImageIO.read(new ByteArrayInputStream(pic));
             }
 
-        int newHeight = getHeightFromWidth(ImagePath, label.getWidth());
+            if (img != null) {
+                int labelWidth = label.getWidth();
+                int labelHeight = label.getHeight();
+                int originalWidth = img.getWidth();
+                int originalHeight = img.getHeight();
 
-        Image img = MyImage.getImage();
-        Image newImg = img.getScaledInstance(label.getWidth(), newHeight, Image.SCALE_SMOOTH);
-        ImageIcon image = new ImageIcon(newImg);
-        return image;
+                if (labelWidth > 0 && labelHeight > 0 && originalWidth > 0 && originalHeight > 0) {
+                    double widthRatio = (double) labelWidth / originalWidth;
+                    double heightRatio = (double) labelHeight / originalHeight;
+
+                    // Use the smaller ratio to fit the image within the label
+                    double scaleFactor = Math.min(widthRatio, heightRatio);
+
+                    int newWidth = (int) (originalWidth * scaleFactor);
+                    int newHeight = (int) (originalHeight * scaleFactor);
+
+                    Image resizedImg = img.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+                    myImage = new ImageIcon(resizedImg);
+                } else {
+                    System.out.println("JLabel or image has zero or negative dimensions. Using original image.");
+                    myImage = new ImageIcon(img);
+                }
+            } else {
+                System.err.println("Error: No image data loaded for path: " + ImagePath);
+            }
+
+        } catch (IOException ex) {
+            System.err.println("Error loading image: " + ex.getMessage());
+            myImage = null;
+        }
+        return myImage;
     }
     
     public void imageUpdater(String existingFilePath, String newFilePath) {
@@ -296,19 +312,8 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         middleName = new javax.swing.JTextField();
         gender = new javax.swing.JLabel();
         Email = new javax.swing.JTextField();
-        password1 = new javax.swing.JLabel();
-        Password = new javax.swing.JPasswordField();
-        confirmPassword = new javax.swing.JLabel();
-        ConfirmPass = new javax.swing.JPasswordField();
-        create_button = new javax.swing.JLabel();
-        showCon = new javax.swing.JLabel();
-        hideCon = new javax.swing.JLabel();
-        show = new javax.swing.JLabel();
-        hide = new javax.swing.JLabel();
+        save_button = new javax.swing.JLabel();
         errorGender = new javax.swing.JLabel();
-        errorPassword = new javax.swing.JLabel();
-        errorConfirm = new javax.swing.JLabel();
-        image = new javax.swing.JLabel();
         delPanel = new javax.swing.JPanel();
         del_prof1 = new javax.swing.JLabel();
         addProf = new javax.swing.JPanel();
@@ -325,6 +330,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         Gender = new javax.swing.JComboBox<>();
         email = new javax.swing.JLabel();
         errorEmail = new javax.swing.JLabel();
+        image = new javax.swing.JLabel();
 
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -393,86 +399,19 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         });
         jPanel2.add(Email, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 190, 270, 40));
 
-        password1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        password1.setForeground(new java.awt.Color(51, 51, 51));
-        password1.setText("Password");
-        jPanel2.add(password1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 340, 120, 30));
-
-        Password.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        Password.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                PasswordFocusLost(evt);
-            }
-        });
-        jPanel2.add(Password, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 370, 240, 40));
-
-        confirmPassword.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        confirmPassword.setForeground(new java.awt.Color(51, 51, 51));
-        confirmPassword.setText("Confirm Password");
-        jPanel2.add(confirmPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 340, 150, 30));
-
-        ConfirmPass.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        ConfirmPass.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                ConfirmPassFocusLost(evt);
-            }
-        });
-        jPanel2.add(ConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 370, 250, 40));
-
-        create_button.setBackground(new java.awt.Color(0, 153, 153));
-        create_button.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        create_button.setForeground(new java.awt.Color(255, 255, 255));
-        create_button.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        create_button.setText("SAVE CHANGES");
-        create_button.setOpaque(true);
-        create_button.addMouseListener(new java.awt.event.MouseAdapter() {
+        save_button.setBackground(new java.awt.Color(0, 153, 153));
+        save_button.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        save_button.setForeground(new java.awt.Color(255, 255, 255));
+        save_button.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        save_button.setText("SAVE CHANGES");
+        save_button.setOpaque(true);
+        save_button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                create_buttonMouseClicked(evt);
+                save_buttonMouseClicked(evt);
             }
         });
-        jPanel2.add(create_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 370, 210, 40));
-
-        showCon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        showCon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/show_bl.png"))); // NOI18N
-        showCon.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                showConMousePressed(evt);
-            }
-        });
-        jPanel2.add(showCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 370, 40, 40));
-
-        hideCon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        hideCon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/hide_bl.png"))); // NOI18N
-        hideCon.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                hideConMousePressed(evt);
-            }
-        });
-        jPanel2.add(hideCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 370, 40, 40));
-
-        show.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        show.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/show_bl.png"))); // NOI18N
-        show.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                showMousePressed(evt);
-            }
-        });
-        jPanel2.add(show, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 370, 40, 40));
-
-        hide.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        hide.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/hide_bl.png"))); // NOI18N
-        hide.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                hideMousePressed(evt);
-            }
-        });
-        jPanel2.add(hide, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 370, 40, 40));
+        jPanel2.add(save_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 340, 210, 40));
         jPanel2.add(errorGender, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 320, 220, 20));
-        jPanel2.add(errorPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 410, 210, 20));
-        jPanel2.add(errorConfirm, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 410, 210, 20));
-
-        image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
-        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 200, 160));
 
         delPanel.setBackground(new java.awt.Color(255, 255, 255));
         delPanel.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
@@ -482,9 +421,9 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         del_prof1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         del_prof1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/del_profile.png"))); // NOI18N
         del_prof1.setText("  Delete");
-        delPanel.add(del_prof1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 40));
+        delPanel.add(del_prof1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 80, 40));
 
-        jPanel2.add(delPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, 100, 40));
+        jPanel2.add(delPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 280, 100, 40));
 
         addProf.setBackground(new java.awt.Color(255, 255, 255));
         addProf.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
@@ -499,9 +438,9 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 add_profMouseClicked(evt);
             }
         });
-        addProf.add(add_prof, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 40));
+        addProf.add(add_prof, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 80, 40));
 
-        jPanel2.add(addProf, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 250, 100, 40));
+        jPanel2.add(addProf, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 280, 100, 40));
 
         username2.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         username2.setForeground(new java.awt.Color(51, 51, 51));
@@ -580,7 +519,10 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         jPanel2.add(email, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 160, 80, 30));
         jPanel2.add(errorEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 230, 220, 20));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 860, 440));
+        image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
+        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 200, 180));
+
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, 860, 410));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
@@ -615,112 +557,109 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_EmailActionPerformed
 
-    private void PasswordFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_PasswordFocusLost
+    private void save_buttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_save_buttonMouseClicked
 
-        String pass = Password.getText();
-
-        if (pass.isEmpty()) {
-            errorPassword.setForeground(Color.RED);
-            errorPassword.setText("Password is required");
-            errorPassword.setForeground(Color.RED);
-        } else {
-            errorPassword.setForeground(Color.BLACK);
-            errorPassword.setText("");
-        }
-        Password.repaint();
-    }//GEN-LAST:event_PasswordFocusLost
-
-    private void ConfirmPassFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ConfirmPassFocusLost
-        String pass = ConfirmPass.getText();
-
-        if (pass.isEmpty()) {
-            errorConfirm.setForeground(Color.RED);
-            errorConfirm.setText("Confirm Password is required");
-            errorConfirm.setForeground(Color.RED);
-        } else {
-            errorConfirm.setForeground(Color.BLACK);
-            errorConfirm.setText("");
-        }
-        ConfirmPass.repaint();
-    }//GEN-LAST:event_ConfirmPassFocusLost
-
-    private void create_buttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_create_buttonMouseClicked
-
+         int userId = Session.getInstance().getUserId();
         ConnectDB connect = new ConnectDB();
 
-        String usernameText = middleName.getText().trim();
+        String fName = firstName.getText().trim();
+        String mName = middleName.getText().trim();
+        String lName = lastName.getText().trim();
+        String genderValue = Gender.getSelectedItem().toString().trim();
+
+        String usernameText = userName.getText().trim();
         String emailText = Email.getText().trim();
-        char[] passwordChars = Password.getPassword();
+
         StringBuilder errorMessage = new StringBuilder();
 
-        if (isAllFieldsEmpty()) {
-            errorMessage.append("Please fill out the registration form.\n");
-        } else {
-            if (emailText.isEmpty()) {
-                errorMessage.append("Email cannot be empty.\n");
-            } else if (!isValidEmail(emailText)) {
-                errorMessage.append("Invalid email format.\n");
-            } else if (isEmailTaken(emailText)) {
-                errorMessage.append("Email is already taken.\n");
-            }
-            if (usernameText.isEmpty()) {
-                errorMessage.append("Username cannot be empty.\n");
-            } else if (isUsernameTaken(usernameText)) {
-                errorMessage.append("Username is already taken.\n");
-            }
-            if (!validatePassword(Password)) {
-                return;
-            }
+        // --- Validate required fields ---
+        if (fName.isEmpty()) 
+            errorMessage.append("First Name is required.\n");
+        if (lName.isEmpty()) 
+            errorMessage.append("Last Name is required.\n");
+        if (Gender.getSelectedIndex() == 0) 
+            errorMessage.append("Please select a Gender.\n");
+
+        if (emailText.isEmpty()) {
+            errorMessage.append("Email cannot be empty.\n");
+        } else if (!isValidEmail(emailText)) {
+            errorMessage.append("Invalid email format.\n");
+        } 
+
+        if (usernameText.isEmpty()) {
+            errorMessage.append("Username cannot be empty.\n");
+        } else if (isUsernameTaken(usernameText) && !usernameText.equalsIgnoreCase(Session.getInstance().getUsername())) {
+            errorMessage.append("Username is already taken.\n");
         }
+
         if (errorMessage.length() > 0) {
             JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        String passwordText = new String(passwordChars);
-        String hashedPassword = hashPassword(passwordText);
-        String sql = "INSERT INTO dcas_sys.users (u_username, u_email, u_password, u_status) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
-            pst.setString(1, usernameText);
-            pst.setString(2, emailText);
-            pst.setString(3, hashedPassword);
-            pst.setString(4, "Pending");
-            pst.executeUpdate();
-            Session sess = Session.getInstance();
-            sess.logEvent("EDITED ADMIN PROFILE", "Admin edited its account.");
-            JOptionPane.showMessageDialog(this, "Added User Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
-            middleName.setText("");
-            Email.setText("");
-            Password.setText("");
+            try (Connection con = connect.getConnection()) {
 
-        } catch (SQLException ex) {
-            Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_create_buttonMouseClicked
+           // --- Update users table ---
+           String updateUser = "UPDATE users SET u_username = ?, u_email = ? WHERE user_id = ?";
+           try (PreparedStatement pst = con.prepareStatement(updateUser)) {
+               pst.setString(1, usernameText);
+               pst.setString(2, emailText);
+               pst.setInt(3, userId);
+               pst.executeUpdate();
+           }
 
-    private void showConMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_showConMousePressed
-        hideCon.setVisible(true);
-        showCon.setVisible(false);
-        ConfirmPass.setEchoChar('*');
-    }//GEN-LAST:event_showConMousePressed
+           // --- Check if staff record exists ---
+           String checkSql = "SELECT COUNT(*) FROM staff WHERE user_id = ?";
+           try (PreparedStatement checkPst = con.prepareStatement(checkSql)) {
+               checkPst.setInt(1, userId);
+               ResultSet rs = checkPst.executeQuery();
+               rs.next();
+               boolean staffExists = rs.getInt(1) > 0;
 
-    private void hideConMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_hideConMousePressed
-        showCon.setVisible(true);
-        hideCon.setVisible(false);
-        ConfirmPass.setEchoChar((char) 0);
-    }//GEN-LAST:event_hideConMousePressed
+               if (staffExists) {
+                   // Update staff
+                   String updateStaff = "UPDATE staff SET s_fname = ?, s_mname = ?, s_lname = ?, s_gender = ? WHERE user_id = ?";
+                   try (PreparedStatement pst = con.prepareStatement(updateStaff)) {
+                       pst.setString(1, fName);
+                       pst.setString(2, mName);
+                       pst.setString(3, lName);
+                       pst.setString(4, genderValue);
+                       pst.setInt(5, userId);
+                       pst.executeUpdate();
+                   }
+               } else {
+                   // Insert into staff
+                   String insertStaff = "INSERT INTO staff (user_id, s_fname, s_mname, s_lname, s_gender) VALUES (?, ?, ?, ?, ?)";
+                   try (PreparedStatement pst = con.prepareStatement(insertStaff)) {
+                       pst.setInt(1, userId);
+                       pst.setString(2, fName);
+                       pst.setString(3, mName);
+                       pst.setString(4, lName);
+                       pst.setString(5, genderValue);
+                       pst.executeUpdate();
+                   }
+               }
+               
+                  // Update the displayed image after saving
+                 String currentImageFromDB = null;
+                if (selectedFile != null) {
+                    image.setIcon(ResizeImage("src/u_images/" + selectedFile.getName(), null, image));
+                } else if (currentImageFromDB == null || currentImageFromDB.isEmpty()) {
+                    image.setIcon(ResizeImage("src/default/u_blank.jpg", null, image));
+                } else {
+                    image.setIcon(ResizeImage("src/u_images/" + currentImageFromDB, null, image));
+                }
+           }
 
-    private void showMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_showMousePressed
-        hide.setVisible(true);
-        show.setVisible(false);
-        Password.setEchoChar('*');
-    }//GEN-LAST:event_showMousePressed
+           // Log and feedback
+           Session.getInstance().logEvent("EDITED ADMIN PROFILE", "Admin updated their account information.");
+           JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
-    private void hideMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_hideMousePressed
-        show.setVisible(true);
-        hide.setVisible(false);
-        Password.setEchoChar((char) 0);
-    }//GEN-LAST:event_hideMousePressed
+       } catch (SQLException ex) {
+           Logger.getLogger(Admin_Profile_Edit.class.getName()).log(Level.SEVERE, null, ex);
+           JOptionPane.showMessageDialog(this, "Error updating profile: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+       }
+    }//GEN-LAST:event_save_buttonMouseClicked
 
     private void firstNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_firstNameFocusLost
         String pass = firstName.getText();
@@ -818,30 +757,22 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPasswordField ConfirmPass;
     private javax.swing.JTextField Email;
     private javax.swing.JComboBox<String> Gender;
-    private javax.swing.JPasswordField Password;
     private javax.swing.JLabel account;
     private javax.swing.JPanel addProf;
     private javax.swing.JLabel add_prof;
-    private javax.swing.JLabel confirmPassword;
-    private javax.swing.JLabel create_button;
     private javax.swing.JPanel delPanel;
     private javax.swing.JLabel del_prof1;
     private javax.swing.JLabel email;
     private javax.swing.JLabel email3;
-    private javax.swing.JLabel errorConfirm;
     private javax.swing.JLabel errorEmail;
     private javax.swing.JLabel errorFirst;
     private javax.swing.JLabel errorGender;
     private javax.swing.JLabel errorLast;
-    private javax.swing.JLabel errorPassword;
     private javax.swing.JLabel errorUser;
     private javax.swing.JTextField firstName;
     private javax.swing.JLabel gender;
-    private javax.swing.JLabel hide;
-    private javax.swing.JLabel hideCon;
     private javax.swing.JLabel image;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -850,11 +781,9 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
     private javax.swing.JLabel lastname;
     private javax.swing.JTextField middleName;
     private javax.swing.JLabel middlename;
-    private javax.swing.JLabel password1;
     private javax.swing.JLabel profile;
     private javax.swing.JPanel profile_header;
-    private javax.swing.JLabel show;
-    private javax.swing.JLabel showCon;
+    private javax.swing.JLabel save_button;
     private javax.swing.JTextField userName;
     private javax.swing.JLabel username2;
     // End of variables declaration//GEN-END:variables

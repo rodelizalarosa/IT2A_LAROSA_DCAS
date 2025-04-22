@@ -32,7 +32,7 @@ public class Register extends javax.swing.JFrame {
         Email.setBackground(new Color(0, 0, 0, 0));
         Email.setBorder(new LineBorder(Color.WHITE, 1));
         
-        // Make role transparent with a border
+        // Makfe role transparent with a border
         Role.setBackground(new Color(0, 0, 0, 0));
         Role.setBorder(new LineBorder(Color.WHITE, 1));
         
@@ -69,7 +69,7 @@ public class Register extends javax.swing.JFrame {
     
     private boolean isEmailTaken(String email) {
         ConnectDB connect = new ConnectDB();
-        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
+        String sql = "SELECT COUNT(*) FROM users WHERE u_email = ?";
         try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
             pst.setString(1, email);
             try (ResultSet rs = pst.executeQuery()) {
@@ -86,7 +86,7 @@ public class Register extends javax.swing.JFrame {
     private boolean isUsernameTaken(String username) {
         ConnectDB connect = new ConnectDB();
         
-        String sql = "SELECT COUNT(*) FROM users WHERE username = ?"; 
+        String sql = "SELECT COUNT(*) FROM users WHERE u_username = ?"; 
         try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
             pst.setString(1, username);
             try (ResultSet rs = pst.executeQuery()) { 
@@ -169,7 +169,7 @@ public class Register extends javax.swing.JFrame {
                 && Password.getPassword().length == 0;
     }
     
-    public String destination = "src/default/u_blank.jpg";
+    public String destination = "default/u_blank.jpg";
     
    
     @SuppressWarnings("unchecked")
@@ -512,13 +512,14 @@ public class Register extends javax.swing.JFrame {
         }
         String passwordText = new String(passwordChars);
         String hashedPassword = hashPassword(passwordText);
-        String sql = "INSERT INTO dcas_sys.users (u_username, u_email, u_role, u_password, u_status) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO dcas_sys.users (u_username, u_email, u_role, u_status, u_password, u_image) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
             pst.setString(1, usernameText);
             pst.setString(2, emailText);
             pst.setString(3, selectedRole);
-            pst.setString(4, hashedPassword);
-            pst.setString(5, "Pending");
+            pst.setString(4, "Pending");
+            pst.setString(5, hashedPassword);
+            pst.setString(6, destination);
             pst.executeUpdate();
             JOptionPane.showMessageDialog(this, "Registration Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
 

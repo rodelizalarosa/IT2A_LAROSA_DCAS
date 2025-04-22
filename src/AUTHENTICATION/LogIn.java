@@ -171,7 +171,7 @@ public class LogIn extends javax.swing.JFrame {
                 login_buttonMouseClicked(evt);
             }
         });
-        jPanel1.add(login_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 410, 350, 40));
+        jPanel1.add(login_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 420, 350, 40));
 
         noAcct.setFont(new java.awt.Font("Verdana", 0, 14)); // NOI18N
         noAcct.setForeground(new java.awt.Color(255, 255, 255));

@@ -6,11 +6,14 @@ import Config.*;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,38 +24,42 @@ import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 
 public class Admin_Profile extends javax.swing.JInternalFrame {
 
-     
+  
     public Admin_Profile() {
         initComponents();
+       
         
         //remove border
         this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0,0,0,0));
         BasicInternalFrameUI bi = (BasicInternalFrameUI)this.getUI();
         bi.setNorthPane(null);
+        
+        formInternalFrameActivated(null); 
     }
     
     private void editProfile(){
         Admin_Profile_Edit edit = new Admin_Profile_Edit();
-       // desktopSettings.add(edit);
+        JDesktopPane desktop = Session.getInstance().getDesktopSettings();
+        desktop.add(edit);
         edit.setVisible(true);
     }
     
-    public String destination = "";
-      File selectedFile;
-      public String path;
-      public String oldpath;
-      
+     public String destination = "";
+     File selectedFile;
+     public String path;
+     public String oldpath;
     
-   public int FileExistenceChecker(String path){
+    public int FileExistenceChecker(String path){
         File file = new File(path);
         String fileName = file.getName();
         
-        Path filePath = Paths.get("src/images", fileName);
+        Path filePath = Paths.get("src/u_images", fileName);
         boolean fileExists = Files.exists(filePath);
         
         if (fileExists) {
@@ -62,17 +69,15 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         }
     }
 
-   public static int getHeightFromWidth(String imagePath, int desiredWidth) {
+    public static int getHeightFromWidth(String imagePath, int desiredWidth) {
         try {
-            // Read the image file
+           
             File imageFile = new File(imagePath);
             BufferedImage image = ImageIO.read(imageFile);
             
-            // Get the original width and height of the image
             int originalWidth = image.getWidth();
             int originalHeight = image.getHeight();
             
-            // Calculate the new height based on the desired width and the aspect ratio
             int newHeight = (int) ((double) desiredWidth / originalWidth * originalHeight);
             
             return newHeight;
@@ -83,21 +88,95 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         return -1;
     }
    
-   public  ImageIcon ResizeImage(String ImagePath, byte[] pic, JLabel label) {
-        ImageIcon MyImage = null;
-            if(ImagePath !=null){
-                MyImage = new ImageIcon(ImagePath);
-            }else{
-                MyImage = new ImageIcon(pic);
+   public ImageIcon ResizeImage(String imagePath, byte[] pic, JLabel label) {
+        ImageIcon myImage = null;
+        BufferedImage img = null;
+
+        try {
+            if (imagePath != null) {
+                if (imagePath.startsWith("/")) {
+                    // Load from resource folder
+                    InputStream is = getClass().getResourceAsStream(imagePath);
+                    if (is == null) {
+                        throw new IOException("Resource not found: " + imagePath);
+                    }
+                    img = ImageIO.read(is);
+                } else {
+                    // Load from file system
+                    File file = new File(imagePath);
+                    if (!file.exists()) {
+                        throw new IOException("File not found: " + imagePath);
+                    }
+                    img = ImageIO.read(file);
+                }
+            } else if (pic != null) {
+                img = ImageIO.read(new ByteArrayInputStream(pic));
             }
 
-        int newHeight = getHeightFromWidth(ImagePath, label.getWidth());
+            if (imagePath != null) {
+            if (imagePath.startsWith("/")) {
+                // Resource path (like default image)
+                InputStream is = getClass().getResourceAsStream(imagePath);
+                if (is == null) {
+                    throw new IOException("Resource not found: " + imagePath);
+                }
+                img = ImageIO.read(is);
+            } else {
+                // File system path (like uploaded images)
+                File file = new File("src/" + imagePath); // ADD "src/" prefix
+                if (!file.exists()) {
+                    throw new IOException("File not found: " + file.getAbsolutePath());
+                }
+                img = ImageIO.read(file);
+            }
+        }
 
-        Image img = MyImage.getImage();
-        Image newImg = img.getScaledInstance(label.getWidth(), newHeight, Image.SCALE_SMOOTH);
-        ImageIcon image = new ImageIcon(newImg);
-        return image;
+        } catch (IOException ex) {
+            System.err.println("Error loading image: " + ex.getMessage());
+            myImage = null;
+        }
+        return myImage;
     }
+    
+    public void imageUpdater(String existingFilePath, String newFilePath) {
+      File existingFile = new File(existingFilePath); // Path of the currently used image
+      File newFile = new File(newFilePath); // Path of the new image
+      String destinationFolder = "src/u_images/";
+      File destinationFile = new File(destinationFolder, newFile.getName()); // Final destination for the new image
+
+      try {
+          // Ensure the u_images folder exists
+          File destinationDir = new File(destinationFolder);
+          if (!destinationDir.exists()) {
+              destinationDir.mkdirs();
+          }
+
+          // Check if existingFile is from default
+          if (existingFile.getPath().contains("default")) {
+              // Do not delete; simply copy the new file to u_images
+              Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+              System.out.println("New image added successfully to u_images.");
+          } else {
+              // For files in u_images, replace the existing image
+              if (existingFile.exists()) {
+                  Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                  existingFile.delete(); // Clean up the old image if necessary
+                  System.out.println("Image updated successfully in u_images.");
+              } else {
+                  // If no file exists, simply copy the new one
+                  Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                  System.out.println("Image added to u_images.");
+              }
+          }
+      } catch (IOException e) {
+          System.out.println("Error while updating the image: " + e.getMessage());
+      }
+  }
+
+
+
+    Color hover = new Color (0,51,51);
+    Color nav = new Color (0,153,153);
    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -198,6 +277,12 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 edit_profileMouseClicked(evt);
             }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                edit_profileMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                edit_profileMouseExited(evt);
+            }
         });
         jPanel2.add(edit_profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, 200, 40));
 
@@ -241,7 +326,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
 
         Gender.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
         Gender.setText("gender");
-        jPanel2.add(Gender, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 190, 90, 30));
+        jPanel2.add(Gender, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 190, 400, 30));
 
         userID.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
         userID.setText("ID");
@@ -264,9 +349,9 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_edit_profileMouseClicked
 
     private void formInternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameActivated
-         Session sess = Session.getInstance();
-    
-        if(sess.getUserId() == 0) {
+        Session sess = Session.getInstance();
+
+        if (sess.getUserId() == 0) {
             JOptionPane.showMessageDialog(null, "No Account, Log in First!", "Notice", JOptionPane.ERROR_MESSAGE);
             LogIn lgf = new LogIn();
             lgf.setVisible(true);
@@ -276,47 +361,64 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
                 ConnectDB dbc = new ConnectDB();
                 ResultSet rs = dbc.getData("SELECT * FROM users WHERE user_id = '" + sess.getUserId() + "'");
 
-                if(rs.next()) {
+                if (rs.next()) {
                     int id = sess.getUserId();
                     String username = rs.getString("u_username");
                     String email = rs.getString("u_email");
                     String role = rs.getString("u_role");
                     String imagePath = rs.getString("u_image");
 
-                    // Check for full name in the staff table
-                    ResultSet rsStaff = dbc.getData("SELECT CONCAT(s_fname, ' ', s_lname) AS fullname FROM staff WHERE staff_id = '" + id + "'");
+                    // Set user ID
+                    userID.setText(String.valueOf(id)); // Make sure you have a JLabel named userID
 
-                    String fullName;
-                    if(rsStaff.next()) {
+                    // Try to get full name and gender from staff table
+                    ResultSet rsStaff = dbc.getData("SELECT CONCAT(s_fname, ' ', s_lname) AS fullname, s_gender FROM staff WHERE staff_id = '" + id + "'");
+
+                    String fullName = "Account not yet updated.";
+                    String genderText = "Account not yet updated.";
+
+                    if (rsStaff.next()) {
                         fullName = rsStaff.getString("fullname");
-                    } else {
-                        fullName = "Admin user details not yet completed";
+                        genderText = rsStaff.getString("s_gender");
                     }
 
-                    // Set retrieved values to the labels
                     fullname.setText(fullName);
+                    Gender.setText(genderText); // Make sure gender is a JLabel
                     User.setText("@" + username);
                     Email.setText(email);
                     Role.setText(role);
 
-                     // Set default image if user image is missing
-                    String defaultImagePath = "src/default/u_blank.jpg"; // Path to default image
-                    String finalImagePath;
+                    String imagePathFromDB = rs.getString("u_image");
+                    ImageIcon imageIcon = null;
 
-                    if (imagePath == null || imagePath.trim().isEmpty()) {
-                        finalImagePath = defaultImagePath;
+                    if (imagePathFromDB == null || imagePathFromDB.trim().isEmpty()) {
+                        // Load default image using ResizeImage
+                        SwingUtilities.invokeLater(() -> {
+                            image.setIcon(ResizeImage("/default/u_blank.jpg", null, image));
+                        });
                     } else {
-                        finalImagePath = "src/u_images" + imagePath;
+                        // Load uploaded image using ResizeImage
+                        SwingUtilities.invokeLater(() -> {
+                            image.setIcon(ResizeImage("u_images/" + imagePathFromDB, null, image));
+                        });
                     }
 
-                    image.setIcon(ResizeImage(finalImagePath, null, image));
-
-                    }
-            } catch(SQLException ex) {
-                System.out.println("Error: " + ex);
+              
             }
+
+        } catch (SQLException ex) {
+            System.out.println("Error: " + ex);
+        }
         }
     }//GEN-LAST:event_formInternalFrameActivated
+
+    private void edit_profileMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_edit_profileMouseEntered
+        edit_profile.setBackground(hover);
+    }//GEN-LAST:event_edit_profileMouseEntered
+
+    private void edit_profileMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_edit_profileMouseExited
+        edit_profile.setBackground(nav);
+    }//GEN-LAST:event_edit_profileMouseExited
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -19,28 +19,35 @@ public class Admin_Manage extends javax.swing.JFrame {
         Admin_User_Internal user = new Admin_User_Internal();
         parentDesktop.add(user);
         user.setVisible(true);
+        this.dispose();
     }
     
     private void showPatient() {
-        Admin_Patient_Internal patient = new Admin_Patient_Internal();
-        parentDesktop.add(patient);
-        patient.setVisible(true);
+        Admin_Patient_Internal pat = new Admin_Patient_Internal();
+        parentDesktop.add(pat);
+        pat.setVisible(true);
+        this.dispose();
     }
     
     private void showStaff(){
-        Admin_Staff_Internal staff = new Admin_Staff_Internal();
-        parentDesktop.add(staff);
-        staff.setVisible(true);
+        Admin_Staff_Internal stf = new Admin_Staff_Internal();
+        parentDesktop.add(stf);
+        stf.setVisible(true);
+        this.dispose();
     }
     
     private void showDoctor(){
         Admin_Doctor_Internal doc = new Admin_Doctor_Internal();
         parentDesktop.add(doc);
         doc.setVisible(true);
+        this.dispose();
     }
     
     Color hoverColor = new Color (0,153,153);
     Color navColor = new Color (55,162,153);
+    
+    Color logoutHover = new Color (55,162,153);
+    Color logoutNav = new Color (0,51,51);
    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -213,6 +220,7 @@ public class Admin_Manage extends javax.swing.JFrame {
     private void backMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_backMouseClicked
         Admin_Dashboard dash = new Admin_Dashboard();
         dash.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_backMouseClicked
 
     private void userPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_userPanelMouseEntered
