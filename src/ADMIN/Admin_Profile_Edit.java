@@ -184,6 +184,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
    File selectedFile;
    public String path;
    public String oldpath;
+   private String currentImageFromDB; // holds the original image path
     
    public int FileExistenceChecker(String path){
         File file = new File(path);
@@ -559,106 +560,106 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
     private void save_buttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_save_buttonMouseClicked
 
-         int userId = Session.getInstance().getUserId();
-        ConnectDB connect = new ConnectDB();
+          int userId = Session.getInstance().getUserId();
+            ConnectDB connect = new ConnectDB();
 
-        String fName = firstName.getText().trim();
-        String mName = middleName.getText().trim();
-        String lName = lastName.getText().trim();
-        String genderValue = Gender.getSelectedItem().toString().trim();
+            String fName = firstName.getText().trim();
+            String mName = middleName.getText().trim();
+            String lName = lastName.getText().trim();
+            String genderValue = Gender.getSelectedItem().toString().trim();
 
-        String usernameText = userName.getText().trim();
-        String emailText = Email.getText().trim();
+            String usernameText = userName.getText().trim();
+            String emailText = Email.getText().trim();
 
-        StringBuilder errorMessage = new StringBuilder();
+            StringBuilder errorMessage = new StringBuilder();
 
-        // --- Validate required fields ---
-        if (fName.isEmpty()) 
-            errorMessage.append("First Name is required.\n");
-        if (lName.isEmpty()) 
-            errorMessage.append("Last Name is required.\n");
-        if (Gender.getSelectedIndex() == 0) 
-            errorMessage.append("Please select a Gender.\n");
+            if (fName.isEmpty()) errorMessage.append("First Name is required.\n");
+            if (lName.isEmpty()) errorMessage.append("Last Name is required.\n");
+            if (Gender.getSelectedIndex() == 0) errorMessage.append("Please select a Gender.\n");
 
-        if (emailText.isEmpty()) {
-            errorMessage.append("Email cannot be empty.\n");
-        } else if (!isValidEmail(emailText)) {
-            errorMessage.append("Invalid email format.\n");
-        } 
+            if (emailText.isEmpty()) {
+                errorMessage.append("Email cannot be empty.\n");
+            } else if (!isValidEmail(emailText)) {
+                errorMessage.append("Invalid email format.\n");
+            }
 
-        if (usernameText.isEmpty()) {
-            errorMessage.append("Username cannot be empty.\n");
-        } else if (isUsernameTaken(usernameText) && !usernameText.equalsIgnoreCase(Session.getInstance().getUsername())) {
-            errorMessage.append("Username is already taken.\n");
-        }
+            if (usernameText.isEmpty()) {
+                errorMessage.append("Username cannot be empty.\n");
+            } else if (isUsernameTaken(usernameText) && !usernameText.equalsIgnoreCase(Session.getInstance().getUsername())) {
+                errorMessage.append("Username is already taken.\n");
+            }
 
-        if (errorMessage.length() > 0) {
-            JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            if (errorMessage.length() > 0) {
+                JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             try (Connection con = connect.getConnection()) {
 
-           // --- Update users table ---
-           String updateUser = "UPDATE users SET u_username = ?, u_email = ? WHERE user_id = ?";
-           try (PreparedStatement pst = con.prepareStatement(updateUser)) {
-               pst.setString(1, usernameText);
-               pst.setString(2, emailText);
-               pst.setInt(3, userId);
-               pst.executeUpdate();
-           }
+                // 🛠️ Correct: use the selected file if available, otherwise use the original path
+                String imagePath = selectedFile != null ? "src/u_images/" + selectedFile.getName() : currentImageFromDB;
 
-           // --- Check if staff record exists ---
-           String checkSql = "SELECT COUNT(*) FROM staff WHERE user_id = ?";
-           try (PreparedStatement checkPst = con.prepareStatement(checkSql)) {
-               checkPst.setInt(1, userId);
-               ResultSet rs = checkPst.executeQuery();
-               rs.next();
-               boolean staffExists = rs.getInt(1) > 0;
-
-               if (staffExists) {
-                   // Update staff
-                   String updateStaff = "UPDATE staff SET s_fname = ?, s_mname = ?, s_lname = ?, s_gender = ? WHERE user_id = ?";
-                   try (PreparedStatement pst = con.prepareStatement(updateStaff)) {
-                       pst.setString(1, fName);
-                       pst.setString(2, mName);
-                       pst.setString(3, lName);
-                       pst.setString(4, genderValue);
-                       pst.setInt(5, userId);
-                       pst.executeUpdate();
-                   }
-               } else {
-                   // Insert into staff
-                   String insertStaff = "INSERT INTO staff (user_id, s_fname, s_mname, s_lname, s_gender) VALUES (?, ?, ?, ?, ?)";
-                   try (PreparedStatement pst = con.prepareStatement(insertStaff)) {
-                       pst.setInt(1, userId);
-                       pst.setString(2, fName);
-                       pst.setString(3, mName);
-                       pst.setString(4, lName);
-                       pst.setString(5, genderValue);
-                       pst.executeUpdate();
-                   }
-               }
-               
-                  // Update the displayed image after saving
-                 String currentImageFromDB = null;
-                if (selectedFile != null) {
-                    image.setIcon(ResizeImage("src/u_images/" + selectedFile.getName(), null, image));
-                } else if (currentImageFromDB == null || currentImageFromDB.isEmpty()) {
-                    image.setIcon(ResizeImage("src/default/u_blank.jpg", null, image));
-                } else {
-                    image.setIcon(ResizeImage("src/u_images/" + currentImageFromDB, null, image));
+                // --- Update users table ---
+                String updateUser = "UPDATE users SET u_username = ?, u_email = ?, u_image = ? WHERE user_id = ?";
+                try (PreparedStatement pst = con.prepareStatement(updateUser)) {
+                    pst.setString(1, usernameText);
+                    pst.setString(2, emailText);
+                    pst.setString(3, imagePath); // 👈 Use correct imagePath
+                    pst.setInt(4, userId);
+                    pst.executeUpdate();
                 }
-           }
 
-           // Log and feedback
-           Session.getInstance().logEvent("EDITED ADMIN PROFILE", "Admin updated their account information.");
-           JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                // --- Check if staff record exists ---
+                String checkSql = "SELECT COUNT(*) FROM staff WHERE user_id = ?";
+                try (PreparedStatement checkPst = con.prepareStatement(checkSql)) {
+                    checkPst.setInt(1, userId);
+                    ResultSet rs = checkPst.executeQuery();
+                    rs.next();
+                    boolean staffExists = rs.getInt(1) > 0;
 
-       } catch (SQLException ex) {
-           Logger.getLogger(Admin_Profile_Edit.class.getName()).log(Level.SEVERE, null, ex);
-           JOptionPane.showMessageDialog(this, "Error updating profile: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
-       }
+                    if (staffExists) {
+                        String updateStaff = "UPDATE staff SET s_fname = ?, s_mname = ?, s_lname = ?, s_gender = ? WHERE user_id = ?";
+                        try (PreparedStatement pst = con.prepareStatement(updateStaff)) {
+                            pst.setString(1, fName);
+                            pst.setString(2, mName);
+                            pst.setString(3, lName);
+                            pst.setString(4, genderValue);
+                            pst.setInt(5, userId);
+                            pst.executeUpdate();
+                        }
+                    } else {
+                        String insertStaff = "INSERT INTO staff (user_id, s_fname, s_mname, s_lname, s_gender) VALUES (?, ?, ?, ?, ?)";
+                        try (PreparedStatement pst = con.prepareStatement(insertStaff)) {
+                            pst.setInt(1, userId);
+                            pst.setString(2, fName);
+                            pst.setString(3, mName);
+                            pst.setString(4, lName);
+                            pst.setString(5, genderValue);
+                            pst.executeUpdate();
+                        }
+                    }
+
+                    // ✅ Image logic
+                    try {
+                        File imgFile = new File(imagePath);
+                        if (imgFile.exists()) {
+                            image.setIcon(ResizeImage(imagePath, null, image));
+                        } else {
+                            image.setIcon(ResizeImage("src/default/u_blank.jpg", null, image));
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error loading image: " + e.getMessage());
+                        image.setIcon(ResizeImage("src/default/u_blank.jpg", null, image));
+                    }
+                }
+
+                Session.getInstance().logEvent("EDITED ADMIN PROFILE", "Admin updated their account information.");
+                JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+            } catch (SQLException ex) {
+                Logger.getLogger(Admin_Profile_Edit.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(this, "Error updating profile: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            }
     }//GEN-LAST:event_save_buttonMouseClicked
 
     private void firstNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_firstNameFocusLost
@@ -717,21 +718,29 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_lastNameActionPerformed
 
     private void add_profMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_add_profMouseClicked
-      JFileChooser fileChooser = new JFileChooser();
+       JFileChooser fileChooser = new JFileChooser();
         int returnValue = fileChooser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             try {
                 selectedFile = fileChooser.getSelectedFile();
                 destination = "src/u_images/" + selectedFile.getName();
-                path  = selectedFile.getAbsolutePath();
+                path = selectedFile.getAbsolutePath();
 
-                if(FileExistenceChecker(path) == 1){
+                if (FileExistenceChecker(path) == 1) {
                     JOptionPane.showMessageDialog(null, "File Already Exist, Rename or Choose another!");
                     destination = "";
-                    path="";
+                    path = "";
+                } else {
+
+                    ImageIcon icon = new ImageIcon(path);
+                    Image img = icon.getImage();
+                    Image newImg = img.getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
+
+
+                    image.setIcon(new ImageIcon(newImg));
                 }
             } catch (Exception ex) {
-                System.out.println("File Error!");
+                System.out.println("File Error! " + ex.getMessage());
             }
         }
     }//GEN-LAST:event_add_profMouseClicked

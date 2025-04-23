@@ -28,7 +28,6 @@ public class Admin_Settings extends javax.swing.JFrame {
         Admin_Security sec = new Admin_Security();
         desktopSettings.add(sec);
         sec.setVisible(true);
-        this.dispose();
     }
      
 

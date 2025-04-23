@@ -138,40 +138,6 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         return myImage;
     }
     
-    public void imageUpdater(String existingFilePath, String newFilePath) {
-      File existingFile = new File(existingFilePath); // Path of the currently used image
-      File newFile = new File(newFilePath); // Path of the new image
-      String destinationFolder = "src/u_images/";
-      File destinationFile = new File(destinationFolder, newFile.getName()); // Final destination for the new image
-
-      try {
-          // Ensure the u_images folder exists
-          File destinationDir = new File(destinationFolder);
-          if (!destinationDir.exists()) {
-              destinationDir.mkdirs();
-          }
-
-          // Check if existingFile is from default
-          if (existingFile.getPath().contains("default")) {
-              // Do not delete; simply copy the new file to u_images
-              Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-              System.out.println("New image added successfully to u_images.");
-          } else {
-              // For files in u_images, replace the existing image
-              if (existingFile.exists()) {
-                  Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                  existingFile.delete(); // Clean up the old image if necessary
-                  System.out.println("Image updated successfully in u_images.");
-              } else {
-                  // If no file exists, simply copy the new one
-                  Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                  System.out.println("Image added to u_images.");
-              }
-          }
-      } catch (IOException e) {
-          System.out.println("Error while updating the image: " + e.getMessage());
-      }
-  }
 
 
 
@@ -383,27 +349,30 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
                     }
 
                     fullname.setText(fullName);
-                    Gender.setText(genderText); // Make sure gender is a JLabel
+                    Gender.setText(genderText); 
                     User.setText("@" + username);
                     Email.setText(email);
                     Role.setText(role);
 
                     String imagePathFromDB = rs.getString("u_image");
-                    ImageIcon imageIcon = null;
 
-                    if (imagePathFromDB == null || imagePathFromDB.trim().isEmpty()) {
-                        // Load default image using ResizeImage
-                        SwingUtilities.invokeLater(() -> {
-                            image.setIcon(ResizeImage("/default/u_blank.jpg", null, image));
-                        });
-                    } else {
-                        // Load uploaded image using ResizeImage
-                        SwingUtilities.invokeLater(() -> {
-                            image.setIcon(ResizeImage("u_images/" + imagePathFromDB, null, image));
-                        });
-                    }
+                    SwingUtilities.invokeLater(() -> {
+                        String imagePathToLoad;
 
-              
+                        if (imagePathFromDB == null || imagePathFromDB.trim().isEmpty()) {
+                            imagePathToLoad = "src/default/u_blank.jpg";
+                        } else {
+                            imagePathToLoad = imagePathFromDB; // This should already contain the full path
+                        }
+
+                        File imgFile = new File(imagePathToLoad);
+                        if (imgFile.exists()) {
+                            image.setIcon(ResizeImage(imagePathToLoad, null, image));
+                        } else {
+                            System.out.println("Error loading image: File not found: " + imagePathToLoad);
+                            image.setIcon(ResizeImage("src/default/u_blank.jpg", null, image)); // fallback
+                        }
+                    }); 
             }
 
         } catch (SQLException ex) {
