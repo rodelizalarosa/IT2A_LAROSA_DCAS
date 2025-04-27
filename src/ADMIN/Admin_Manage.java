@@ -19,28 +19,24 @@ public class Admin_Manage extends javax.swing.JFrame {
         Admin_User_Internal user = new Admin_User_Internal();
         parentDesktop.add(user);
         user.setVisible(true);
-        this.dispose();
     }
     
     private void showPatient() {
         Admin_Patient_Internal pat = new Admin_Patient_Internal();
         parentDesktop.add(pat);
         pat.setVisible(true);
-        this.dispose();
     }
     
     private void showStaff(){
         Admin_Staff_Internal stf = new Admin_Staff_Internal();
         parentDesktop.add(stf);
         stf.setVisible(true);
-        this.dispose();
     }
     
     private void showDoctor(){
         Admin_Doctor_Internal doc = new Admin_Doctor_Internal();
         parentDesktop.add(doc);
         doc.setVisible(true);
-        this.dispose();
     }
     
     Color hoverColor = new Color (0,153,153);
@@ -295,11 +291,11 @@ public class Admin_Manage extends javax.swing.JFrame {
     }//GEN-LAST:event_logoutPanelMouseClicked
 
     private void logoutPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutPanelMouseEntered
-        logoutPanel.setBackground(hoverColor);
+        logoutPanel.setBackground(logoutHover);
     }//GEN-LAST:event_logoutPanelMouseEntered
 
     private void logoutPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutPanelMouseExited
-        logoutPanel.setBackground(navColor);
+        logoutPanel.setBackground(logoutNav);
     }//GEN-LAST:event_logoutPanelMouseExited
 
  

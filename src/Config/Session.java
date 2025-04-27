@@ -7,13 +7,22 @@ import java.sql.ResultSet;
 
 public class Session {
     private static Session instance;
-    private int userId = 0;  // Default to 0 (no user)
+
+    // User session fields
+    private int userId = 0;
     private String username;
     private String email;
     private JDesktopPane mainDesktop;
     private JDesktopPane desktopSettings;
 
-    // Private constructor to enforce Singleton pattern
+    // Patient session fields (for appointment pre-fill)
+    private int patientId = -1;
+    private String patientFirstName;
+    private String patientLastName;
+    private String patientGender;
+    private String patientDob;
+    private String patientContact;
+
     private Session() {}
 
     public static synchronized Session getInstance() {
@@ -23,6 +32,7 @@ public class Session {
         return instance;
     }
 
+    // User setters and getters
     public void setUser(int userId, String username, String email) {
         this.userId = userId;
         this.username = username;
@@ -41,10 +51,6 @@ public class Session {
         return email;
     }
 
-    public void setUserId(int id) {
-        this.userId = id;
-    }
-
     public void setDesktopPane(JDesktopPane desktopPane) {
         this.mainDesktop = desktopPane;
     }
@@ -52,13 +58,66 @@ public class Session {
     public JDesktopPane getDesktopPane() {
         return mainDesktop;
     }
-    
+
     public void setDesktopSettings(JDesktopPane desktopPane) {
         this.desktopSettings = desktopPane;
     }
 
     public JDesktopPane getDesktopSettings() {
         return desktopSettings;
+    }
+
+    // Patient setters and getters
+    public void setPatient(int id, String fname, String lname, String gender, String dob, String contact) {
+        this.patientId = id;
+        this.patientFirstName = fname;
+        this.patientLastName = lname;
+        this.patientGender = gender;
+        this.patientDob = dob;
+        this.patientContact = contact;
+    }
+
+    public int getPatientId() {
+        return patientId;
+    }
+    
+    // Set the patientId
+    public void setPatientId(int patientId) {
+        this.patientId = patientId;
+    }
+    
+    // Clear the patientId
+    public void clearPatientId() {
+        this.patientId = -1;
+    }
+
+    public String getPatientFirstName() {
+        return patientFirstName;
+    }
+
+    public String getPatientLastName() {
+        return patientLastName;
+    }
+
+    public String getPatientGender() {
+        return patientGender;
+    }
+
+    public String getPatientDob() {
+        return patientDob;
+    }
+
+    public String getPatientContact() {
+        return patientContact;
+    }
+
+    public void clearPatient() {
+        this.patientId = -1;
+        this.patientFirstName = null;
+        this.patientLastName = null;
+        this.patientGender = null;
+        this.patientDob = null;
+        this.patientContact = null;
     }
 
     public void logEvent(String event, String description) {

@@ -5,6 +5,11 @@ import AUTHENTICATION.Register;
 import Config.*;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Image;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.PreparedStatement;
@@ -14,9 +19,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.border.LineBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 
 public class Admin_Add_User extends javax.swing.JFrame {
@@ -176,7 +183,8 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 && Password.getPassword().length == 0;
     }
     
-
+    private String selectedImagePath = null;
+    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -189,7 +197,8 @@ public class Admin_Add_User extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        profile = new javax.swing.JLabel();
+        logs1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
         username1 = new javax.swing.JLabel();
         userName = new javax.swing.JTextField();
         email2 = new javax.swing.JLabel();
@@ -211,10 +220,8 @@ public class Admin_Add_User extends javax.swing.JFrame {
         errorPassword = new javax.swing.JLabel();
         errorConfirmPass = new javax.swing.JLabel();
         image = new javax.swing.JLabel();
-        delPanel = new javax.swing.JPanel();
-        del_prof1 = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
-        add_prof1 = new javax.swing.JLabel();
+        add_prof = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -254,10 +261,17 @@ public class Admin_Add_User extends javax.swing.JFrame {
         jPanel3.setBackground(new java.awt.Color(55, 162, 153));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        profile.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        profile.setForeground(new java.awt.Color(255, 255, 255));
-        profile.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jPanel3.add(profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 810, 50));
+        logs1.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        logs1.setForeground(new java.awt.Color(255, 255, 255));
+        logs1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        logs1.setText("CREATE NEW USER ACCOUNT");
+        jPanel3.add(logs1, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 0, 550, 30));
+
+        jLabel2.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(204, 204, 204));
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("Fill out user details.");
+        jPanel3.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 20, 730, 30));
 
         jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 860, 50));
 
@@ -399,29 +413,22 @@ public class Admin_Add_User extends javax.swing.JFrame {
         image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
         jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 200, 160));
 
-        delPanel.setBackground(new java.awt.Color(255, 255, 255));
-        delPanel.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
-        delPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        del_prof1.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        del_prof1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        del_prof1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/del_profile.png"))); // NOI18N
-        del_prof1.setText("  Delete");
-        delPanel.add(del_prof1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 40));
-
-        jPanel2.add(delPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, 100, 40));
-
         jPanel4.setBackground(new java.awt.Color(255, 255, 255));
         jPanel4.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
         jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        add_prof1.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
-        add_prof1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        add_prof1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/upload.png"))); // NOI18N
-        add_prof1.setText("  Add");
-        jPanel4.add(add_prof1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 40));
+        add_prof.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
+        add_prof.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        add_prof.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/upload.png"))); // NOI18N
+        add_prof.setText("  Add");
+        add_prof.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                add_profMouseClicked(evt);
+            }
+        });
+        jPanel4.add(add_prof, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 40));
 
-        jPanel2.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 250, 100, 40));
+        jPanel2.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 240, 100, 40));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 860, 420));
 
@@ -512,7 +519,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
 
     private void create_buttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_create_buttonMouseClicked
 
-        ConnectDB connect = new ConnectDB();
+         ConnectDB connect = new ConnectDB();
 
         String usernameText = userName.getText().trim();
         String emailText = Email.getText().trim();
@@ -542,27 +549,51 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 return;
             }
         }
+
         if (errorMessage.length() > 0) {
             JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
         String passwordText = new String(passwordChars);
         String hashedPassword = hashPassword(passwordText);
-        String sql = "INSERT INTO dcas_sys.users (u_username, u_email, u_role, u_password, u_status) VALUES (?, ?, ?, ?, ?)";
+
+        // Determine image path
+        String imagePath;
+        if (selectedImagePath != null) {
+            // Copy image to /src/u_images/
+            File source = new File(selectedImagePath);
+            File dest = new File("src/u_images/" + source.getName());
+            try {
+                Files.copy(source.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Failed to save image: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            imagePath = "src/u_images/" + source.getName(); // This is the saved path
+        } else {
+            imagePath = "src/default/u_blank.jpg"; // Default image
+        }
+
+        String sql = "INSERT INTO dcas_sys.users (u_username, u_email, u_role, u_password, u_status, u_image) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
             pst.setString(1, usernameText);
             pst.setString(2, emailText);
             pst.setString(3, selectedRole);
             pst.setString(4, hashedPassword);
             pst.setString(5, "Pending");
+            pst.setString(6, imagePath); // Set image path
             pst.executeUpdate();
-            Session sess = Session.getInstance();
-            sess.logEvent("ADDED USER ACCOUNT", "Admin added user account.");
+
+            Session.getInstance().logEvent("ADDED USER ACCOUNT", "Admin added user account.");
             JOptionPane.showMessageDialog(this, "Added User Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
+            // Reset form
             userName.setText("");
             Email.setText("");
             Password.setText("");
+            selectedImagePath = null;
+            add_prof.setIcon(null); // clear image preview (optional)
 
         } catch (SQLException ex) {
             Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, ex);
@@ -598,6 +629,23 @@ public class Admin_Add_User extends javax.swing.JFrame {
         man.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_backMouseClicked
+
+    private void add_profMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_add_profMouseClicked
+        JFileChooser chooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Images", "jpg", "png", "jpeg");
+        chooser.setFileFilter(filter);
+
+        int result = chooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = chooser.getSelectedFile();
+            selectedImagePath = selectedFile.getAbsolutePath();
+
+            // Show preview in the correct JLabel
+            ImageIcon icon = new ImageIcon(selectedImagePath);
+            Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
+            image.setIcon(new ImageIcon(img));
+        }
+    }//GEN-LAST:event_add_profMouseClicked
 
  
     public static void main(String args[]) {
@@ -637,12 +685,10 @@ public class Admin_Add_User extends javax.swing.JFrame {
     private javax.swing.JTextField Email;
     private javax.swing.JPasswordField Password;
     private javax.swing.JComboBox<String> Role;
-    private javax.swing.JLabel add_prof1;
+    private javax.swing.JLabel add_prof;
     private javax.swing.JLabel back;
     private javax.swing.JLabel confirmPassword;
     private javax.swing.JLabel create_button;
-    private javax.swing.JPanel delPanel;
-    private javax.swing.JLabel del_prof1;
     private javax.swing.JLabel email2;
     private javax.swing.JLabel errorConfirmPass;
     private javax.swing.JLabel errorEmail;
@@ -653,14 +699,15 @@ public class Admin_Add_User extends javax.swing.JFrame {
     private javax.swing.JLabel hideCon;
     private javax.swing.JLabel image;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JLabel logs;
+    private javax.swing.JLabel logs1;
     private javax.swing.JPanel logs_header;
     private javax.swing.JLabel password1;
-    private javax.swing.JLabel profile;
     private javax.swing.JLabel role1;
     private javax.swing.JLabel show;
     private javax.swing.JLabel showCon;

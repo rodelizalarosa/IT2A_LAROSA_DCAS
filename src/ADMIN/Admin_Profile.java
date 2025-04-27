@@ -49,94 +49,9 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         desktop.add(edit);
         edit.setVisible(true);
     }
-    
-     public String destination = "";
-     File selectedFile;
-     public String path;
-     public String oldpath;
-    
-    public int FileExistenceChecker(String path){
-        File file = new File(path);
-        String fileName = file.getName();
-        
-        Path filePath = Paths.get("src/u_images", fileName);
-        boolean fileExists = Files.exists(filePath);
-        
-        if (fileExists) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
 
-    public static int getHeightFromWidth(String imagePath, int desiredWidth) {
-        try {
-           
-            File imageFile = new File(imagePath);
-            BufferedImage image = ImageIO.read(imageFile);
-            
-            int originalWidth = image.getWidth();
-            int originalHeight = image.getHeight();
-            
-            int newHeight = (int) ((double) desiredWidth / originalWidth * originalHeight);
-            
-            return newHeight;
-        } catch (IOException ex) {
-            System.out.println("No image found!");
-        }
-        
-        return -1;
-    }
+    
    
-   public ImageIcon ResizeImage(String imagePath, byte[] pic, JLabel label) {
-        ImageIcon myImage = null;
-        BufferedImage img = null;
-
-        try {
-            if (imagePath != null) {
-                if (imagePath.startsWith("/")) {
-                    // Load from resource folder
-                    InputStream is = getClass().getResourceAsStream(imagePath);
-                    if (is == null) {
-                        throw new IOException("Resource not found: " + imagePath);
-                    }
-                    img = ImageIO.read(is);
-                } else {
-                    // Load from file system
-                    File file = new File(imagePath);
-                    if (!file.exists()) {
-                        throw new IOException("File not found: " + imagePath);
-                    }
-                    img = ImageIO.read(file);
-                }
-            } else if (pic != null) {
-                img = ImageIO.read(new ByteArrayInputStream(pic));
-            }
-
-            if (imagePath != null) {
-            if (imagePath.startsWith("/")) {
-                // Resource path (like default image)
-                InputStream is = getClass().getResourceAsStream(imagePath);
-                if (is == null) {
-                    throw new IOException("Resource not found: " + imagePath);
-                }
-                img = ImageIO.read(is);
-            } else {
-                // File system path (like uploaded images)
-                File file = new File("src/" + imagePath); // ADD "src/" prefix
-                if (!file.exists()) {
-                    throw new IOException("File not found: " + file.getAbsolutePath());
-                }
-                img = ImageIO.read(file);
-            }
-        }
-
-        } catch (IOException ex) {
-            System.err.println("Error loading image: " + ex.getMessage());
-            myImage = null;
-        }
-        return myImage;
-    }
     
 
 
@@ -158,7 +73,6 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         username1 = new javax.swing.JLabel();
         Role = new javax.swing.JLabel();
         edit_profile = new javax.swing.JLabel();
-        image = new javax.swing.JLabel();
         email3 = new javax.swing.JLabel();
         email4 = new javax.swing.JLabel();
         email5 = new javax.swing.JLabel();
@@ -171,6 +85,10 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         email7 = new javax.swing.JLabel();
 
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
             public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
                 formInternalFrameActivated(evt);
             }
@@ -181,10 +99,6 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
             public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
             }
         });
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -251,9 +165,6 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
             }
         });
         jPanel2.add(edit_profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, 200, 40));
-
-        image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
-        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 200, 180));
 
         email3.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         email3.setForeground(new java.awt.Color(51, 51, 51));
@@ -354,25 +265,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
                     Email.setText(email);
                     Role.setText(role);
 
-                    String imagePathFromDB = rs.getString("u_image");
-
-                    SwingUtilities.invokeLater(() -> {
-                        String imagePathToLoad;
-
-                        if (imagePathFromDB == null || imagePathFromDB.trim().isEmpty()) {
-                            imagePathToLoad = "src/default/u_blank.jpg";
-                        } else {
-                            imagePathToLoad = imagePathFromDB; // This should already contain the full path
-                        }
-
-                        File imgFile = new File(imagePathToLoad);
-                        if (imgFile.exists()) {
-                            image.setIcon(ResizeImage(imagePathToLoad, null, image));
-                        } else {
-                            System.out.println("Error loading image: File not found: " + imagePathToLoad);
-                            image.setIcon(ResizeImage("src/default/u_blank.jpg", null, image)); // fallback
-                        }
-                    }); 
+                  
             }
 
         } catch (SQLException ex) {
@@ -404,7 +297,6 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
     private javax.swing.JLabel email6;
     private javax.swing.JLabel email7;
     private javax.swing.JLabel fullname;
-    private javax.swing.JLabel image;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;

@@ -19,6 +19,7 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -186,118 +187,132 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
    public String oldpath;
    private String currentImageFromDB; // holds the original image path
     
-   public int FileExistenceChecker(String path){
-        File file = new File(path);
-        String fileName = file.getName();
-        
-        Path filePath = Paths.get("src/u_images", fileName);
-        boolean fileExists = Files.exists(filePath);
-        
-        if (fileExists) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
+        public void chooseAndUpdateProfileImage(int userId, JLabel image) {
+          JFileChooser fileChooser = new JFileChooser();
+          fileChooser.setDialogTitle("Choose Profile Image");
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-   public static int getHeightFromWidth(String imagePath, int desiredWidth) {
-        try {
+          int result = fileChooser.showOpenDialog(null);
+          if (result == JFileChooser.APPROVE_OPTION) {
+              File selectedFile = fileChooser.getSelectedFile();
 
-           
-            File imageFile = new File(imagePath);
-            BufferedImage image = ImageIO.read(imageFile);
-            
-            int originalWidth = image.getWidth();
-            int originalHeight = image.getHeight();
-            
-            int newHeight = (int) ((double) desiredWidth / originalWidth * originalHeight);
-            
-            return newHeight;
-        } catch (IOException ex) {
-            System.out.println("No image found!");
-        }
-        
-        return -1;
-    }
-   
-    public ImageIcon ResizeImage(String ImagePath, byte[] pic, JLabel label) {
-        ImageIcon myImage = null;
-        BufferedImage img = null;
+              // Step 1: Save image to u_images
+              String newImagePath = saveImageToFolder(selectedFile); // Saves and returns "src/u_images/filename.jpg"
 
-        try {
-            if (ImagePath != null) {
-                img = ImageIO.read(new File(ImagePath));
-            } else if (pic != null) {
-                img = ImageIO.read(new ByteArrayInputStream(pic));
-            }
-
-            if (img != null) {
-                int labelWidth = label.getWidth();
-                int labelHeight = label.getHeight();
-                int originalWidth = img.getWidth();
-                int originalHeight = img.getHeight();
-
-                if (labelWidth > 0 && labelHeight > 0 && originalWidth > 0 && originalHeight > 0) {
-                    double widthRatio = (double) labelWidth / originalWidth;
-                    double heightRatio = (double) labelHeight / originalHeight;
-
-                    // Use the smaller ratio to fit the image within the label
-                    double scaleFactor = Math.min(widthRatio, heightRatio);
-
-                    int newWidth = (int) (originalWidth * scaleFactor);
-                    int newHeight = (int) (originalHeight * scaleFactor);
-
-                    Image resizedImg = img.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
-                    myImage = new ImageIcon(resizedImg);
-                } else {
-                    System.out.println("JLabel or image has zero or negative dimensions. Using original image.");
-                    myImage = new ImageIcon(img);
-                }
-            } else {
-                System.err.println("Error: No image data loaded for path: " + ImagePath);
-            }
-
-        } catch (IOException ex) {
-            System.err.println("Error loading image: " + ex.getMessage());
-            myImage = null;
-        }
-        return myImage;
-    }
-    
-    public void imageUpdater(String existingFilePath, String newFilePath) {
-      File existingFile = new File(existingFilePath); // Path of the currently used image
-      File newFile = new File(newFilePath); // Path of the new image
-      String destinationFolder = "src/u_images/";
-      File destinationFile = new File(destinationFolder, newFile.getName()); // Final destination for the new image
-
-      try {
-          // Ensure the u_images folder exists
-          File destinationDir = new File(destinationFolder);
-          if (!destinationDir.exists()) {
-              destinationDir.mkdirs();
-          }
-
-          // Check if existingFile is from u_default
-          if (existingFile.getPath().contains("u_default")) {
-              // Do not delete; simply copy the new file to u_images
-              Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-              System.out.println("New image added successfully to u_images.");
-          } else {
-              // For files in u_images, replace the existing image
-              if (existingFile.exists()) {
-                  Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                  existingFile.delete(); // Clean up the old image if necessary
-                  System.out.println("Image updated successfully in u_images.");
-              } else {
-                  // If no file exists, simply copy the new one
-                  Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                  System.out.println("Image added to u_images.");
+              if (newImagePath == null) {
+                  JOptionPane.showMessageDialog(null, "Image saving failed.");
+                  return;
               }
+
+              // Step 2: Replace the old image file
+              imageUpdater(currentImageFromDB, selectedFile.getAbsolutePath());
+
+              // Step 3: Update UI image preview
+              ImageIcon updatedIcon = ResizeImage(newImagePath, null, image);
+              if (updatedIcon != null) {
+                  image.setIcon(updatedIcon);
+              }
+
+              // Step 4: Update path in database
+              updateUserImagePath(userId, newImagePath);
+
+              // Step 5: Update cached image path for reuse
+              currentImageFromDB = newImagePath;
+
+              JOptionPane.showMessageDialog(null, "Profile image updated successfully.");
           }
-      } catch (IOException e) {
-          System.out.println("Error while updating the image: " + e.getMessage());
-      }
-    }
+        }
+        
+        private ImageIcon ResizeImage(String imagePath, byte[] pic, JLabel label) {
+            ImageIcon icon;
+            if (imagePath != null) {
+                icon = new ImageIcon(imagePath);
+            } else {
+                icon = new ImageIcon(pic);
+            }
+
+            // Resize the image to fit the label
+            Image img = icon.getImage();
+            Image newImg = img.getScaledInstance(label.getWidth(), label.getHeight(), Image.SCALE_SMOOTH);
+            return new ImageIcon(newImg);
+        }
+
+        
+        private String saveImageToFolder(File selectedFile) {
+            try {
+                String folderPath = "src/u_images";
+                File directory = new File(folderPath);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+
+                String originalFileName = selectedFile.getName();
+                File destinationFile = new File(folderPath + File.separator + originalFileName);
+                Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                return destinationFile.getPath(); // Path to be stored in DB
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Error saving image: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            return null;
+        }
+        
+        public void imageUpdater(String existingFilePath, String newFilePath) {
+            File existingFile = new File(existingFilePath);
+            File newFile = new File(newFilePath);
+            String destinationFolder = "src/u_images/";
+            File destinationFile = new File(destinationFolder, newFile.getName());
+
+            try {
+                File destinationDir = new File(destinationFolder);
+                if (!destinationDir.exists()) {
+                    destinationDir.mkdirs();
+                }
+
+                if (existingFilePath.contains("default")) {
+                    // Don't delete default image
+                    Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                    if (existingFile.exists()) {
+                        Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        existingFile.delete();
+                    } else {
+                        Files.copy(newFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("Error while updating the image: " + e.getMessage());
+            }
+        }
+        
+        public void updateUserImagePath(int userId, String newImagePath) {
+            String url = "jdbc:mysql://localhost:3306/dcas.sys";
+            String dbUser = "root";
+            String dbPass = "";
+
+            String updateQuery = "UPDATE users SET u_image = ? WHERE user_id = ?";
+
+            try (Connection conn = DriverManager.getConnection(url, dbUser, dbPass);
+                 PreparedStatement pstmt = conn.prepareStatement(updateQuery)) {
+
+                pstmt.setString(1, newImagePath);
+                pstmt.setInt(2, userId);
+
+                int affectedRows = pstmt.executeUpdate();
+                if (affectedRows > 0) {
+                    System.out.println("Image path updated successfully.");
+                } else {
+                    System.out.println("No user found with the specified ID.");
+                }
+
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Error updating image path: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+
+
+
    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -560,14 +575,13 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
     private void save_buttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_save_buttonMouseClicked
 
-          int userId = Session.getInstance().getUserId();
+         int userId = Session.getInstance().getUserId();
             ConnectDB connect = new ConnectDB();
 
             String fName = firstName.getText().trim();
             String mName = middleName.getText().trim();
             String lName = lastName.getText().trim();
             String genderValue = Gender.getSelectedItem().toString().trim();
-
             String usernameText = userName.getText().trim();
             String emailText = Email.getText().trim();
 
@@ -594,22 +608,45 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 return;
             }
 
+            String destinationImagePath = currentImageFromDB; // Default to current DB image
+
+            // ✅ If a new file is selected, update the image in u_images
+            if (selectedFile != null) {
+                String destinationFolder = "src/u_images/";
+                File destinationFile = new File(destinationFolder + selectedFile.getName());
+
+                try {
+                    File dir = new File(destinationFolder);
+                    if (!dir.exists()) dir.mkdirs();
+
+                    // Copy selected image to u_images folder
+                    Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                    // Optionally delete old image if it's not the default
+                    if (currentImageFromDB != null && currentImageFromDB.contains("u_images") && !currentImageFromDB.contains("u_default")) {
+                        File oldFile = new File(currentImageFromDB);
+                        if (oldFile.exists()) oldFile.delete();
+                    }
+
+                    destinationImagePath = destinationFile.getPath().replace("\\", "/"); // Save path in a consistent format
+
+                } catch (IOException e) {
+                    System.out.println("Error copying image: " + e.getMessage());
+                }
+            }
+
             try (Connection con = connect.getConnection()) {
-
-                // 🛠️ Correct: use the selected file if available, otherwise use the original path
-                String imagePath = selectedFile != null ? "src/u_images/" + selectedFile.getName() : currentImageFromDB;
-
                 // --- Update users table ---
                 String updateUser = "UPDATE users SET u_username = ?, u_email = ?, u_image = ? WHERE user_id = ?";
                 try (PreparedStatement pst = con.prepareStatement(updateUser)) {
                     pst.setString(1, usernameText);
                     pst.setString(2, emailText);
-                    pst.setString(3, imagePath); // 👈 Use correct imagePath
+                    pst.setString(3, destinationImagePath);
                     pst.setInt(4, userId);
                     pst.executeUpdate();
                 }
 
-                // --- Check if staff record exists ---
+                // --- Update or Insert staff ---
                 String checkSql = "SELECT COUNT(*) FROM staff WHERE user_id = ?";
                 try (PreparedStatement checkPst = con.prepareStatement(checkSql)) {
                     checkPst.setInt(1, userId);
@@ -638,21 +675,22 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                             pst.executeUpdate();
                         }
                     }
-
-                    // ✅ Image logic
-                    try {
-                        File imgFile = new File(imagePath);
-                        if (imgFile.exists()) {
-                            image.setIcon(ResizeImage(imagePath, null, image));
-                        } else {
-                            image.setIcon(ResizeImage("src/default/u_blank.jpg", null, image));
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error loading image: " + e.getMessage());
-                        image.setIcon(ResizeImage("src/default/u_blank.jpg", null, image));
-                    }
                 }
 
+                // ✅ Update profile image display
+                try {
+                    File imgFile = new File(destinationImagePath);
+                    if (imgFile.exists()) {
+                        image.setIcon(ResizeImage(destinationImagePath, null, image));
+                    } else {
+                        image.setIcon(ResizeImage("src/default/u_blank.jpg", null, image));
+                    }
+                } catch (Exception e) {
+                    image.setIcon(ResizeImage("src/default/u_blank.jpg", null, image));
+                    System.out.println("Error displaying image: " + e.getMessage());
+                }
+
+                // ✅ Log and notify
                 Session.getInstance().logEvent("EDITED ADMIN PROFILE", "Admin updated their account information.");
                 JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
@@ -718,31 +756,8 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_lastNameActionPerformed
 
     private void add_profMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_add_profMouseClicked
-       JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(null);
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            try {
-                selectedFile = fileChooser.getSelectedFile();
-                destination = "src/u_images/" + selectedFile.getName();
-                path = selectedFile.getAbsolutePath();
-
-                if (FileExistenceChecker(path) == 1) {
-                    JOptionPane.showMessageDialog(null, "File Already Exist, Rename or Choose another!");
-                    destination = "";
-                    path = "";
-                } else {
-
-                    ImageIcon icon = new ImageIcon(path);
-                    Image img = icon.getImage();
-                    Image newImg = img.getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
-
-
-                    image.setIcon(new ImageIcon(newImg));
-                }
-            } catch (Exception ex) {
-                System.out.println("File Error! " + ex.getMessage());
-            }
-        }
+        int currentUserId = Session.getInstance().getUserId(); // ✅ Get user ID from session
+        chooseAndUpdateProfileImage(currentUserId, image); 
     }//GEN-LAST:event_add_profMouseClicked
 
     private void GenderFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_GenderFocusLost

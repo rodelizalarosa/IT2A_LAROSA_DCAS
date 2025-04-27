@@ -5,12 +5,16 @@ import AUTHENTICATION.Register;
 import Config.ConnectDB;
 import Config.Session;
 import java.awt.Color;
+import java.awt.Image;
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 public class Patient_Profile_Edit extends javax.swing.JInternalFrame {
@@ -23,6 +27,8 @@ public class Patient_Profile_Edit extends javax.swing.JInternalFrame {
         BasicInternalFrameUI bi = (BasicInternalFrameUI)this.getUI();
         bi.setNorthPane(null);
     }
+    
+      private String selectedImagePath = null;
 
 
     @SuppressWarnings("unchecked")
@@ -467,22 +473,19 @@ public class Patient_Profile_Edit extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_hideMousePressed
 
     private void add_profMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_add_profMouseClicked
-        JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(null);
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            try {
-                selectedFile = fileChooser.getSelectedFile();
-                destination = "src/u_images/" + selectedFile.getName();
-                path  = selectedFile.getAbsolutePath();
+        JFileChooser chooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Images", "jpg", "png", "jpeg");
+        chooser.setFileFilter(filter);
 
-                if(FileExistenceChecker(path) == 1){
-                    JOptionPane.showMessageDialog(null, "File Already Exist, Rename or Choose another!");
-                    destination = "";
-                    path="";
-                }
-            } catch (Exception ex) {
-                System.out.println("File Error!");
-            }
+        int result = chooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = chooser.getSelectedFile();
+            selectedImagePath = selectedFile.getAbsolutePath();
+
+            // Show preview in the correct JLabel
+            ImageIcon icon = new ImageIcon(selectedImagePath);
+            Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
+            image.setIcon(new ImageIcon(img));
         }
     }//GEN-LAST:event_add_profMouseClicked
 

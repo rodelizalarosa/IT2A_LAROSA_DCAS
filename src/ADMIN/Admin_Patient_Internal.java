@@ -102,7 +102,7 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
     }
 
     
-    public int getSelectedUserId() {
+    public int getSelectedPatientId() {
         int selectedRow = patients.getSelectedRow(); // Get the selected row index
 
             if (selectedRow != -1) { // Check if a row is selected
@@ -110,6 +110,8 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
             }
         return -1; // Return -1 if no row is selected
     }
+    
+    
     
     Color hoverColor = new Color (55,162,153);
     Color navColor = new Color (0,51,51);
@@ -134,7 +136,7 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
         delete = new javax.swing.JLabel();
         refreshPanel = new javax.swing.JPanel();
         refresh = new javax.swing.JLabel();
-        bookPanel = new javax.swing.JPanel();
+        bookAppointment = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
 
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -268,17 +270,28 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
 
         jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 70, 60, -1));
 
-        bookPanel.setBackground(new java.awt.Color(0, 51, 51));
-        bookPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        bookAppointment.setBackground(new java.awt.Color(0, 51, 51));
+        bookAppointment.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bookAppointmentMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                bookAppointmentMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                bookAppointmentMouseExited(evt);
+            }
+        });
+        bookAppointment.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel2.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/book.png"))); // NOI18N
         jLabel2.setText("  BOOK AN APPOINTMENT");
-        bookPanel.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 220, 30));
+        bookAppointment.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 220, 30));
 
-        jPanel1.add(bookPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 240, 30));
+        jPanel1.add(bookAppointment, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 240, 30));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
@@ -302,7 +315,7 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
 
     private void editPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_editPanelMouseClicked
 
-        int selectedUserId = getSelectedUserId(); // Get selected user's ID
+        int selectedUserId = getSelectedPatientId(); // Get selected patient's ID
 
         if (selectedUserId != -1) {
             ConnectDB connect = new ConnectDB();
@@ -325,11 +338,11 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
                     String email = rs.getString("u_email");
                     String role = rs.getString("u_role");
 
-                    // Pass data to userUPDATE form (without password)
-                    Admin_User_Update updateForm = new Admin_User_Update(selectedUserId, username, email, role);
-                    Session.getInstance().getDesktopPane().add(updateForm);
-                    //updateForm.setUserData(selectedUserId, username, email, role);
-                    updateForm.setVisible(true);
+//                    // Pass data to userUPDATE form (without password)
+//                    Admin_Update_User updateForm = new Admin_Update_User(selectedUserId, username, email, role);
+//                    Session.getInstance().getDesktopPane().add(updateForm);
+//                    //updateForm.setUserData(selectedUserId, username, email, role);
+//                    updateForm.setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(this, "User not found.");
                 }
@@ -356,7 +369,7 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_editPanelMouseExited
 
     private void deletePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deletePanelMouseClicked
-        int selectedUserId = getSelectedUserId(); // Get the selected user's ID
+        int selectedUserId = getSelectedPatientId(); // Get the selected patient's ID
 
         if (selectedUserId != -1) {
             int confirmation = JOptionPane.showConfirmDialog(
@@ -413,11 +426,36 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
         refreshPanel.setBackground(navColor);
     }//GEN-LAST:event_refreshPanelMouseExited
 
+    private void bookAppointmentMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bookAppointmentMouseEntered
+        bookAppointment.setBackground(hoverColor);
+    }//GEN-LAST:event_bookAppointmentMouseEntered
+
+    private void bookAppointmentMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bookAppointmentMouseExited
+        bookAppointment.setBackground(navColor);
+    }//GEN-LAST:event_bookAppointmentMouseExited
+
+    private void bookAppointmentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bookAppointmentMouseClicked
+        int selectedPatientId = getSelectedPatientId();  // Assuming this fetches the selected patient's ID from a table or elsewhere
+
+        if (selectedPatientId != -1) {
+            // A patient is selected, open the Admin_Appointment_Add form with patientId
+            Admin_Appointment_Add appointmentAddForm = new Admin_Appointment_Add();
+            appointmentAddForm.setVisible(true);
+            this.dispose();  // Optionally close the current form
+        } else {
+            // No patient selected, redirect to Admin_Appointment_Patient form for new patient registration
+            Admin_Appointment_Patient appointmentPatientForm = new Admin_Appointment_Patient();
+            appointmentPatientForm.setVisible(true);
+            this.dispose();  // Optionally close the current form
+        }
+
+    }//GEN-LAST:event_bookAppointmentMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel add;
     private javax.swing.JPanel addPanel;
-    private javax.swing.JPanel bookPanel;
+    private javax.swing.JPanel bookAppointment;
     private javax.swing.JLabel delete;
     private javax.swing.JPanel deletePanel;
     private javax.swing.JLabel edit;

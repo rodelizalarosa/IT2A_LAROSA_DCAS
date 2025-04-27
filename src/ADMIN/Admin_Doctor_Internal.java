@@ -71,7 +71,7 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
                     rs.getString("d_fname"),
                     rs.getString("d_lname"),
                     rs.getString("specialization"),
-                    rs.getString("p_contactNumber")
+                    rs.getString("d_contact")
                 });
             }
 
@@ -163,7 +163,7 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
 
         jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 50, 840, 380));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, 860, 440));
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 860, 440));
 
         addPanel.setBackground(new java.awt.Color(0, 51, 51));
         addPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -185,7 +185,7 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         add.setText("ADD");
         addPanel.add(add, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(addPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 110, -1));
+        jPanel1.add(addPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 110, -1));
 
         editPanel.setBackground(new java.awt.Color(0, 51, 51));
         editPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -207,7 +207,7 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         edit.setText("UPDATE");
         editPanel.add(edit, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(editPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 70, 110, -1));
+        jPanel1.add(editPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 70, 110, -1));
 
         deletePanel.setBackground(new java.awt.Color(0, 51, 51));
         deletePanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -229,7 +229,7 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         delete.setText("ARCHIVE");
         deletePanel.add(delete, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(deletePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 70, 110, -1));
+        jPanel1.add(deletePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 70, 110, -1));
 
         refreshPanel.setBackground(new java.awt.Color(0, 51, 51));
         refreshPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -251,7 +251,7 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         refresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh (2).png"))); // NOI18N
         refreshPanel.add(refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 40, 30));
 
-        jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 70, 60, -1));
+        jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 70, 60, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
@@ -298,11 +298,11 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
                     String email = rs.getString("u_email");
                     String role = rs.getString("u_role");
 
-                    // Pass data to userUPDATE form (without password)
-                    Admin_User_Update updateForm = new Admin_User_Update(selectedUserId, username, email, role);
-                    Session.getInstance().getDesktopPane().add(updateForm);
-                    //updateForm.setUserData(selectedUserId, username, email, role);
-                    updateForm.setVisible(true);
+//                    // Pass data to userUPDATE form (without password)
+//                    Admin_Update_User updateForm = new Admin_Update_User(selectedUserId, username, email, role);
+//                    Session.getInstance().getDesktopPane().add(updateForm);
+//                    //updateForm.setUserData(selectedUserId, username, email, role);
+//                    updateForm.setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(this, "User not found.");
                 }

@@ -147,7 +147,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         jPanel16 = new javax.swing.JPanel();
         totalServices = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
-        jPanel4 = new javax.swing.JPanel();
+        pieChart = new javax.swing.JPanel();
         jPanel19 = new javax.swing.JPanel();
         jPanel20 = new javax.swing.JPanel();
         jPanel21 = new javax.swing.JPanel();
@@ -169,6 +169,10 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
 
         setBackground(new java.awt.Color(255, 255, 255));
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
             public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
                 formInternalFrameActivated(evt);
             }
@@ -179,10 +183,6 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
             public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
             }
         });
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -196,6 +196,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         jPanel1.add(dashboard, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 0, 730, 50));
 
         dashboard_header.setBackground(new java.awt.Color(55, 162, 153));
+        dashboard_header.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
         jPanel1.add(dashboard_header, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 50));
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
@@ -426,7 +427,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
         jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 260, 210));
+        jPanel3.add(pieChart, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 260, 210));
 
         jPanel19.setBackground(java.awt.Color.cyan);
         jPanel3.add(jPanel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 190, 40, 20));
@@ -510,7 +511,6 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
 
     private void formInternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameActivated
         Session sess = Session.getInstance();
-        System.out.println("🟢 Debug: Session User ID = " + sess.getUserId()); // Debugging
 
         if (sess.getUserId() == 0) {  // No user is logged in
             JOptionPane.showMessageDialog(null, "No Account, Log in First!", "Notice", JOptionPane.ERROR_MESSAGE);
@@ -625,7 +625,6 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel24;
     private javax.swing.JPanel jPanel25;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
@@ -634,6 +633,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
     private javax.swing.JPanel logsPanel;
     private javax.swing.JLabel pendingUsers;
     private javax.swing.JLabel picture;
+    private javax.swing.JPanel pieChart;
     private javax.swing.JPanel profilePanel;
     private javax.swing.JLabel refresh;
     private javax.swing.JLabel refresh1;
