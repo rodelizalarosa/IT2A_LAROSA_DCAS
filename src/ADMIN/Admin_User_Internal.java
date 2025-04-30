@@ -5,6 +5,10 @@ import Config.ConnectDB;
 import Config.Session;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,6 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import javax.swing.JDesktopPane;
 import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 import javax.swing.table.DefaultTableModel;
 
@@ -40,53 +45,88 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         users.getColumnModel().getColumn(1).setPreferredWidth(55);
         users.getColumnModel().getColumn(2).setPreferredWidth(150);
         users.getColumnModel().getColumn(3).setPreferredWidth(55);
-        users.getColumnModel().getColumn(4).setPreferredWidth(55);
+        users.getColumnModel().getColumn(4).setPreferredWidth(55);    
         
+        //FOR LIVE SEARCH LEZGOOO
+        searchUser.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                searchUsers();
+            }
+        });     
+        
+        filterUser.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                searchUsers();
+            }
+        });
+        
+        users.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 2) { // Double-click detected
+                    int selectedRow = users.getSelectedRow();
+                    if (selectedRow != -1) {
+                        int selectedUserId = Integer.parseInt(users.getValueAt(selectedRow, 0).toString());
+                        new Admin_Update_User(selectedUserId).setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Please select a user.");
+                    }
+                }
+            }
+        });
+
+
     }
     
-     private void loadUsers() {
-        ConnectDB connect = new ConnectDB();
+    private void loadUsers() {
+            DefaultTableModel model = new DefaultTableModel(
+                new String[]{"User ID", "Username", "Email", "Role", "Status"}, 0
+            ) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
 
-        DefaultTableModel model = new DefaultTableModel();
-        model.addColumn("User ID");
-        model.addColumn("Username");
-        model.addColumn("Email");
-        model.addColumn("Role");
-        model.addColumn("Status");
+            ConnectDB connect = new ConnectDB();
 
-        try {
-            Connection conn = connect.getConnection();
-            if (conn == null) {
-                System.out.println("Database connection failed!");
-                return;
-            }
+            try {
+                Connection conn = connect.getConnection();
+                if (conn == null) {
+                    System.out.println("Database connection failed!");
+                    return;
+                }
 
-            String query = "SELECT user_id, u_username, u_email, u_role, u_status FROM users"; // Corrected query
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
+                // 🔥 Exclude archived users
+                String query = "SELECT user_id, u_username, u_email, u_role, u_status FROM users WHERE u_status != 'Archived'";
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(query);
 
-            while (rs.next()) {
-                model.addRow(new Object[]{
-                    rs.getInt("user_id"),
-                    rs.getString("u_username"),
-                    rs.getString("u_email"),
-                    rs.getString("u_role"),
-                    rs.getString("u_status")
-                });
+                while (rs.next()) {
+                    model.addRow(new Object[]{
+                        rs.getInt("user_id"),
+                        rs.getString("u_username"),
+                        rs.getString("u_email"),
+                        rs.getString("u_role"),
+                        rs.getString("u_status")
+                    });
+                }
+
+                users.setModel(model);
+                model.fireTableDataChanged();
+
+                rs.close();
+                stmt.close();
+                conn.close();
+
+            } catch (SQLException ex) {
+                System.out.println("Error loading users: " + ex.getMessage());
+                ex.printStackTrace();
             }
 
             users.setModel(model);
-            model.fireTableDataChanged();
-
-            rs.close();
-            stmt.close();
-            conn.close();
-
-        } catch (SQLException ex) {
-            System.out.println("Error loading users: " + ex.getMessage());
-            ex.printStackTrace();
-        }
+            users.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
+
     
     public int getSelectedUserId() {
         int selectedRow = users.getSelectedRow(); // Get the selected row index
@@ -96,6 +136,63 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
             }
         return -1; // Return -1 if no row is selected
     }
+    
+    private void searchUsers() {
+        String keyword = searchUser.getText().trim();
+        String filter = filterUser.getSelectedItem().toString();
+
+        try {
+            ConnectDB connect = new ConnectDB();
+            Connection conn = connect.getConnection();
+
+            // Build the SQL query
+            StringBuilder sql = new StringBuilder("SELECT user_id, u_username, u_email, u_role, u_status FROM users WHERE 1=1");
+
+            if (!keyword.isEmpty()) {
+                sql.append(" AND (u_username LIKE ? OR u_email LIKE ?)");
+            }
+
+            if (!filter.equals("All")) {
+                sql.append(" AND u_role = ?");
+            }
+
+            PreparedStatement pstmt = conn.prepareStatement(sql.toString());
+
+            int paramIndex = 1;
+            if (!keyword.isEmpty()) {
+                pstmt.setString(paramIndex++, "%" + keyword + "%");
+                pstmt.setString(paramIndex++, "%" + keyword + "%");
+            }
+            if (!filter.equals("All")) {
+                pstmt.setString(paramIndex++, filter);
+            }
+
+            ResultSet rs = pstmt.executeQuery();
+
+            // Clear existing table data
+            DefaultTableModel model = (DefaultTableModel) users.getModel();
+            model.setRowCount(0);
+
+            // Populate table with search results
+            while (rs.next()) {
+                int userId = rs.getInt("user_id");
+                String username = rs.getString("u_username");
+                String email = rs.getString("u_email");
+                String role = rs.getString("u_role");
+                String status = rs.getString("u_status");
+
+                model.addRow(new Object[]{userId, username, email, role, status});
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error searching users: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
 
     Color hoverColor = new Color (55,162,153);
     Color navColor = new Color (0,51,51);
@@ -110,8 +207,6 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        users = new javax.swing.JTable();
         activatePanel = new javax.swing.JPanel();
         activate = new javax.swing.JLabel();
         addPanel = new javax.swing.JPanel();
@@ -120,8 +215,12 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         edit = new javax.swing.JLabel();
         archivePanel = new javax.swing.JPanel();
         delete = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        users = new javax.swing.JTable();
         refreshPanel = new javax.swing.JPanel();
         refresh = new javax.swing.JLabel();
+        searchUser = new javax.swing.JTextField();
+        filterUser = new javax.swing.JComboBox<>();
 
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -151,22 +250,6 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
 
         jPanel3.setBackground(new java.awt.Color(55, 162, 153));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 860, 40));
-
-        users.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-
-            }
-        ));
-        users.getTableHeader().setReorderingAllowed(false);
-        jScrollPane1.setViewportView(users);
-
-        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 50, 840, 380));
-
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 860, 440));
 
         activatePanel.setBackground(new java.awt.Color(0, 51, 51));
         activatePanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -188,7 +271,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         activate.setText("ACTIVATE");
         activatePanel.add(activate, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(activatePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 110, -1));
+        jPanel3.add(activatePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 110, -1));
 
         addPanel.setBackground(new java.awt.Color(0, 51, 51));
         addPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -210,7 +293,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         add.setText("ADD");
         addPanel.add(add, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(addPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 70, 110, -1));
+        jPanel3.add(addPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 10, 110, -1));
 
         updatePanel.setBackground(new java.awt.Color(0, 51, 51));
         updatePanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -232,7 +315,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         edit.setText("UPDATE");
         updatePanel.add(edit, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(updatePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 70, 110, -1));
+        jPanel3.add(updatePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 10, 110, -1));
 
         archivePanel.setBackground(new java.awt.Color(0, 51, 51));
         archivePanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -254,7 +337,24 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         delete.setText("ARCHIVE");
         archivePanel.add(delete, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(archivePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 70, 110, -1));
+        jPanel3.add(archivePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 10, 110, -1));
+
+        jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 860, 50));
+
+        users.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        users.getTableHeader().setReorderingAllowed(false);
+        jScrollPane1.setViewportView(users);
+
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 60, 840, 380));
+
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, 860, 450));
 
         refreshPanel.setBackground(new java.awt.Color(0, 51, 51));
         refreshPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -276,7 +376,21 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         refresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh (2).png"))); // NOI18N
         refreshPanel.add(refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 40, 30));
 
-        jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 70, 60, -1));
+        jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 60, 60, -1));
+
+        searchUser.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        searchUser.setForeground(new java.awt.Color(153, 153, 153));
+        searchUser.setText("Search");
+        searchUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchUserActionPerformed(evt);
+            }
+        });
+        jPanel1.add(searchUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 60, 230, 30));
+
+        filterUser.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        filterUser.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Admin", "Patient", "Dentist" }));
+        jPanel1.add(filterUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 60, 130, 30));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 570));
 
@@ -371,57 +485,9 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         int selectedUserId = getSelectedUserId(); // Get selected user's ID
 
         if (selectedUserId != -1) {
-            ConnectDB connect = new ConnectDB();
-            Connection conn = connect.getConnection();
-
-            if (conn == null) {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "<html><b>Failed to connect to the database.</b><br>Please try again later.</html>",
-                    "❌ Connection Error",
-                    JOptionPane.ERROR_MESSAGE
-                );
-                return;
-            }
-
-            try {
-                String query = "SELECT u_username, u_email, u_role, u_image FROM users WHERE user_id = ?";
-                PreparedStatement pstmt = conn.prepareStatement(query);
-                pstmt.setInt(1, selectedUserId);
-                ResultSet rs = pstmt.executeQuery();
-
-                if (rs.next()) {
-                    // Retrieve user details
-                    String username = rs.getString("u_username");
-                    String email = rs.getString("u_email");
-                    String role = rs.getString("u_role");
-                    String imagePath = rs.getString("u_image");
-
-                    Admin_Update_User updateForm = new Admin_Update_User(selectedUserId, username, email, role, imagePath);
-                    updateForm.setVisible(true);
-                    updateForm.setLocationRelativeTo(null);
-                } else {
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "<html><b>User not found.</b><br>The selected user ID does not exist.</html>",
-                        "⚠️ Not Found",
-                        JOptionPane.WARNING_MESSAGE
-                    );
-                }
-
-                // Close resources
-                rs.close();
-                pstmt.close();
-                conn.close();
-
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "<html><b>Database error occurred:</b><br>" + e.getMessage() + "</html>",
-                    "❗ SQL Error",
-                    JOptionPane.ERROR_MESSAGE
-                );
-            }
+            Admin_Update_User updateForm = new Admin_Update_User(selectedUserId);
+            updateForm.setVisible(true);
+            this.dispose(); // Optional: Close the current form if you want
         } else {
             JOptionPane.showMessageDialog(
                 this,
@@ -520,6 +586,10 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
         refreshPanel.setBackground(navColor);
     }//GEN-LAST:event_refreshPanelMouseExited
 
+    private void searchUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchUserActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_searchUserActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel activate;
@@ -529,6 +599,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
     private javax.swing.JPanel archivePanel;
     private javax.swing.JLabel delete;
     private javax.swing.JLabel edit;
+    private javax.swing.JComboBox<String> filterUser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -536,6 +607,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel refresh;
     private javax.swing.JPanel refreshPanel;
+    private javax.swing.JTextField searchUser;
     private javax.swing.JPanel updatePanel;
     private javax.swing.JLabel user;
     private javax.swing.JPanel user_header;

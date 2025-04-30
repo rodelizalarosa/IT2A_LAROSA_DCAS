@@ -13,6 +13,7 @@ public class Session {
     private String username;
     private String email;
     private JDesktopPane mainDesktop;
+    private JDesktopPane parentDesktop;
     private JDesktopPane desktopSettings;
 
     // Patient session fields (for appointment pre-fill)
@@ -22,6 +23,9 @@ public class Session {
     private String patientGender;
     private String patientDob;
     private String patientContact;
+    
+    private String staffFirstName;
+    private String staffLastName;
 
     private Session() {}
 
@@ -37,6 +41,7 @@ public class Session {
         this.userId = userId;
         this.username = username;
         this.email = email;
+        // Staff name is not automatically loaded here anymore
     }
 
     public int getUserId() {
@@ -57,6 +62,14 @@ public class Session {
 
     public JDesktopPane getDesktopPane() {
         return mainDesktop;
+    }
+    
+    public void setParentPane(JDesktopPane desktopPane) {
+        this.parentDesktop = desktopPane;
+    }
+
+    public JDesktopPane getParentPane() {
+        return parentDesktop;
     }
 
     public void setDesktopSettings(JDesktopPane desktopPane) {
@@ -118,6 +131,21 @@ public class Session {
         this.patientGender = null;
         this.patientDob = null;
         this.patientContact = null;
+    }
+    
+    // Setters
+    public void setStaffName(String fname, String lname) {
+        this.staffFirstName = fname;
+        this.staffLastName = lname;
+    }
+
+    // Getters
+    public String getStaffFirstName() {
+        return staffFirstName;
+    }
+
+    public String getStaffLastName() {
+        return staffLastName;
     }
 
     public void logEvent(String event, String description) {

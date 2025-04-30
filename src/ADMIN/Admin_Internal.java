@@ -6,6 +6,7 @@ import Config.ConnectDB;
 import Config.Session;
 import java.awt.Color;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -20,19 +21,30 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
     public Admin_Internal() {
         initComponents();
         loadDashboardStats();
-        
-        
+
+        // Get session info
         Session sess = Session.getInstance();
-        String username = Session.getInstance().getUsername();
-        username = sess.getUsername();
+        String username = sess.getUsername();
+        int userId = sess.getUserId();
+        String fname = sess.getStaffFirstName();
+        String lname = sess.getStaffLastName();
+
+        if (fname == null || lname == null || fname.isEmpty() || lname.isEmpty()) {
+            admin.setText("Update your profile");
+        } else {
+            admin.setText(fname + " " + lname);
+        }
         dashboard.setText(username + "'s Dashboard");
         
-        //remove border
+        
+
+        // UI tweaks
         this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0,0,0,0));
         BasicInternalFrameUI bi = (BasicInternalFrameUI)this.getUI();
         bi.setNorthPane(null);
     }
     
+
     private void loadDashboardStats() {
         ConnectDB connect = new ConnectDB();
 
@@ -100,6 +112,13 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         JDesktopPane desktop = Session.getInstance().getDesktopPane();
         desktop.add(prof);
         prof.setVisible(true);
+    }
+    
+    private void showLogs(){
+        Admin_Logs log = new Admin_Logs();
+        JDesktopPane desktop = Session.getInstance().getDesktopPane();
+        desktop.add(log);
+        log.setVisible(true);
     }
 
     
@@ -542,7 +561,6 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
                 System.out.println("SQL Exception: " + ex.getMessage());
             }
         }
-
     }//GEN-LAST:event_formInternalFrameActivated
 
     private void usernameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_usernameFocusLost
@@ -559,7 +577,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_usernameActionPerformed
 
     private void logsPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logsPanelMouseClicked
-
+        showLogs();
     }//GEN-LAST:event_logsPanelMouseClicked
 
     private void logsPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logsPanelMouseEntered

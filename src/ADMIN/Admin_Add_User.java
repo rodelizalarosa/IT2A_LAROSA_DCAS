@@ -160,8 +160,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
         return isValid;
  }
     
-    
-    
+      
     private String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -183,8 +182,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 && Password.getPassword().length == 0;
     }
     
-    private String selectedImagePath = null;
-    
+    private String selectedImagePath = null;   
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents

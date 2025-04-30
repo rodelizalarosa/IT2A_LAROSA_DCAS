@@ -30,13 +30,14 @@ public class Admin_Appointment_Add extends javax.swing.JFrame {
     }
     
     public Admin_Appointment_Add(int patientId, int dentistId, Date appointmentDate) {
-        this.patientId = patientId;  // Retrieve patient ID passed as parameter
-        initComponents();
-        initTimeSlots(dentistId, appointmentDate);  // Initialize the available time slots
-        patientID.setText(String.valueOf(patientId));
-        patientID.setEditable(false);  // Make it uneditable
-        loadServices();
-        loadDentists();
+        this.patientId = patientId;
+        initComponents();             // Initialize GUI
+        setupServicesTable();         // FIXED: Needed to populate services table
+        initTimeSlots(dentistId, appointmentDate);
+        patientID.setText(String.valueOf(patientId)); // Pre-fill Patient ID
+        patientID.setEditable(false);                 // Make Patient ID uneditable
+        loadServices();              // Load services into the table
+        loadDentists();              // Load dentist names into ComboBox
     }
 
     
@@ -224,27 +225,23 @@ public class Admin_Appointment_Add extends javax.swing.JFrame {
          return times;
      }
    
-   private void loadDentists() {
+    private void loadDentists() {
         try (Connection conn = ConnectDB.getConnection()) {
-            // SQL query to join the users and dentists table to get active dentists
-            String query = "SELECT d.d_fname, d.d_lname " +
+            String query = "SELECT d.d_fname AS fname, d.d_lname AS lname " +
                            "FROM dentists d " +
-                           "JOIN users u ON d.d_user_id = u.user_id " +  // Join on the user_id
-                           "WHERE u.u_role = 'Dentist' AND u.u_status = 'Active'";  // Filter by role and status
-
+                           "JOIN users u ON d.d_user_id = u.user_id " +
+                           "WHERE u.u_role = 'Dentist' AND u.u_status = 'Active'";
             PreparedStatement stmt = conn.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
 
-            // Loop through the result set to load dentists into the combo box
-            while (rs.next()) {
-                String fullName = rs.getString("d.d_fname") + " " + rs.getString("d.d_lname");
-                dentist.addItem(fullName);  // Add the full name to the combo box
-            }
+            dentist.removeAllItems();  // Clear ComboBox
 
-            rs.close();
-            stmt.close();
+            while (rs.next()) {
+                String fullName = rs.getString("fname") + " " + rs.getString("lname");
+                dentist.addItem(fullName);
+            }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error loading dentists: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

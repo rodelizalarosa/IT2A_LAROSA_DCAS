@@ -5,6 +5,10 @@ import Config.ConnectDB;
 import Config.Session;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -40,6 +44,19 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         dentist.getColumnModel().getColumn(3).setPreferredWidth(60);
         dentist.getColumnModel().getColumn(4).setPreferredWidth(60);
         dentist.getColumnModel().getColumn(5).setPreferredWidth(30);
+        
+        //FOR LIVE SEARCH LEZGOOO
+        searchDentist.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                searchDentist();
+            }
+        });  
+        
+        filterDentist.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                searchDentist();
+            }
+        });
     }
     
     private void loadDoctors(){ 
@@ -97,6 +114,62 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         return -1; // Return -1 if no row is selected
     }
     
+    private void searchDentist() {
+        String keyword = searchDentist.getText().trim();
+        String filter = filterDentist.getSelectedItem().toString(); // ComboBox: All, General, Orthodontist
+
+        try {
+            ConnectDB connect = new ConnectDB();
+            Connection conn = connect.getConnection();
+
+            StringBuilder sql = new StringBuilder("SELECT dentist_id, user_id, d_fname, d_lname, specialization, d_contact FROM dentist WHERE 1=1");
+
+            if (!keyword.isEmpty()) {
+                sql.append(" AND (d_fname LIKE ? OR d_lname LIKE ?)");
+            }
+
+            if (!filter.equals("All")) {
+                sql.append(" AND specialization = ?");
+            }
+
+            PreparedStatement pstmt = conn.prepareStatement(sql.toString());
+
+            int paramIndex = 1;
+            if (!keyword.isEmpty()) {
+                pstmt.setString(paramIndex++, "%" + keyword + "%");
+                pstmt.setString(paramIndex++, "%" + keyword + "%");
+            }
+
+            if (!filter.equals("All")) {
+                pstmt.setString(paramIndex++, filter);
+            }
+
+            ResultSet rs = pstmt.executeQuery();
+
+            DefaultTableModel model = (DefaultTableModel) dentist.getModel();
+            model.setRowCount(0);
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getInt("dentist_id"),
+                    rs.getInt("user_id"),
+                    rs.getString("d_fname"),
+                    rs.getString("d_lname"),
+                    rs.getString("specialization"),
+                    rs.getString("d_contact")
+                });
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error searching dentists: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
     Color hoverColor = new Color (55,162,153);
     Color navColor = new Color (0,51,51);
 
@@ -110,16 +183,18 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        dentist = new javax.swing.JTable();
         addPanel = new javax.swing.JPanel();
         add = new javax.swing.JLabel();
         editPanel = new javax.swing.JPanel();
         edit = new javax.swing.JLabel();
         deletePanel = new javax.swing.JPanel();
         delete = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        dentist = new javax.swing.JTable();
         refreshPanel = new javax.swing.JPanel();
         refresh = new javax.swing.JLabel();
+        searchDentist = new javax.swing.JTextField();
+        filterDentist = new javax.swing.JComboBox<>();
 
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -148,22 +223,6 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
 
         jPanel3.setBackground(new java.awt.Color(55, 162, 153));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 860, 40));
-
-        dentist.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-
-            }
-        ));
-        dentist.getTableHeader().setReorderingAllowed(false);
-        jScrollPane1.setViewportView(dentist);
-
-        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 50, 840, 380));
-
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 860, 440));
 
         addPanel.setBackground(new java.awt.Color(0, 51, 51));
         addPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -185,7 +244,7 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         add.setText("ADD");
         addPanel.add(add, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(addPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 110, -1));
+        jPanel3.add(addPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 110, -1));
 
         editPanel.setBackground(new java.awt.Color(0, 51, 51));
         editPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -207,7 +266,7 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         edit.setText("UPDATE");
         editPanel.add(edit, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(editPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 70, 110, -1));
+        jPanel3.add(editPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 10, 110, -1));
 
         deletePanel.setBackground(new java.awt.Color(0, 51, 51));
         deletePanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -229,7 +288,24 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         delete.setText("ARCHIVE");
         deletePanel.add(delete, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(deletePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 70, 110, -1));
+        jPanel3.add(deletePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 10, 110, -1));
+
+        jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 860, 50));
+
+        dentist.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        dentist.getTableHeader().setReorderingAllowed(false);
+        jScrollPane1.setViewportView(dentist);
+
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 60, 840, 380));
+
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, 860, 450));
 
         refreshPanel.setBackground(new java.awt.Color(0, 51, 51));
         refreshPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -251,7 +327,21 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         refresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh (2).png"))); // NOI18N
         refreshPanel.add(refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 40, 30));
 
-        jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 70, 60, -1));
+        jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 60, 60, -1));
+
+        searchDentist.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        searchDentist.setForeground(new java.awt.Color(153, 153, 153));
+        searchDentist.setText("Search");
+        searchDentist.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchDentistActionPerformed(evt);
+            }
+        });
+        jPanel1.add(searchDentist, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 60, 230, 30));
+
+        filterDentist.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        filterDentist.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "General", "Orthodontist" }));
+        jPanel1.add(filterDentist, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 60, 130, 30));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
@@ -386,6 +476,10 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
         refreshPanel.setBackground(navColor);
     }//GEN-LAST:event_refreshPanelMouseExited
 
+    private void searchDentistActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchDentistActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_searchDentistActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel add;
@@ -397,6 +491,7 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
     private javax.swing.JPanel doctor_header;
     private javax.swing.JLabel edit;
     private javax.swing.JPanel editPanel;
+    private javax.swing.JComboBox<String> filterDentist;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -404,5 +499,6 @@ public class Admin_Doctor_Internal extends javax.swing.JInternalFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel refresh;
     private javax.swing.JPanel refreshPanel;
+    private javax.swing.JTextField searchDentist;
     // End of variables declaration//GEN-END:variables
 }

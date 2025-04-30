@@ -4,6 +4,8 @@ package ADMIN;
 import Config.ConnectDB;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,6 +40,14 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
         staffs.getColumnModel().getColumn(2).setPreferredWidth(60);
         staffs.getColumnModel().getColumn(3).setPreferredWidth(60);
         staffs.getColumnModel().getColumn(4).setPreferredWidth(60);
+        
+        
+          //FOR LIVE SEARCH LEZGOOO
+        searchStaff.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                searchStaff();
+            }
+        });  
     }
     
     private void loadStaffs(){ 
@@ -93,6 +103,53 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
         return -1; // Return -1 if no row is selected
     }
     
+    private void searchStaff() {
+    String keyword = searchStaff.getText().trim(); // JTextField for live search
+
+    try {
+        ConnectDB connect = new ConnectDB();
+        Connection conn = connect.getConnection();
+
+        StringBuilder sql = new StringBuilder("SELECT staff_id, user_id, s_fname, s_lname, s_gender FROM staff");
+
+        if (!keyword.isEmpty()) {
+            sql.append(" WHERE s_fname LIKE ? OR s_lname LIKE ?");
+        }
+
+        PreparedStatement pstmt = conn.prepareStatement(sql.toString());
+
+        if (!keyword.isEmpty()) {
+            pstmt.setString(1, "%" + keyword + "%");
+            pstmt.setString(2, "%" + keyword + "%");
+        }
+
+        ResultSet rs = pstmt.executeQuery();
+
+        // Clear table
+        DefaultTableModel model = (DefaultTableModel) staffs.getModel(); // assuming JTable name is staffTable
+        model.setRowCount(0);
+
+        // Populate table
+        while (rs.next()) {
+            model.addRow(new Object[]{
+                rs.getInt("staff_id"),
+                rs.getInt("user_id"),
+                rs.getString("s_fname"),
+                rs.getString("s_lname"),
+                rs.getString("s_gender")
+            });
+        }
+
+        rs.close();
+        pstmt.close();
+        conn.close();
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error searching staff: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+    
     Color hoverColor = new Color (55,162,153);
     Color navColor = new Color (0,51,51);
 
@@ -106,16 +163,19 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        staffs = new javax.swing.JTable();
-        addPanel = new javax.swing.JPanel();
-        add = new javax.swing.JLabel();
+        deletePanel = new javax.swing.JPanel();
+        archive = new javax.swing.JLabel();
         editPanel = new javax.swing.JPanel();
         edit = new javax.swing.JLabel();
-        deletePanel = new javax.swing.JPanel();
-        delete = new javax.swing.JLabel();
+        addPanel = new javax.swing.JPanel();
+        add = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        jPanel5 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        staffs = new javax.swing.JTable();
         refreshPanel = new javax.swing.JPanel();
         refresh = new javax.swing.JLabel();
+        searchStaff = new javax.swing.JTextField();
 
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -144,44 +204,28 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
 
         jPanel3.setBackground(new java.awt.Color(55, 162, 153));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 870, 40));
 
-        staffs.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-
-            }
-        ));
-        staffs.getTableHeader().setReorderingAllowed(false);
-        jScrollPane1.setViewportView(staffs);
-
-        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 50, 840, 380));
-
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 860, 440));
-
-        addPanel.setBackground(new java.awt.Color(0, 51, 51));
-        addPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+        deletePanel.setBackground(new java.awt.Color(0, 51, 51));
+        deletePanel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                addPanelMouseClicked(evt);
+                deletePanelMouseClicked(evt);
             }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                addPanelMouseEntered(evt);
+                deletePanelMouseEntered(evt);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                addPanelMouseExited(evt);
+                deletePanelMouseExited(evt);
             }
         });
-        addPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        deletePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        add.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        add.setForeground(new java.awt.Color(255, 255, 255));
-        add.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        add.setText("ADD");
-        addPanel.add(add, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
+        archive.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        archive.setForeground(new java.awt.Color(255, 255, 255));
+        archive.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        archive.setText("ARCHIVE");
+        deletePanel.add(archive, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(addPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 110, -1));
+        jPanel3.add(deletePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 10, 110, -1));
 
         editPanel.setBackground(new java.awt.Color(0, 51, 51));
         editPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -203,29 +247,48 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
         edit.setText("UPDATE");
         editPanel.add(edit, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(editPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 70, 110, -1));
+        jPanel3.add(editPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 10, 110, -1));
 
-        deletePanel.setBackground(new java.awt.Color(0, 51, 51));
-        deletePanel.addMouseListener(new java.awt.event.MouseAdapter() {
+        addPanel.setBackground(new java.awt.Color(0, 51, 51));
+        addPanel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                deletePanelMouseClicked(evt);
+                addPanelMouseClicked(evt);
             }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                deletePanelMouseEntered(evt);
+                addPanelMouseEntered(evt);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                deletePanelMouseExited(evt);
+                addPanelMouseExited(evt);
             }
         });
-        deletePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        addPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        delete.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        delete.setForeground(new java.awt.Color(255, 255, 255));
-        delete.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        delete.setText("ARCHIVE");
-        deletePanel.add(delete, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
+        add.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        add.setForeground(new java.awt.Color(255, 255, 255));
+        add.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        add.setText("ADD");
+        addPanel.add(add, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel1.add(deletePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 70, 110, -1));
+        jPanel3.add(addPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 110, -1));
+        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, -30, -1, -1));
+        jPanel3.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, -40, 80, 30));
+
+        jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 870, 50));
+
+        staffs.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        staffs.getTableHeader().setReorderingAllowed(false);
+        jScrollPane1.setViewportView(staffs);
+
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 60, 840, 380));
+
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, 860, 450));
 
         refreshPanel.setBackground(new java.awt.Color(0, 51, 51));
         refreshPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -247,7 +310,17 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
         refresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh (2).png"))); // NOI18N
         refreshPanel.add(refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 40, 30));
 
-        jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 70, 60, -1));
+        jPanel1.add(refreshPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 60, 60, -1));
+
+        searchStaff.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        searchStaff.setForeground(new java.awt.Color(153, 153, 153));
+        searchStaff.setText("Search");
+        searchStaff.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchStaffActionPerformed(evt);
+            }
+        });
+        jPanel1.add(searchStaff, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 60, 230, 30));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
@@ -382,11 +455,15 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
         refreshPanel.setBackground(navColor);
     }//GEN-LAST:event_refreshPanelMouseExited
 
+    private void searchStaffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchStaffActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_searchStaffActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel add;
     private javax.swing.JPanel addPanel;
-    private javax.swing.JLabel delete;
+    private javax.swing.JLabel archive;
     private javax.swing.JPanel deletePanel;
     private javax.swing.JLabel edit;
     private javax.swing.JPanel editPanel;
@@ -394,9 +471,12 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel refresh;
     private javax.swing.JPanel refreshPanel;
+    private javax.swing.JTextField searchStaff;
     private javax.swing.JLabel staff;
     private javax.swing.JPanel staff_header;
     private javax.swing.JTable staffs;

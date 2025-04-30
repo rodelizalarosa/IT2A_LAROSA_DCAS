@@ -6,10 +6,15 @@ import ADMIN.*;
 import AUTHENTICATION.Register;
 import Config.ConnectDB;
 import Config.Session;
+import static Config.Session.getInstance;
 import java.awt.Component;
 import java.awt.Image;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,7 +23,9 @@ import java.util.logging.Logger;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
+import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.border.LineBorder;
@@ -27,30 +34,85 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Admin_Update_User extends javax.swing.JFrame {
 
-
     private int userId;
-    
-    public Admin_Update_User(int userId, String username, String email, String role, String imagePath) {
+
+    public Admin_Update_User() {
         initComponents();
         borderField();
-        
-        this.userId = userId;
-        userName.setText(username);  // ← Throws NPE if userName is null!
-        Email.setText(email);
-        Role.setSelectedItem(role);
-
-        // Load profile image
-        if (imagePath != null && !imagePath.isEmpty()) {
-            ImageIcon icon = new ImageIcon(imagePath);
-            Image img = icon.getImage().getScaledInstance(add_prof.getWidth(), add_prof.getHeight(), Image.SCALE_SMOOTH);
-            add_prof.setIcon(new ImageIcon(img));
-        } else {
-            // Load default image
-            ImageIcon defaultIcon = new ImageIcon("src/default/u_blank.jpg");
-            Image img = defaultIcon.getImage().getScaledInstance(add_prof.getWidth(), add_prof.getHeight(), Image.SCALE_SMOOTH);
-            add_prof.setIcon(new ImageIcon(img));
-        }
     }
+
+    public Admin_Update_User(int selectedUserId) {
+        initComponents();
+        borderField();
+        loadUser(selectedUserId);
+    }
+
+
+    public void loadUser(int selectedUserId) {
+         this.userId = selectedUserId;
+
+         String query = "SELECT u_username, u_email, u_role, u_image FROM users WHERE user_id = ?";
+
+         try (Connection conn = new ConnectDB().getConnection();
+              PreparedStatement pst = conn.prepareStatement(query)) {
+
+             pst.setInt(1, selectedUserId);
+             try (ResultSet rs = pst.executeQuery()) {
+                 if (rs.next()) {
+                     String username = rs.getString("u_username");
+                     String email = rs.getString("u_email");
+                     String role = rs.getString("u_role");
+                     String imagePath = rs.getString("u_image");
+
+                     userID.setText(String.valueOf(selectedUserId));
+                     userName.setText(username);
+                     Email.setText(email);
+                     Role.setSelectedItem(role);
+
+                     // Handle image loading
+                     if (imagePath != null && !imagePath.trim().isEmpty()) {
+                         File imageFile = new File(imagePath);
+                         if (imageFile.exists()) {
+                             ImageIcon icon = new ImageIcon(imagePath);
+                             Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
+                             image.setIcon(new ImageIcon(img));
+
+                             this.selectedImagePath = imagePath; // 🔥 added
+                             this.currentImageFromDB = imagePath; // 🔥 added
+                         } else {
+                             loadDefaultImage(); 
+                         }
+                     } else {
+                         loadDefaultImage();
+                     }
+                 } else {
+                     JOptionPane.showMessageDialog(this,
+                         "User with ID " + selectedUserId + " not found.",
+                         "User Not Found",
+                         JOptionPane.WARNING_MESSAGE);
+                 }
+             }
+
+         } catch (SQLException e) {
+             JOptionPane.showMessageDialog(this,
+                 "Error loading user data: " + e.getMessage(),
+                 "Database Error",
+                 JOptionPane.ERROR_MESSAGE);
+             e.printStackTrace();
+         }
+     }
+
+    
+    private void loadDefaultImage() {
+        String defaultImagePath = "src/default/u_blank.jpg";
+        ImageIcon icon = new ImageIcon(defaultImagePath);
+        Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
+        image.setIcon(new ImageIcon(img));
+
+        selectedImagePath = defaultImagePath; // 🔥 important!
+        currentImageFromDB = defaultImagePath; // 🔥 important!
+    }
+
     
     private void borderField(){
          // Make username transparent with a border
@@ -92,11 +154,12 @@ public class Admin_Update_User extends javax.swing.JFrame {
         return email.matches(emailRegex);
     }
     
-   private boolean isEmailTaken(String email) {
+    private boolean isEmailTaken(String email, int currentUserId) {
         ConnectDB connect = new ConnectDB();
-        String sql = "SELECT COUNT(*) FROM users WHERE u_email = ?";
+        String sql = "SELECT COUNT(*) FROM users WHERE u_email = ? AND user_id != ?";
         try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
             pst.setString(1, email);
+            pst.setInt(2, currentUserId);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) > 0;
@@ -108,29 +171,68 @@ public class Admin_Update_User extends javax.swing.JFrame {
         return false;
     }
 
-    private boolean isUsernameTaken(String username) {
+    private boolean isUsernameTaken(String username, int currentUserId) {
         ConnectDB connect = new ConnectDB();
-        
-        String sql = "SELECT COUNT(*) FROM users WHERE u_username = ?"; 
+        String sql = "SELECT COUNT(*) FROM users WHERE u_username = ? AND user_id != ?";
         try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
             pst.setString(1, username);
-            try (ResultSet rs = pst.executeQuery()) { 
+            pst.setInt(2, currentUserId);
+            try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) > 0;
                 }
             }
         } catch (SQLException ex) {
-            ex.printStackTrace(); 
+            ex.printStackTrace();
         }
         return false;
     }
-    
+
     private boolean isAllFieldsEmpty() {
         return userName.getText().trim().isEmpty() && Role.getSelectedIndex() == 0 && Email.getText().trim().isEmpty();
     }
 
+        private String selectedImagePath = null;
+        private String currentImageFromDB = null; // the image path from database
+        private final String defaultImagePath = "src/default/u_blank.jpg"; // constant
     
-    private String selectedImagePath = null;
+        private String saveImageToFolder(File selectedFile) {
+            try {
+                String folderPath = "src/u_images";
+                File directory = new File(folderPath);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+
+                String originalFileName = selectedFile.getName();
+                File destinationFile = new File(folderPath + File.separator + originalFileName);
+
+                Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                return destinationFile.getPath();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error saving image: " + e.getMessage());
+            }
+            return null;
+        }
+
+        private void updateUserImagePath(int userId, String newImagePath) {
+            try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/dcas_sys", "root", "");
+                 PreparedStatement pstmt = conn.prepareStatement("UPDATE users SET u_image = ? WHERE user_id = ?")) {
+
+                pstmt.setString(1, newImagePath);
+                pstmt.setInt(2, userId);
+
+                int affectedRows = pstmt.executeUpdate();
+                if (affectedRows > 0) {
+                    System.out.println("Image path updated successfully.");
+                } else {
+                    System.out.println("No user found with the specified ID.");
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error updating image path: " + ex.getMessage());
+            }
+        }
+
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -163,7 +265,7 @@ public class Admin_Update_User extends javax.swing.JFrame {
         jPanel4 = new javax.swing.JPanel();
         add_prof = new javax.swing.JLabel();
         username2 = new javax.swing.JLabel();
-        userID = new javax.swing.JTextField();
+        userID = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -301,6 +403,11 @@ public class Admin_Update_User extends javax.swing.JFrame {
         del_prof.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         del_prof.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/del_profile.png"))); // NOI18N
         del_prof.setText("  Delete");
+        del_prof.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                del_profMouseClicked(evt);
+            }
+        });
         delPanel.add(del_prof, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 40));
 
         jPanel2.add(delPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 260, 100, 40));
@@ -327,17 +434,9 @@ public class Admin_Update_User extends javax.swing.JFrame {
         username2.setText("Account ID:");
         jPanel2.add(username2, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 50, 80, 30));
 
-        userID.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        userID.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                userIDFocusLost(evt);
-            }
-        });
-        userID.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                userIDActionPerformed(evt);
-            }
-        });
+        userID.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        userID.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        userID.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
         jPanel2.add(userID, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 80, 90, 40));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 70, 560, 420));
@@ -349,9 +448,20 @@ public class Admin_Update_User extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void backMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_backMouseClicked
-        Admin_User_Internal user = new Admin_User_Internal();
-        user.setVisible(true);
-        this.dispose();
+
+        Session session = Session.getInstance();
+        JDesktopPane parentDesktop = new JDesktopPane();  // Create the parent desktop
+        session.setParentPane(parentDesktop);
+
+        if (parentDesktop != null) {
+            // Create a new internal frame
+            Admin_User_Internal userInternal = new Admin_User_Internal();
+            parentDesktop.add(userInternal);
+            userInternal.setVisible(true);
+            this.dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, "Error: Parent Desktop is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_backMouseClicked
 
     private void userNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_userNameFocusLost
@@ -414,31 +524,40 @@ public class Admin_Update_User extends javax.swing.JFrame {
     }//GEN-LAST:event_RoleActionPerformed
 
     private void update_buttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_update_buttonMouseClicked
-
         ConnectDB connect = new ConnectDB();
 
-        String usernameText = userName.getText().trim();
-        String emailText = Email.getText().trim();
-        String selectedRole = Role.getSelectedItem().toString().trim();
-        StringBuilder errorMessage = new StringBuilder();
+       String usernameText = userName.getText().trim();
+       String emailText = Email.getText().trim();
+       String selectedRole = Role.getSelectedItem().toString().trim();
+       StringBuilder errorMessage = new StringBuilder();
 
-        if (isAllFieldsEmpty()) {
-            errorMessage.append("Please fill out the registration form.\n");
-        } else {
-            if (Role.getSelectedIndex() == 0) {
-                errorMessage.append("Please select a type.\n");
-            }
-            if (emailText.isEmpty()) {
-                errorMessage.append("Email cannot be empty.\n");
-            } else if (!isValidEmail(emailText)) {
-                errorMessage.append("Invalid email format.\n");
-            } else if (isEmailTaken(emailText)) {
-                errorMessage.append("Email is already taken.\n");
-            }
+       // Parse current user ID
+       int currentUserId;
+       try {
+           currentUserId = Integer.parseInt(userID.getText().trim());
+       } catch (NumberFormatException e) {
+           JOptionPane.showMessageDialog(this, "Invalid User ID.", "Error", JOptionPane.ERROR_MESSAGE);
+           return;
+       }
+
+       // Validation
+       if (isAllFieldsEmpty()) {
+           errorMessage.append("Please fill out the registration form.\n");
+       } else {
+           if (Role.getSelectedIndex() == 0) {
+               errorMessage.append("Please select a type.\n");
+           }
+           if (emailText.isEmpty()) {
+               errorMessage.append("Email cannot be empty.\n");
+           } else if (!isValidEmail(emailText)) {
+               errorMessage.append("Invalid email format.\n");
+           } else if (isEmailTaken(emailText, currentUserId)) {
+               errorMessage.append("Email is already taken.\n");
+           }
 
             if (usernameText.isEmpty()) {
                 errorMessage.append("Username cannot be empty.\n");
-            } else if (isUsernameTaken(usernameText)) {
+            } else if (isUsernameTaken(usernameText, currentUserId)) {
                 errorMessage.append("Username is already taken.\n");
             }
         }
@@ -448,13 +567,13 @@ public class Admin_Update_User extends javax.swing.JFrame {
             return;
         }
 
-        String sql = "UPDATE dcas_sys.users SET u_username = ?, u_email = ?, u_role = ? WHERE u_id = ?";
+        // Update the user in the database
+        String sql = "UPDATE dcas_sys.users SET u_username = ?, u_email = ?, u_role = ? WHERE user_id = ?";
         try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
-
             pst.setString(1, usernameText);
             pst.setString(2, emailText);
             pst.setString(3, selectedRole);
-            pst.setInt(4, Integer.parseInt(userID.getText().trim())); // You must have this field in the form
+            pst.setInt(4, currentUserId);
 
             pst.executeUpdate();
 
@@ -462,22 +581,10 @@ public class Admin_Update_User extends javax.swing.JFrame {
             sess.logEvent("UPDATED USER ACCOUNT", "Admin updated user account.");
             JOptionPane.showMessageDialog(this, "Updated User Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
-            userName.setText("");
-            Email.setText("");
-            userID.setText(""); // Optional: Clear ID if you're resetting form
-
         } catch (SQLException ex) {
             Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_update_buttonMouseClicked
-
-    private void userIDFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_userIDFocusLost
-        // TODO add your handling code here:
-    }//GEN-LAST:event_userIDFocusLost
-
-    private void userIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userIDActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_userIDActionPerformed
 
     private void add_profMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_add_profMouseClicked
         JFileChooser chooser = new JFileChooser();
@@ -487,14 +594,62 @@ public class Admin_Update_User extends javax.swing.JFrame {
         int result = chooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = chooser.getSelectedFile();
-            selectedImagePath = selectedFile.getAbsolutePath();
 
-            // Show preview in the correct JLabel
-            ImageIcon icon = new ImageIcon(selectedImagePath);
-            Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
-            image.setIcon(new ImageIcon(img));
+            // Save the selected image to src/u_images/
+            String newImagePath = saveImageToFolder(selectedFile);
+
+            if (newImagePath != null) {
+                // Update JLabel
+                ImageIcon icon = new ImageIcon(newImagePath);
+                Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
+                image.setIcon(new ImageIcon(img));
+
+                // Update selected paths
+                selectedImagePath = newImagePath;
+                currentImageFromDB = newImagePath;
+
+                // Update database
+                updateUserImagePath(userId, newImagePath);
+            }
         }
     }//GEN-LAST:event_add_profMouseClicked
+
+    private void del_profMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_del_profMouseClicked
+         if (selectedImagePath == null || selectedImagePath.equals(defaultImagePath)) {
+            JOptionPane.showMessageDialog(this, "Profile picture is already set to default.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        int response = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to delete the profile picture?",
+                "Confirm Deletion",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        if (response == JOptionPane.YES_OPTION) {
+            // Delete file only if it is from u_images and not a default image
+            if (selectedImagePath.startsWith("src/u_images/")) {
+                File imgFile = new File(selectedImagePath);
+                if (imgFile.exists()) {
+                    imgFile.delete();
+                }
+            }
+
+            // Reset to default
+            ImageIcon icon = new ImageIcon(defaultImagePath);
+            Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
+            image.setIcon(new ImageIcon(img));
+
+            // Update paths
+            selectedImagePath = defaultImagePath;
+            currentImageFromDB = defaultImagePath;
+
+            // Update database
+            updateUserImagePath(userId, defaultImagePath);
+        }
+    }//GEN-LAST:event_del_profMouseClicked
 
     /**
      * @param args the command line arguments
@@ -526,8 +681,8 @@ public class Admin_Update_User extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Admin_Update_User(userId, username, email, role, imagePath).setVisible(true);
-            }
+                new Admin_Update_User().setVisible(true);
+            }   
         });
     }
 
@@ -556,7 +711,7 @@ public class Admin_Update_User extends javax.swing.JFrame {
     private javax.swing.JPanel logs_header;
     private javax.swing.JLabel role1;
     private javax.swing.JLabel update_button;
-    private javax.swing.JTextField userID;
+    private javax.swing.JLabel userID;
     private javax.swing.JTextField userName;
     private javax.swing.JLabel username1;
     private javax.swing.JLabel username2;
