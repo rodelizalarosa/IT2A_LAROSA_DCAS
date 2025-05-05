@@ -50,10 +50,6 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         edit.setVisible(true);
     }
 
-    
-   
-    
-
 
 
     Color hover = new Color (0,51,51);
@@ -83,12 +79,9 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         Gender = new javax.swing.JLabel();
         userID = new javax.swing.JLabel();
         email7 = new javax.swing.JLabel();
+        image = new javax.swing.JPanel();
 
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
-            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
-            }
             public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
                 formInternalFrameActivated(evt);
             }
@@ -99,6 +92,10 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
             public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
             }
         });
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -214,6 +211,11 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         email7.setText("Account ID:");
         jPanel2.add(email7, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 80, 100, 30));
 
+        image.setBackground(new java.awt.Color(255, 255, 255));
+        image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
+        image.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 200, 180));
+
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 830, 380));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
@@ -297,6 +299,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
     private javax.swing.JLabel email6;
     private javax.swing.JLabel email7;
     private javax.swing.JLabel fullname;
+    private javax.swing.JPanel image;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;

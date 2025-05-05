@@ -4,16 +4,26 @@ package ADMIN;
 import AUTHENTICATION.LogIn;
 import Config.ConnectDB;
 import Config.Session;
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import javafx.scene.chart.PieChart;
+import javax.swing.BorderFactory;
 import javax.swing.JDesktopPane;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.data.general.DefaultPieDataset;
 
 
 public class Admin_Internal extends javax.swing.JInternalFrame {
@@ -21,6 +31,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
     public Admin_Internal() {
         initComponents();
         loadDashboardStats();
+        showPieChart();
 
         // Get session info
         Session sess = Session.getInstance();
@@ -45,7 +56,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
     }
     
 
-    private void loadDashboardStats() {
+   private void loadDashboardStats() {
         ConnectDB connect = new ConnectDB();
 
         try {
@@ -55,34 +66,26 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
                 return;
             }
 
-            // Active Users
+            // Queries
             String activeUserQuery = "SELECT COUNT(*) FROM users WHERE u_status = 'Active'";
             String pendingUserQuery = "SELECT COUNT(*) FROM users WHERE u_status = 'Pending'";
-
-            // Patients with linked accounts
-            String patientQuery = "SELECT COUNT(*) FROM patients WHERE user_id IS NOT NULL";
-
-            // Doctors with linked accounts
+            String totalPatientsQuery = "SELECT COUNT(*) FROM patients";
             String doctorQuery = "SELECT COUNT(*) FROM dentist WHERE user_id IS NOT NULL";
-
-            // Total Appointments
             String appointmentQuery = "SELECT COUNT(*) FROM appointments";
-
-            // Total Services Availed in Appointments
             String servicesQuery = "SELECT COUNT(*) FROM treatment_services";
 
-            // Helper method to run a single count query
+            // Execute counts
             int activeUsersCount = getCount(conn, activeUserQuery);
             int pendingUsersCount = getCount(conn, pendingUserQuery);
-            int patientCount = getCount(conn, patientQuery);
+            int totalPatientCount = getCount(conn, totalPatientsQuery);
             int doctorCount = getCount(conn, doctorQuery);
             int appointmentCount = getCount(conn, appointmentQuery);
             int servicesCount = getCount(conn, servicesQuery);
 
-            // Update labels (replace these with your actual component names)
+            // Update Swing UI labels
             activeUsers.setText(String.valueOf(activeUsersCount));
             pendingUsers.setText(String.valueOf(pendingUsersCount));
-            activePatients.setText(String.valueOf(patientCount));
+            activePatients.setText(String.valueOf(totalPatientCount));
             activeDoctors.setText(String.valueOf(doctorCount));
             totalAppointments.setText(String.valueOf(appointmentCount));
             totalServices.setText(String.valueOf(servicesCount));
@@ -92,8 +95,8 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
             System.out.println("Error loading dashboard stats: " + ex.getMessage());
             ex.printStackTrace();
         }
-        
     }
+
     
     private int getCount(Connection conn, String query) throws SQLException {
         Statement stmt = conn.createStatement();
@@ -120,6 +123,78 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         desktop.add(log);
         log.setVisible(true);
     }
+    
+    private void showPieChart() {
+        DefaultPieDataset dataset = new DefaultPieDataset();
+
+        try {
+            ConnectDB connect = new ConnectDB();
+            Connection conn = connect.getConnection();
+
+            String sql = "SELECT s.service_name, SUM(ts.quantity) AS total_quantity " +
+                         "FROM treatment_services ts " +
+                         "JOIN services s ON ts.service_id = s.service_id " +
+                         "GROUP BY ts.service_id";
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                String serviceName = rs.getString("service_name");
+                int quantity = rs.getInt("total_quantity");
+                dataset.setValue(serviceName, quantity);
+            }
+
+            rs.close();
+            stmt.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        // Tooltips enabled: 4th param is 'true'
+        JFreeChart chart = ChartFactory.createPieChart(
+            null, // Chart title
+            dataset,                        // Dataset
+            false,                          // No legend
+            true,                           // Enable tooltips
+            false                           // No URLs
+        );
+
+        PiePlot plot = (PiePlot) chart.getPlot();
+
+        // Optional: remove labels from pie slices (tooltips still work)
+        plot.setLabelGenerator(null);  // Remove this line if you want labels on slices
+
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setOutlineStroke(new BasicStroke(0));
+        plot.setSectionOutlineStroke(new BasicStroke(0));
+
+        // Color mapping
+        plot.setSectionPaint("Consultation", new Color(255, 192, 203));         // PINK
+        plot.setSectionPaint("Cleaning", new Color(255, 165, 0));               // ORANGE
+        plot.setSectionPaint("Tooth Extraction", new Color(255, 255, 0));       // YELLOW
+        plot.setSectionPaint("Root Canal", new Color(0, 128, 0));               // GREEN
+        plot.setSectionPaint("Wisdom Tooth Removal", new Color(255, 0, 255));   // MAGENTA
+        plot.setSectionPaint("Braces", new Color(0, 0, 255));                   // BLUE
+        plot.setSectionPaint("Retainers", new Color(0, 255, 255));              // CYAN
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new Dimension(pieChart.getWidth(), pieChart.getHeight()));
+        chartPanel.setBorder(BorderFactory.createEmptyBorder());
+        chartPanel.setBackground(Color.WHITE);
+
+        pieChart.removeAll();
+        pieChart.add(chartPanel, BorderLayout.CENTER);
+        pieChart.validate();
+        
+        pieChart.revalidate();
+        pieChart.repaint();
+
+    }
+
 
     
     Color hoverColor = new Color (55,162,153);
@@ -188,10 +263,6 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
 
         setBackground(new java.awt.Color(255, 255, 255));
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
-            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
-            }
             public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
                 formInternalFrameActivated(evt);
             }
@@ -202,6 +273,10 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
             public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
             }
         });
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -343,7 +418,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         activePatients.setForeground(new java.awt.Color(255, 255, 255));
         activePatients.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         activePatients.setText("0");
-        jPanel8.add(activePatients, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 0, 90, 40));
+        jPanel8.add(activePatients, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 170, 40));
 
         jPanel1.add(jPanel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 400, 170, 40));
 
@@ -446,6 +521,8 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
         jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        pieChart.setLayout(new java.awt.BorderLayout());
         jPanel3.add(pieChart, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 260, 210));
 
         jPanel19.setBackground(java.awt.Color.cyan);
@@ -474,19 +551,19 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         jPanel3.add(account4, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 130, 150, 20));
 
         account10.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
-        account10.setText("Consultations");
+        account10.setText("Consultation");
         jPanel3.add(account10, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 10, 150, 20));
 
         account11.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
-        account11.setText("Cleanings");
+        account11.setText("Cleaning");
         jPanel3.add(account11, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 40, 150, 20));
 
         account12.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
-        account12.setText("Tooth Extractions");
+        account12.setText("Tooth Extraction");
         jPanel3.add(account12, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 70, 150, 20));
 
         account13.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
-        account13.setText("Root Canals");
+        account13.setText("Root Canal");
         jPanel3.add(account13, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 100, 150, 20));
 
         account14.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
@@ -532,14 +609,19 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         Session sess = Session.getInstance();
 
         if (sess.getUserId() == 0) {  // No user is logged in
-            JOptionPane.showMessageDialog(null, "No Account, Log in First!", "Notice", JOptionPane.ERROR_MESSAGE);
+            // Display an error message if no user is logged in
+            JOptionPane.showMessageDialog(
+                null,
+                "<html><b>❌ No Account, Log in First!</b><br>Please log in to access the dashboard.</html>",
+                "Notice",
+                JOptionPane.ERROR_MESSAGE
+            );
 
             SwingUtilities.invokeLater(() -> {
                 new LogIn().setVisible(true);
             });
 
-            this.dispose(); 
-
+            this.dispose();  // Close the current window
         } else {
             try {
                 ConnectDB dbc = new ConnectDB();
@@ -550,15 +632,20 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
 
                     // Update the dashboard text in the Event Dispatch Thread
                     SwingUtilities.invokeLater(() -> {
-                        dashboard.setText(username + "'s Dashboard");
-
+                        dashboard.setText("<html><b>" + username + "'s Dashboard</b></html>");
                     });
 
                 } else {
                     System.out.println("⚠ No user found for ID: " + sess.getUserId());
                 }
             } catch (SQLException ex) {
-                System.out.println("SQL Exception: " + ex.getMessage());
+                // Show error message with HTML formatting if an SQL exception occurs
+                JOptionPane.showMessageDialog(
+                    this,
+                    "<html><b>❌ SQL Error:</b><br>" + ex.getMessage() + "</html>",
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }//GEN-LAST:event_formInternalFrameActivated

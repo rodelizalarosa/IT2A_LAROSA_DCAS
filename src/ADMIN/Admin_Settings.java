@@ -164,7 +164,7 @@ public class Admin_Settings extends javax.swing.JFrame {
 
         int choice = JOptionPane.showConfirmDialog(
             this,
-            "Are you sure you want to log out?",
+            "<html><b>Are you sure you want to log out?</b><br>This will end your current session.</html>",
             "Confirm Logout",
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE,
@@ -175,7 +175,6 @@ public class Admin_Settings extends javax.swing.JFrame {
             LogIn lg = new LogIn();
             lg.setLocationRelativeTo(null);
             lg.setVisible(true);
-
             this.dispose();
         }
     }//GEN-LAST:event_logoutPanelMouseClicked

@@ -2,10 +2,13 @@
 package ADMIN;
 
 import Config.ConnectDB;
+import Config.Session;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -48,10 +51,30 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
                 searchStaff();
             }
         });  
+        
+        staffs.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                if (evt.getClickCount() == 2) {
+                    int selectedRow = staffs.getSelectedRow();
+                    if (selectedRow != -1) {
+                        int staffId = Integer.parseInt(staffs.getValueAt(selectedRow, 0).toString());
+                        new Admin_Update_Staff(staffId).setVisible(true);
+                    } else {
+                         JOptionPane.showMessageDialog(
+                            null,
+                            "<html><b>No staff member selected.</b><br>Please select a staff member before proceeding.</html>",
+                            "⚠ Selection Required",
+                            JOptionPane.WARNING_MESSAGE
+                        );
+                    }
+                }
+            }
+        });
     }
     
     private void loadStaffs(){ 
         ConnectDB connect = new ConnectDB();
+        int currentUserId = Session.getInstance().getUserId(); // Correct
 
         DefaultTableModel model = new DefaultTableModel();
         model.addColumn("Staff ID");
@@ -67,9 +90,11 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
                 return;
             }
 
-            String query = "SELECT staff_id, user_id, s_fname, s_lname, s_gender FROM staff"; // Corrected query
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
+            String query = "SELECT staff_id, user_id, s_fname, s_lname, s_gender " +
+                           "FROM staff WHERE s_status != 'Archived' AND user_id != ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, currentUserId);
+            ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 model.addRow(new Object[]{
@@ -77,7 +102,7 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
                     rs.getInt("user_id"),
                     rs.getString("s_fname"),
                     rs.getString("s_lname"),
-                    rs.getString("s_gender"),
+                    rs.getString("s_gender")
                 });
             }
 
@@ -89,65 +114,72 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
             conn.close();
 
         } catch (SQLException ex) {
-            System.out.println("Error loading doctors: " + ex.getMessage());
+            System.out.println("Error loading staff: " + ex.getMessage());
             ex.printStackTrace();
         }
     }
+
     
-    public int getSelectedUserId() {
+    public int getSelectedStaffId() {
         int selectedRow = staffs.getSelectedRow(); // Get the selected row index
 
-            if (selectedRow != -1) { // Check if a row is selected
-                return Integer.parseInt(staffs.getValueAt(selectedRow, 0).toString()); // Get user_id from the first column
-            }
+        if (selectedRow != -1) { // Check if a row is selected
+            return Integer.parseInt(staffs.getValueAt(selectedRow, 0).toString()); // Get staff_id from the first column
+        }
         return -1; // Return -1 if no row is selected
     }
-    
+
     private void searchStaff() {
-    String keyword = searchStaff.getText().trim(); // JTextField for live search
+        String keyword = searchStaff.getText().trim(); // JTextField for live search
 
-    try {
-        ConnectDB connect = new ConnectDB();
-        Connection conn = connect.getConnection();
+        try {
+            ConnectDB connect = new ConnectDB();
+            Connection conn = connect.getConnection();
 
-        StringBuilder sql = new StringBuilder("SELECT staff_id, user_id, s_fname, s_lname, s_gender FROM staff");
+            StringBuilder sql = new StringBuilder("SELECT staff_id, user_id, s_fname, s_lname, s_gender FROM staff");
 
-        if (!keyword.isEmpty()) {
-            sql.append(" WHERE s_fname LIKE ? OR s_lname LIKE ?");
+            if (!keyword.isEmpty()) {
+                sql.append(" WHERE s_fname LIKE ? OR s_lname LIKE ?");
+            }
+
+            PreparedStatement pstmt = conn.prepareStatement(sql.toString());
+
+            if (!keyword.isEmpty()) {
+                pstmt.setString(1, "%" + keyword + "%");
+                pstmt.setString(2, "%" + keyword + "%");
+            }
+
+            ResultSet rs = pstmt.executeQuery();
+
+            // Clear table
+            DefaultTableModel model = (DefaultTableModel) staffs.getModel(); // assuming JTable name is staffTable
+            model.setRowCount(0);
+
+            // Populate table
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getInt("staff_id"),
+                    rs.getInt("user_id"),
+                    rs.getString("s_fname"),
+                    rs.getString("s_lname"),
+                    rs.getString("s_gender")
+                });
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>⚠ An error occurred while searching staff.</b><br>" +
+                e.getMessage() + "</html>",
+                "Search Error",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
-
-        PreparedStatement pstmt = conn.prepareStatement(sql.toString());
-
-        if (!keyword.isEmpty()) {
-            pstmt.setString(1, "%" + keyword + "%");
-            pstmt.setString(2, "%" + keyword + "%");
-        }
-
-        ResultSet rs = pstmt.executeQuery();
-
-        // Clear table
-        DefaultTableModel model = (DefaultTableModel) staffs.getModel(); // assuming JTable name is staffTable
-        model.setRowCount(0);
-
-        // Populate table
-        while (rs.next()) {
-            model.addRow(new Object[]{
-                rs.getInt("staff_id"),
-                rs.getInt("user_id"),
-                rs.getString("s_fname"),
-                rs.getString("s_lname"),
-                rs.getString("s_gender")
-            });
-        }
-
-        rs.close();
-        pstmt.close();
-        conn.close();
-
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Error searching staff: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
-}
 
     
     Color hoverColor = new Color (55,162,153);
@@ -163,12 +195,10 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        deletePanel = new javax.swing.JPanel();
+        archivePanel = new javax.swing.JPanel();
         archive = new javax.swing.JLabel();
-        editPanel = new javax.swing.JPanel();
+        updatePanel = new javax.swing.JPanel();
         edit = new javax.swing.JLabel();
-        addPanel = new javax.swing.JPanel();
-        add = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -205,71 +235,49 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
         jPanel3.setBackground(new java.awt.Color(55, 162, 153));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        deletePanel.setBackground(new java.awt.Color(0, 51, 51));
-        deletePanel.addMouseListener(new java.awt.event.MouseAdapter() {
+        archivePanel.setBackground(new java.awt.Color(0, 51, 51));
+        archivePanel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                deletePanelMouseClicked(evt);
+                archivePanelMouseClicked(evt);
             }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                deletePanelMouseEntered(evt);
+                archivePanelMouseEntered(evt);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                deletePanelMouseExited(evt);
+                archivePanelMouseExited(evt);
             }
         });
-        deletePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        archivePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         archive.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         archive.setForeground(new java.awt.Color(255, 255, 255));
         archive.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         archive.setText("ARCHIVE");
-        deletePanel.add(archive, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
+        archivePanel.add(archive, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel3.add(deletePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 10, 110, -1));
+        jPanel3.add(archivePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 10, 110, -1));
 
-        editPanel.setBackground(new java.awt.Color(0, 51, 51));
-        editPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+        updatePanel.setBackground(new java.awt.Color(0, 51, 51));
+        updatePanel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                editPanelMouseClicked(evt);
+                updatePanelMouseClicked(evt);
             }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                editPanelMouseEntered(evt);
+                updatePanelMouseEntered(evt);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                editPanelMouseExited(evt);
+                updatePanelMouseExited(evt);
             }
         });
-        editPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        updatePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         edit.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         edit.setForeground(new java.awt.Color(255, 255, 255));
         edit.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         edit.setText("UPDATE");
-        editPanel.add(edit, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
+        updatePanel.add(edit, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
 
-        jPanel3.add(editPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 10, 110, -1));
-
-        addPanel.setBackground(new java.awt.Color(0, 51, 51));
-        addPanel.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                addPanelMouseClicked(evt);
-            }
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                addPanelMouseEntered(evt);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                addPanelMouseExited(evt);
-            }
-        });
-        addPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        add.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        add.setForeground(new java.awt.Color(255, 255, 255));
-        add.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        add.setText("ADD");
-        addPanel.add(add, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 30));
-
-        jPanel3.add(addPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 110, -1));
+        jPanel3.add(updatePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 110, -1));
         jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, -30, -1, -1));
         jPanel3.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, -40, 80, 30));
 
@@ -327,121 +335,115 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void addPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_addPanelMouseClicked
+    private void updatePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_updatePanelMouseClicked
 
-        Admin_Add_User ad = new Admin_Add_User();
-        ad.setVisible(true);
-        this.dispose();
-    }//GEN-LAST:event_addPanelMouseClicked
+        int selectedStaffId = getSelectedStaffId(); // Get selected staff ID
 
-    private void addPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_addPanelMouseEntered
-        addPanel.setBackground(hoverColor);
-    }//GEN-LAST:event_addPanelMouseEntered
-
-    private void addPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_addPanelMouseExited
-        addPanel.setBackground(navColor);
-    }//GEN-LAST:event_addPanelMouseExited
-
-    private void editPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_editPanelMouseClicked
-
-        int selectedUserId = getSelectedUserId(); // Get selected user's ID
-
-        if (selectedUserId != -1) {
-            ConnectDB connect = new ConnectDB();
-            Connection conn = connect.getConnection();
-
-            if (conn == null) {
-                JOptionPane.showMessageDialog(this, "Database connection failed!", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            try {
-                String query = "SELECT u_username, u_email, u_role FROM users WHERE user_id = ?";
-                PreparedStatement pstmt = conn.prepareStatement(query);
-                pstmt.setInt(1, selectedUserId);
-                ResultSet rs = pstmt.executeQuery();
-
-                if (rs.next()) {
-                    // Retrieve user details
-                    String username = rs.getString("u_username");
-                    String email = rs.getString("u_email");
-                    String role = rs.getString("u_role");
-
-                    //                    // Pass data to userUPDATE form (without password)
-                    //                    Admin_Update_User updateForm = new Admin_Update_User(selectedUserId, username, email, role);
-                    //                    Session.getInstance().getDesktopPane().add(updateForm);
-                    //                    //updateForm.setUserData(selectedUserId, username, email, role);
-                    //                    updateForm.setVisible(true);
-                } else {
-                    JOptionPane.showMessageDialog(this, "User not found.");
-                }
-
-                // Close resources
-                rs.close();
-                pstmt.close();
-                conn.close();
-
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
+        if (selectedStaffId != -1) {
+            Admin_Update_Staff updateForm = new Admin_Update_Staff(selectedStaffId);
+            updateForm.setVisible(true);
+            this.dispose(); // Optional: close current window
         } else {
-            JOptionPane.showMessageDialog(this, "Please select a User to Edit.");
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>Please select a staff member to edit.</b></html>",
+                "🔍 No Staff Selected",
+                JOptionPane.WARNING_MESSAGE
+            );
         }
-    }//GEN-LAST:event_editPanelMouseClicked
+    }//GEN-LAST:event_updatePanelMouseClicked
 
-    private void editPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_editPanelMouseEntered
-        editPanel.setBackground(hoverColor);
-    }//GEN-LAST:event_editPanelMouseEntered
+    private void updatePanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_updatePanelMouseEntered
+        updatePanel.setBackground(hoverColor);
+    }//GEN-LAST:event_updatePanelMouseEntered
 
-    private void editPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_editPanelMouseExited
-        editPanel.setBackground(navColor);
-    }//GEN-LAST:event_editPanelMouseExited
+    private void updatePanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_updatePanelMouseExited
+        updatePanel.setBackground(navColor);
+    }//GEN-LAST:event_updatePanelMouseExited
 
-    private void deletePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deletePanelMouseClicked
-        int selectedUserId = getSelectedUserId(); // Get the selected user's ID
+    private void archivePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_archivePanelMouseClicked
+        int selectedStaffId = getSelectedStaffId(); // Implement this to return selected staff_id
 
-        if (selectedUserId != -1) {
+        if (selectedStaffId != -1) {
             int confirmation = JOptionPane.showConfirmDialog(
                 this,
-                "Do you want to delete the user information?",
-                "Confirm Deletion",
+                "Are you sure you want to archive this staff's information?",
+                "Confirm Archive",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE
             );
 
             if (confirmation == JOptionPane.YES_OPTION) {
                 try {
-                    ConnectDB db = new ConnectDB(); // Create an instance of dbConnector
-                    Connection conn = db.getConnection(); // Get database connection
+                    ConnectDB db = new ConnectDB();
+                    try (Connection conn = db.getConnection()) {
 
-                    String query = "DELETE FROM users WHERE user_id = ?";
-                    PreparedStatement pstmt = conn.prepareStatement(query);
-                    pstmt.setInt(1, selectedUserId);
+                        // Step 1: Fetch staff details for logging
+                        String fetchQuery = "SELECT s_fname, s_lname FROM staff WHERE staff_id = ?";
+                        String staffName = "";
 
-                    int rowsDeleted = pstmt.executeUpdate();
-                    if (rowsDeleted > 0) {
-                        JOptionPane.showMessageDialog(this, "User Deleted Successfully!");
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Failed to Delete User.");
+                        try (PreparedStatement fetchStmt = conn.prepareStatement(fetchQuery)) {
+                            fetchStmt.setInt(1, selectedStaffId);
+                            try (ResultSet rs = fetchStmt.executeQuery()) {
+                                if (rs.next()) {
+                                    staffName = rs.getString("s_fname") + " " + rs.getString("s_lname");
+                                }
+                            }
+                        }
+
+                        // Step 2: Archive the staff
+                        String archiveQuery = "UPDATE staff SET s_status = 'Archived' WHERE staff_id = ?";
+                        try (PreparedStatement archiveStmt = conn.prepareStatement(archiveQuery)) {
+                            archiveStmt.setInt(1, selectedStaffId);
+                            int rowsUpdated = archiveStmt.executeUpdate();
+
+                            if (rowsUpdated > 0) {
+                                // Step 3: Log archive event
+                                Session sess = Session.getInstance();
+                                sess.logEvent("ARCHIVED STAFF", "Admin archived staff: " + staffName + " (ID: " + selectedStaffId + ")");
+
+                                JOptionPane.showMessageDialog(
+                                    this,
+                                    "<html><b>Staff archived successfully!</b></html>",
+                                    "Archive Success",
+                                    JOptionPane.INFORMATION_MESSAGE
+                                );
+                            } else {
+                                JOptionPane.showMessageDialog(
+                                    this,
+                                    "<html><b>Failed to archive staff.</b><br>Please try again or check database connection.</html>",
+                                    "Archive Failed",
+                                    JOptionPane.WARNING_MESSAGE
+                                );
+                            }
+                        }
                     }
-                    pstmt.close();
-                    conn.close();
                 } catch (SQLException e) {
-                    JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage());
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "<html><b>Database Error:</b><br>" + e.getMessage() + "</html>",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
                 }
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Please select a User to Delete.");
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>No Selection</b><br>Please select a staff member to archive.</html>",
+                "Selection Required",
+                JOptionPane.WARNING_MESSAGE
+            );
         }
-    }//GEN-LAST:event_deletePanelMouseClicked
+    }//GEN-LAST:event_archivePanelMouseClicked
 
-    private void deletePanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deletePanelMouseEntered
-        deletePanel.setBackground(hoverColor);
-    }//GEN-LAST:event_deletePanelMouseEntered
+    private void archivePanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_archivePanelMouseEntered
+        archivePanel.setBackground(hoverColor);
+    }//GEN-LAST:event_archivePanelMouseEntered
 
-    private void deletePanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deletePanelMouseExited
-        deletePanel.setBackground(navColor);
-    }//GEN-LAST:event_deletePanelMouseExited
+    private void archivePanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_archivePanelMouseExited
+        archivePanel.setBackground(navColor);
+    }//GEN-LAST:event_archivePanelMouseExited
 
     private void refreshPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_refreshPanelMouseClicked
         loadStaffs();
@@ -461,12 +463,9 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel add;
-    private javax.swing.JPanel addPanel;
     private javax.swing.JLabel archive;
-    private javax.swing.JPanel deletePanel;
+    private javax.swing.JPanel archivePanel;
     private javax.swing.JLabel edit;
-    private javax.swing.JPanel editPanel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -480,5 +479,6 @@ public class Admin_Staff_Internal extends javax.swing.JInternalFrame {
     private javax.swing.JLabel staff;
     private javax.swing.JPanel staff_header;
     private javax.swing.JTable staffs;
+    private javax.swing.JPanel updatePanel;
     // End of variables declaration//GEN-END:variables
 }

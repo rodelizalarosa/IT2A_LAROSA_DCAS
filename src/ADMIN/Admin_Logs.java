@@ -6,6 +6,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
+import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 import javax.swing.table.DefaultTableModel;
@@ -42,6 +45,13 @@ public class Admin_Logs extends javax.swing.JInternalFrame {
         tableLogs.getColumnModel().getColumn(2).setPreferredWidth(80);
         tableLogs.getColumnModel().getColumn(3).setPreferredWidth(150);
         tableLogs.getColumnModel().getColumn(4).setPreferredWidth(70);
+        
+         //FOR LIVE SEARCH LEZGOOO
+        searchLogs.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                searchLogs();
+            }
+        }); 
     }
     
     private void loadLogs() {
@@ -97,6 +107,65 @@ public class Admin_Logs extends javax.swing.JInternalFrame {
             ex.printStackTrace();
         }
     }
+    
+    private void searchLogs() {
+        String keyword = searchLogs.getText().trim(); // Replace with your actual JTextField variable name
+
+        try {
+            ConnectDB connect = new ConnectDB();
+            Connection conn = ConnectDB.getConnection(); // Use static getter
+
+            StringBuilder sql = new StringBuilder("SELECT log_id, user_id, log_event, log_description, log_timestamp FROM logs");
+
+            if (!keyword.isEmpty()) {
+                sql.append(" WHERE log_event LIKE ? OR log_description LIKE ? OR log_timestamp LIKE ?");
+            }
+
+            PreparedStatement pstmt = conn.prepareStatement(sql.toString());
+
+            if (!keyword.isEmpty()) {
+                String likeKeyword = "%" + keyword + "%";
+                pstmt.setString(1, likeKeyword);
+                pstmt.setString(2, likeKeyword);
+                pstmt.setString(3, likeKeyword);
+            }
+
+            ResultSet rs = pstmt.executeQuery();
+
+            // Clear table
+            DefaultTableModel model = (DefaultTableModel) tableLogs.getModel(); // Use your JTable variable
+            model.setRowCount(0);
+
+            // Populate table
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getInt("log_id"),
+                    rs.getInt("user_id"),
+                    rs.getString("log_event"),
+                    rs.getString("log_description"),
+                    rs.getTimestamp("log_timestamp")
+                });
+            }
+
+            model.fireTableDataChanged();
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+
+        } catch (SQLException ex) {
+            // Display the error message in HTML format for better clarity
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>❌ Error Searching Logs:</b><br>" + ex.getMessage() + "</html>",
+                "Database Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            // Print the stack trace for debugging purposes
+            ex.printStackTrace();
+        }
+    }
+
 
 
     
@@ -110,27 +179,25 @@ public class Admin_Logs extends javax.swing.JInternalFrame {
     }
     
     public void logEvent(int userId, String event, String description) {
-   
         ConnectDB dbc = new ConnectDB();
         PreparedStatement pstmt = null;
-        
+
         try {
-
-
             String sql = "INSERT INTO logs (user_id, log_event, log_description, log_timestamp) VALUES (?, ?, ?, ?)";
-            pstmt = dbc.connect.prepareStatement(sql);
+            pstmt = ConnectDB.getConnection().prepareStatement(sql);  // Use the static getter
             pstmt.setInt(1, userId);
             pstmt.setString(2, event);
             pstmt.setString(3, description);
-            pstmt.setTimestamp(4, new Timestamp(new Date().getTime()));
+            pstmt.setTimestamp(4, new Timestamp(new java.util.Date().getTime()));
 
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-
+            // Optionally close resources here
         }
     }
+
     
     public void autoRefreshLogs() {
         Timer timer = new Timer(5000, new ActionListener() {
@@ -152,6 +219,7 @@ public class Admin_Logs extends javax.swing.JInternalFrame {
         logs = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableLogs = new javax.swing.JTable();
+        searchLogs = new javax.swing.JTextField();
 
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -184,12 +252,26 @@ public class Admin_Logs extends javax.swing.JInternalFrame {
         tableLogs.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(tableLogs);
 
-        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 80, 820, 440));
+        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, 820, 410));
+
+        searchLogs.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        searchLogs.setForeground(new java.awt.Color(153, 153, 153));
+        searchLogs.setText("Search");
+        searchLogs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchLogsActionPerformed(evt);
+            }
+        });
+        jPanel1.add(searchLogs, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 70, 340, 30));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void searchLogsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchLogsActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_searchLogsActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -197,6 +279,7 @@ public class Admin_Logs extends javax.swing.JInternalFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel logs;
     private javax.swing.JPanel logs_header;
+    private javax.swing.JTextField searchLogs;
     private javax.swing.JTable tableLogs;
     // End of variables declaration//GEN-END:variables
 }

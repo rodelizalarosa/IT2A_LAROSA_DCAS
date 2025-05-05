@@ -1,6 +1,7 @@
 
 package ADMIN;
 
+import AUTHENTICATION.EmailSender;
 import Config.ConnectDB;
 import Config.Session;
 import java.awt.Color;
@@ -14,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import javax.mail.MessagingException;
 import javax.swing.JDesktopPane;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -68,7 +70,12 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
                         int selectedUserId = Integer.parseInt(users.getValueAt(selectedRow, 0).toString());
                         new Admin_Update_User(selectedUserId).setVisible(true);
                     } else {
-                        JOptionPane.showMessageDialog(null, "Please select a user.");
+                        JOptionPane.showMessageDialog(
+                            null, 
+                            "<html><b>Please select a user.</b><br>Make sure to select a user before proceeding.</html>", 
+                            "Selection Required", 
+                            JOptionPane.WARNING_MESSAGE
+                        );
                     }
                 }
             }
@@ -189,7 +196,12 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
             conn.close();
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error searching users: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                this, 
+                "<html><b>Error searching users:</b><br>" + e.getMessage() + "</html>", 
+                "❌ Database Error", 
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }
     
@@ -398,51 +410,80 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void activatePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_activatePanelMouseClicked
-         int selectedUserId = getSelectedUserId(); // Get the selected user's ID
+        int selectedUserId = getSelectedUserId(); // Get the selected user's ID
 
         if (selectedUserId != -1) {
             int confirmation = JOptionPane.showConfirmDialog(
                 this,
                 "<html><b>Are you sure you want to activate this user account?</b><br>This will allow the user to access the system.</html>",
-                "🔓 Confirm Activation",
+                "Confirm Activation",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
             );
 
             if (confirmation == JOptionPane.YES_OPTION) {
                 try {
-                    ConnectDB db = new ConnectDB(); // Create an instance of dbConnector
-                    Connection conn = db.getConnection(); // Get database connection
+                    ConnectDB db = new ConnectDB();
+                    Connection conn = db.getConnection();
 
+                    // Activate the user
                     String query = "UPDATE users SET u_status = 'Active' WHERE user_id = ?";
                     PreparedStatement pstmt = conn.prepareStatement(query);
                     pstmt.setInt(1, selectedUserId);
 
                     int rowsUpdated = pstmt.executeUpdate();
+                    pstmt.close();
+
                     if (rowsUpdated > 0) {
+                        // Retrieve user's email and username
+                        String infoQuery = "SELECT u_email, u_username FROM users WHERE user_id = ?";
+                        PreparedStatement infoStmt = conn.prepareStatement(infoQuery);
+                        infoStmt.setInt(1, selectedUserId);
+                        ResultSet rs = infoStmt.executeQuery();
+
+                        if (rs.next()) {
+                            String userEmail = rs.getString("u_email");
+                            String username = rs.getString("u_username");
+
+                            try {
+                                // Send activation email
+                                EmailSender.sendActivationEmail(userEmail, username);
+                            } catch (MessagingException me) {
+                                me.printStackTrace();
+                                JOptionPane.showMessageDialog(
+                                    this,
+                                    "<html><b>User activated, but failed to send email:</b><br>" + me.getMessage() + "</html>",
+                                    "✉️ Email Error",
+                                    JOptionPane.WARNING_MESSAGE
+                                );
+                            }
+                        }
+
+                        rs.close();
+                        infoStmt.close();
+
                         JOptionPane.showMessageDialog(
                             this,
                             "<html><b>User account activated successfully!</b><br>The user can now access the system.</html>",
-                            "✅ Activation Successful",
+                            "Activation Successful",
                             JOptionPane.INFORMATION_MESSAGE
                         );
                     } else {
                         JOptionPane.showMessageDialog(
                             this,
                             "<html><b>Activation failed.</b><br>No changes were made.</html>",
-                            "❌ Activation Failed",
+                            "Activation Failed",
                             JOptionPane.ERROR_MESSAGE
                         );
                     }
 
-                    pstmt.close();
                     conn.close();
 
                 } catch (SQLException e) {
                     JOptionPane.showMessageDialog(
                         this,
                         "<html><b>Database error:</b><br>" + e.getMessage() + "</html>",
-                        "❗ SQL Error",
+                        "SQL Error",
                         JOptionPane.ERROR_MESSAGE
                     );
                 }
@@ -451,7 +492,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(
                 this,
                 "<html><b>Please select a user to activate.</b></html>",
-                "🔍 No User Selected",
+                "?No User Selected",
                 JOptionPane.WARNING_MESSAGE
             );
         }

@@ -50,7 +50,12 @@ public class LogIn extends javax.swing.JFrame {
             }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            JOptionPane.showMessageDialog(this, "Hashing error", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>Hashing Error:</b><br>Unable to apply SHA-256 algorithm.</html>",
+                "❗ Hashing Failed",
+                JOptionPane.ERROR_MESSAGE
+            );
             return null;
         }
     }
@@ -72,9 +77,10 @@ public class LogIn extends javax.swing.JFrame {
         errorPassword = new javax.swing.JLabel();
         show = new javax.swing.JLabel();
         login_button = new javax.swing.JLabel();
-        noAcct = new javax.swing.JLabel();
+        forgot = new javax.swing.JLabel();
         Register = new javax.swing.JLabel();
         hide = new javax.swing.JLabel();
+        noAcct = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -173,10 +179,20 @@ public class LogIn extends javax.swing.JFrame {
         });
         jPanel1.add(login_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 420, 350, 40));
 
-        noAcct.setFont(new java.awt.Font("Verdana", 0, 14)); // NOI18N
-        noAcct.setForeground(new java.awt.Color(255, 255, 255));
-        noAcct.setText("Don't have an account?");
-        jPanel1.add(noAcct, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 480, 180, 30));
+        forgot.setBackground(new java.awt.Color(255, 255, 255));
+        forgot.setFont(new java.awt.Font("Verdana", 1, 12)); // NOI18N
+        forgot.setForeground(new java.awt.Color(255, 255, 255));
+        forgot.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        forgot.setText("FORGOT PASSWORD");
+        forgot.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                forgotMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                forgotMouseEntered(evt);
+            }
+        });
+        jPanel1.add(forgot, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 460, 180, 30));
 
         Register.setFont(new java.awt.Font("Verdana", 1, 13)); // NOI18N
         Register.setForeground(new java.awt.Color(204, 255, 255));
@@ -187,7 +203,7 @@ public class LogIn extends javax.swing.JFrame {
                 RegisterMouseClicked(evt);
             }
         });
-        jPanel1.add(Register, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 480, 180, 30));
+        jPanel1.add(Register, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 490, 180, 30));
 
         hide.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         hide.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/hide.png"))); // NOI18N
@@ -197,6 +213,11 @@ public class LogIn extends javax.swing.JFrame {
             }
         });
         jPanel1.add(hide, new org.netbeans.lib.awtextra.AbsoluteConstraints(1000, 330, 40, 40));
+
+        noAcct.setFont(new java.awt.Font("Verdana", 0, 14)); // NOI18N
+        noAcct.setForeground(new java.awt.Color(255, 255, 255));
+        noAcct.setText("Don't have an account?");
+        jPanel1.add(noAcct, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 490, 180, 30));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1100, 560));
 
@@ -260,56 +281,89 @@ public class LogIn extends javax.swing.JFrame {
         String pass = new String(password.getPassword()).trim();
 
         if (user.isEmpty() || pass.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill in both fields.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-        } else {
-            ConnectDB db = new ConnectDB();
-            Connection con = db.getConnection();
-            Session sess = Session.getInstance();
-            String sql = "SELECT user_id, u_password, u_status, u_role FROM users WHERE u_username = ?";
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>Please fill in both fields.</b><br>Username and password are required.</html>",
+                "❗ Validation Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
 
-            try {
-                PreparedStatement pst = con.prepareStatement(sql);
-                pst.setString(1, user);
-                ResultSet rs = pst.executeQuery();
+        ConnectDB db = new ConnectDB();
+        Connection con = db.getConnection();
+        Session sess = Session.getInstance();
+        String sql = "SELECT user_id, u_password, u_status, u_role FROM users WHERE u_username = ?";
 
-                if (rs.next()) {
-                    String storedPassword = rs.getString("u_password");
-                    String status = rs.getString("u_status");
-                    String roleFromDB = rs.getString("u_role");
-                    int userId = rs.getInt("user_id");
+        try {
+            PreparedStatement pst = con.prepareStatement(sql);
+            pst.setString(1, user);
+            ResultSet rs = pst.executeQuery();
 
-                    if (storedPassword.equals(hashPassword(pass))) {
-                        if ("Pending".equalsIgnoreCase(status)) {
-                            JOptionPane.showMessageDialog(this, "Your account is pending approval.", "Login Error", JOptionPane.ERROR_MESSAGE);
-                        } else {
-                            sess.setUser(userId, user, roleFromDB);
-                            sess.logEvent("LOGIN ", "User Logged in");
-                            JOptionPane.showMessageDialog(this, "Login successful! You are logged in as " + roleFromDB + ".", "Success", JOptionPane.INFORMATION_MESSAGE);
-                            this.dispose();
+            if (rs.next()) {
+                String storedPassword = rs.getString("u_password");
+                String status = rs.getString("u_status");
+                String roleFromDB = rs.getString("u_role");
+                int userId = rs.getInt("user_id");
 
-                            if ("Admin".equalsIgnoreCase(roleFromDB)) {
-                                new Admin_Dashboard().setVisible(true);
-                            } else if ("Patient".equalsIgnoreCase(roleFromDB)) {
-                                new Patient_Dashboard().setVisible(true);
-                            } else if ("Dentist".equalsIgnoreCase(roleFromDB)) {
-                                //new Dentist_Das6hboard().setVisible(true);
-                            }
-                        }
+                if (storedPassword.equals(hashPassword(pass))) {
+                    if ("Pending".equalsIgnoreCase(status)) {
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "<html><b>Your account is pending approval.</b><br>Please contact the administrator.</html>",
+                            "⏳ Login Pending",
+                            JOptionPane.WARNING_MESSAGE
+                        );
                     } else {
-                        sess.logEvent( "Login ", "User attempted login");
-                        JOptionPane.showMessageDialog(this, "Invalid username or password.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                        sess.setUser(userId, user, roleFromDB);
+                        sess.logEvent("LOGIN", "User logged in");
+
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "<html><b>Login successful!</b><br>You are logged in as <b>" + roleFromDB + "</b>.</html>",
+                            "✅ Login Success",
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
+
+                        this.dispose();
+
+                        if ("Admin".equalsIgnoreCase(roleFromDB)) {
+                            new Admin_Dashboard().setVisible(true);
+                        } else if ("Patient".equalsIgnoreCase(roleFromDB)) {
+                            new Patient_Dashboard().setVisible(true);
+                        } else if ("Dentist".equalsIgnoreCase(roleFromDB)) {
+                            // new Dentist_Dashboard().setVisible(true); // Enable this when implemented
+                        }
                     }
                 } else {
-                    sess.logEvent( "Login ", "User attempted login");
-                    JOptionPane.showMessageDialog(this, "Invalid username or password.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                    sess.logEvent("LOGIN", "User attempted login with incorrect password");
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "<html><b>Invalid username or password.</b><br>Please try again.</html>",
+                        "❌ Login Failed",
+                        JOptionPane.ERROR_MESSAGE
+                    );
                 }
-
-                rs.close();
-                pst.close();
-                con.close();
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                sess.logEvent("LOGIN", "Unknown username attempted login");
+                JOptionPane.showMessageDialog(
+                    this,
+                    "<html><b>Invalid username or password.</b><br>User not found.</html>",
+                    "❌ Login Failed",
+                    JOptionPane.ERROR_MESSAGE
+                );
             }
+
+            rs.close();
+            pst.close();
+            con.close();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>Database error:</b><br>" + ex.getMessage() + "</html>",
+                "❗ SQL Error",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }//GEN-LAST:event_login_buttonMouseClicked
 
@@ -331,6 +385,15 @@ public class LogIn extends javax.swing.JFrame {
         hide.setVisible(false);
         password.setEchoChar((char) 0);
     }//GEN-LAST:event_hideMousePressed
+
+    private void forgotMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_forgotMouseEntered
+       
+    }//GEN-LAST:event_forgotMouseEntered
+
+    private void forgotMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_forgotMouseClicked
+        Forgot_Password pass = new Forgot_Password();
+        pass.setVisible(true);
+    }//GEN-LAST:event_forgotMouseClicked
 
     
     public static void main(String args[]) {
@@ -369,6 +432,7 @@ public class LogIn extends javax.swing.JFrame {
     private javax.swing.JLabel Register;
     private javax.swing.JLabel errorPassword;
     private javax.swing.JLabel errorUsername;
+    private javax.swing.JLabel forgot;
     private javax.swing.JLabel hide;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;

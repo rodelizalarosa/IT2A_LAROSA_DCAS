@@ -1,14 +1,81 @@
 
 package ADMIN;
 
-import PRINT.Appointment;
+import AUTHENTICATION.EmailSender;
+import Config.ConnectDB;
+import Config.Session;
+import PRINT.AppointmentSlip;
+import PRINT.Decline_Reason;
+import PRINT.GenerateSlip;
 import java.awt.Color;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.mail.MessagingException;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.border.Border;
 
 public class Admin_View_Appointment extends javax.swing.JFrame {
 
     public Admin_View_Appointment() {
         initComponents();
+        loadSessionData(); // Custom method to prefill fields from session
     }
+
+    private void loadSessionData() {
+      Session session = Session.getInstance();
+        if (session.getPatientId() == 0 || session.getAppointmentId() == 0) {
+            System.out.println("Session is empty or not set.");
+            return;
+        }
+
+        // Gray background and border for IDs
+        Color grayBg = new Color(240, 240, 240);
+        Border lightBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
+
+        // patientID
+        patientID.setText(String.valueOf(session.getPatientId()));
+        patientID.setEditable(false);
+        patientID.setBackground(grayBg);
+        patientID.setBorder(lightBorder);
+
+        // appointmentID
+        appointmentID.setText(String.valueOf(session.getAppointmentId()));
+        appointmentID.setEditable(false);
+        appointmentID.setBackground(grayBg);
+        appointmentID.setBorder(lightBorder);
+
+        // Other fields (editable false, keep default styling)
+        fullName.setText(session.getPatientFirstName() + " " + session.getPatientLastName());
+        fullName.setEditable(false);
+
+        gender.setText(session.getPatientGender());
+        gender.setEditable(false);
+
+        phone.setText(session.getPatientContact());
+        phone.setEditable(false);
+
+        services.setText(session.getServiceNameList());
+        services.setEditable(false);
+
+        time.setText(session.getAppointmentTime());
+        time.setEditable(false);
+
+        date.setText(session.getAppointmentDate());
+        date.setEditable(false);
+
+        dentist.setText(session.getDentistFullName());
+        dentist.setEditable(false);
+
+        notes.setText(session.getAppointmentNotes());
+        notes.setEditable(false);
+    }
+    
+    
+
     
     Color Hover = new Color (55,162,153);
     Color Nav = new Color (0,51,51);
@@ -32,30 +99,29 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         fullName = new javax.swing.JTextField();
         appointmentID = new javax.swing.JTextField();
         appointment3 = new javax.swing.JLabel();
-        appointment4 = new javax.swing.JLabel();
         gender = new javax.swing.JTextField();
         appointment5 = new javax.swing.JLabel();
         time = new javax.swing.JTextField();
         appointment6 = new javax.swing.JLabel();
-        date = new javax.swing.JTextField();
+        dentist = new javax.swing.JTextField();
         appointment7 = new javax.swing.JLabel();
-        category = new javax.swing.JComboBox<>();
         appointment8 = new javax.swing.JLabel();
-        dentist = new javax.swing.JComboBox<>();
         appointment9 = new javax.swing.JLabel();
         appointment10 = new javax.swing.JLabel();
-        time3 = new javax.swing.JTextField();
         appointment11 = new javax.swing.JLabel();
-        notes = new javax.swing.JTextField();
         appointment12 = new javax.swing.JLabel();
-        services = new javax.swing.JComboBox<>();
         appointment13 = new javax.swing.JLabel();
+        date = new javax.swing.JTextField();
         phone = new javax.swing.JTextField();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        notes = new javax.swing.JTextArea();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        services = new javax.swing.JTextArea();
         approvePanel = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         declinePanel = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        printPanel = new javax.swing.JPanel();
+        generateSlip = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         updatePanel = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
@@ -117,9 +183,9 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         appointment.setText("Patient ID:");
         jPanel2.add(appointment, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 50, 130, 30));
 
-        patientID.setBackground(new java.awt.Color(204, 204, 204));
-        patientID.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        patientID.setForeground(new java.awt.Color(255, 255, 255));
+        patientID.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        patientID.setForeground(new java.awt.Color(51, 51, 51));
+        patientID.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         patientID.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 patientIDFocusLost(evt);
@@ -142,9 +208,8 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         appointment2.setText("Full Name");
         jPanel2.add(appointment2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 160, 30));
 
-        fullName.setBackground(new java.awt.Color(204, 204, 204));
-        fullName.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        fullName.setForeground(new java.awt.Color(255, 255, 255));
+        fullName.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        fullName.setForeground(new java.awt.Color(51, 51, 51));
         fullName.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 fullNameFocusLost(evt);
@@ -162,9 +227,9 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         });
         jPanel2.add(fullName, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 100, 250, 30));
 
-        appointmentID.setBackground(new java.awt.Color(204, 204, 204));
-        appointmentID.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        appointmentID.setForeground(new java.awt.Color(255, 255, 255));
+        appointmentID.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        appointmentID.setForeground(new java.awt.Color(51, 51, 51));
+        appointmentID.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         appointmentID.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 appointmentIDFocusLost(evt);
@@ -187,14 +252,8 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         appointment3.setText("Appointment ID:");
         jPanel2.add(appointment3, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 50, 160, 30));
 
-        appointment4.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        appointment4.setForeground(new java.awt.Color(51, 51, 51));
-        appointment4.setText("Category");
-        jPanel2.add(appointment4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 250, 160, 30));
-
-        gender.setBackground(new java.awt.Color(204, 204, 204));
-        gender.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        gender.setForeground(new java.awt.Color(255, 255, 255));
+        gender.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        gender.setForeground(new java.awt.Color(51, 51, 51));
         gender.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 genderFocusLost(evt);
@@ -217,9 +276,8 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         appointment5.setText("Preferred Time");
         jPanel2.add(appointment5, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 100, 160, 30));
 
-        time.setBackground(new java.awt.Color(204, 204, 204));
-        time.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        time.setForeground(new java.awt.Color(255, 255, 255));
+        time.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        time.setForeground(new java.awt.Color(51, 51, 51));
         time.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 timeFocusLost(evt);
@@ -242,9 +300,62 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         appointment6.setText("Preferred Date");
         jPanel2.add(appointment6, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 150, 160, 30));
 
-        date.setBackground(new java.awt.Color(204, 204, 204));
-        date.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        date.setForeground(new java.awt.Color(255, 255, 255));
+        dentist.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        dentist.setForeground(new java.awt.Color(51, 51, 51));
+        dentist.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                dentistFocusLost(evt);
+            }
+        });
+        dentist.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                dentistMouseReleased(evt);
+            }
+        });
+        dentist.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                dentistActionPerformed(evt);
+            }
+        });
+        jPanel2.add(dentist, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 200, 200, 30));
+
+        appointment7.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        appointment7.setForeground(new java.awt.Color(51, 51, 51));
+        appointment7.setText("Gender");
+        jPanel2.add(appointment7, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 150, 160, 30));
+
+        appointment8.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        appointment8.setForeground(new java.awt.Color(51, 51, 51));
+        appointment8.setText("Dental Services");
+        jPanel2.add(appointment8, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 250, 160, 30));
+
+        appointment9.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        appointment9.setForeground(new java.awt.Color(51, 51, 51));
+        appointment9.setText("Preferred Dentist");
+        jPanel2.add(appointment9, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 200, 160, 30));
+
+        appointment10.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        appointment10.setForeground(new java.awt.Color(51, 51, 51));
+        appointment10.setText("Preferred Date");
+        jPanel2.add(appointment10, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 150, 160, 30));
+
+        appointment11.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        appointment11.setForeground(new java.awt.Color(51, 51, 51));
+        appointment11.setText("or Notes");
+        jPanel2.add(appointment11, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 270, 160, 30));
+
+        appointment12.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        appointment12.setForeground(new java.awt.Color(51, 51, 51));
+        appointment12.setText("Special Requests");
+        jPanel2.add(appointment12, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 250, 160, 30));
+
+        appointment13.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        appointment13.setForeground(new java.awt.Color(51, 51, 51));
+        appointment13.setText("Phone Number");
+        jPanel2.add(appointment13, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 200, 160, 30));
+
+        date.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        date.setForeground(new java.awt.Color(51, 51, 51));
         date.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 dateFocusLost(evt);
@@ -262,117 +373,8 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         });
         jPanel2.add(date, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 150, 200, 30));
 
-        appointment7.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        appointment7.setForeground(new java.awt.Color(51, 51, 51));
-        appointment7.setText("Gender");
-        jPanel2.add(appointment7, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 150, 160, 30));
-
-        category.setBackground(new java.awt.Color(204, 204, 204));
-        category.setFont(new java.awt.Font("Tw Cen MT", 0, 15)); // NOI18N
-        category.setForeground(new java.awt.Color(204, 204, 204));
-        category.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Category", "General", "Orthodontics", " " }));
-        category.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                categoryFocusLost(evt);
-            }
-        });
-        jPanel2.add(category, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 250, 250, 30));
-
-        appointment8.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        appointment8.setForeground(new java.awt.Color(51, 51, 51));
-        appointment8.setText("Dental Services");
-        jPanel2.add(appointment8, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 300, 160, 30));
-
-        dentist.setBackground(new java.awt.Color(204, 204, 204));
-        dentist.setFont(new java.awt.Font("Tw Cen MT", 0, 15)); // NOI18N
-        dentist.setForeground(new java.awt.Color(204, 204, 204));
-        dentist.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select a Dentist" }));
-        dentist.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                dentistFocusLost(evt);
-            }
-        });
-        jPanel2.add(dentist, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 200, 200, 30));
-
-        appointment9.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        appointment9.setForeground(new java.awt.Color(51, 51, 51));
-        appointment9.setText("Preferred Dentist");
-        jPanel2.add(appointment9, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 200, 160, 30));
-
-        appointment10.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        appointment10.setForeground(new java.awt.Color(51, 51, 51));
-        appointment10.setText("Preferred Date");
-        jPanel2.add(appointment10, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 150, 160, 30));
-
-        time3.setBackground(new java.awt.Color(204, 204, 204));
-        time3.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        time3.setForeground(new java.awt.Color(255, 255, 255));
-        time3.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                time3FocusLost(evt);
-            }
-        });
-        time3.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                time3MouseReleased(evt);
-            }
-        });
-        time3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                time3ActionPerformed(evt);
-            }
-        });
-        jPanel2.add(time3, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 150, 180, 30));
-
-        appointment11.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        appointment11.setForeground(new java.awt.Color(51, 51, 51));
-        appointment11.setText("or Notes");
-        jPanel2.add(appointment11, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 270, 160, 30));
-
-        notes.setBackground(new java.awt.Color(204, 204, 204));
-        notes.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        notes.setForeground(new java.awt.Color(255, 255, 255));
-        notes.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                notesFocusLost(evt);
-            }
-        });
-        notes.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                notesMouseReleased(evt);
-            }
-        });
-        notes.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                notesActionPerformed(evt);
-            }
-        });
-        jPanel2.add(notes, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 250, 200, 80));
-
-        appointment12.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        appointment12.setForeground(new java.awt.Color(51, 51, 51));
-        appointment12.setText("Special Requests");
-        jPanel2.add(appointment12, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 250, 160, 30));
-
-        services.setBackground(new java.awt.Color(204, 204, 204));
-        services.setFont(new java.awt.Font("Tw Cen MT", 0, 15)); // NOI18N
-        services.setForeground(new java.awt.Color(204, 204, 204));
-        services.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Dental Services", "Consultation", "Cleaning", "Tooth Extraction", "Root Canal", "Wisdom Tooth Removal", "Braces", "Retainers" }));
-        services.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                servicesFocusLost(evt);
-            }
-        });
-        jPanel2.add(services, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 300, 250, 30));
-
-        appointment13.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        appointment13.setForeground(new java.awt.Color(51, 51, 51));
-        appointment13.setText("Phone Number");
-        jPanel2.add(appointment13, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 200, 160, 30));
-
-        phone.setBackground(new java.awt.Color(204, 204, 204));
-        phone.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
-        phone.setForeground(new java.awt.Color(255, 255, 255));
+        phone.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        phone.setForeground(new java.awt.Color(51, 51, 51));
         phone.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 phoneFocusLost(evt);
@@ -390,10 +392,27 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         });
         jPanel2.add(phone, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 200, 250, 30));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 140, 790, 350));
+        notes.setColumns(20);
+        notes.setRows(5);
+        notes.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
+        jScrollPane1.setViewportView(notes);
+
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 260, 200, -1));
+
+        services.setColumns(20);
+        services.setRows(5);
+        services.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
+        jScrollPane2.setViewportView(services);
+
+        jPanel2.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 250, 250, -1));
+
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 130, 790, 370));
 
         approvePanel.setBackground(new java.awt.Color(0, 51, 51));
         approvePanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                approvePanelMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 approvePanelMouseEntered(evt);
             }
@@ -409,10 +428,13 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         jLabel5.setText("APPROVE");
         approvePanel.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 70, 30));
 
-        jPanel1.add(approvePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 90, 30));
+        jPanel1.add(approvePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 90, 90, 30));
 
         declinePanel.setBackground(new java.awt.Color(0, 51, 51));
         declinePanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                declinePanelMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 declinePanelMouseEntered(evt);
             }
@@ -428,29 +450,29 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         jLabel2.setText("DECLINE");
         declinePanel.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 70, 30));
 
-        jPanel1.add(declinePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 100, 90, 30));
+        jPanel1.add(declinePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 90, 90, 30));
 
-        printPanel.setBackground(new java.awt.Color(0, 51, 51));
-        printPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+        generateSlip.setBackground(new java.awt.Color(0, 51, 51));
+        generateSlip.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                printPanelMouseClicked(evt);
+                generateSlipMouseClicked(evt);
             }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                printPanelMouseEntered(evt);
+                generateSlipMouseEntered(evt);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                printPanelMouseExited(evt);
+                generateSlipMouseExited(evt);
             }
         });
-        printPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        generateSlip.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel6.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(255, 255, 255));
         jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel6.setText("PRINT");
-        printPanel.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 80, 30));
+        jLabel6.setText("GENERATE SLIP");
+        generateSlip.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 120, 30));
 
-        jPanel1.add(printPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 100, 100, 30));
+        jPanel1.add(generateSlip, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 90, 140, 30));
 
         updatePanel.setBackground(new java.awt.Color(0, 51, 51));
         updatePanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -469,7 +491,7 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         jLabel7.setText("UPDATE");
         updatePanel.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 70, 30));
 
-        jPanel1.add(updatePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 100, 90, 30));
+        jPanel1.add(updatePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 90, 90, 30));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 850, 550));
 
@@ -482,8 +504,7 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
     }//GEN-LAST:event_patientIDFocusLost
 
     private void patientIDMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_patientIDMouseReleased
-        //        username.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2), "Username", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 0, 12), new java.awt.Color(0, 0, 0)));
-        //        errorUsername.setText("");
+        
     }//GEN-LAST:event_patientIDMouseReleased
 
     private void patientIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_patientIDActionPerformed
@@ -514,78 +535,6 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_appointmentIDActionPerformed
 
-    private void genderFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_genderFocusLost
-        // TODO add your handling code here:
-    }//GEN-LAST:event_genderFocusLost
-
-    private void genderMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_genderMouseReleased
-        // TODO add your handling code here:
-    }//GEN-LAST:event_genderMouseReleased
-
-    private void genderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_genderActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_genderActionPerformed
-
-    private void timeFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_timeFocusLost
-        // TODO add your handling code here:
-    }//GEN-LAST:event_timeFocusLost
-
-    private void timeMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_timeMouseReleased
-        // TODO add your handling code here:
-    }//GEN-LAST:event_timeMouseReleased
-
-    private void timeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timeActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_timeActionPerformed
-
-    private void dateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_dateFocusLost
-        // TODO add your handling code here:
-    }//GEN-LAST:event_dateFocusLost
-
-    private void dateMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dateMouseReleased
-        // TODO add your handling code here:
-    }//GEN-LAST:event_dateMouseReleased
-
-    private void dateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dateActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_dateActionPerformed
-
-    private void categoryFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_categoryFocusLost
-
-    }//GEN-LAST:event_categoryFocusLost
-
-    private void dentistFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_dentistFocusLost
-        // TODO add your handling code here:
-    }//GEN-LAST:event_dentistFocusLost
-
-    private void time3FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_time3FocusLost
-        // TODO add your handling code here:
-    }//GEN-LAST:event_time3FocusLost
-
-    private void time3MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_time3MouseReleased
-        // TODO add your handling code here:
-    }//GEN-LAST:event_time3MouseReleased
-
-    private void time3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_time3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_time3ActionPerformed
-
-    private void notesFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_notesFocusLost
-        // TODO add your handling code here:
-    }//GEN-LAST:event_notesFocusLost
-
-    private void notesMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_notesMouseReleased
-        // TODO add your handling code here:
-    }//GEN-LAST:event_notesMouseReleased
-
-    private void notesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_notesActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_notesActionPerformed
-
-    private void servicesFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_servicesFocusLost
-        // TODO add your handling code here:
-    }//GEN-LAST:event_servicesFocusLost
-
     private void backMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_backMouseClicked
         Admin_Appointment app = new Admin_Appointment();
         app.setVisible(true);
@@ -596,22 +545,102 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
 
     }//GEN-LAST:event_backMouseEntered
 
-    private void phoneFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_phoneFocusLost
-        // TODO add your handling code here:
-    }//GEN-LAST:event_phoneFocusLost
+    private void generateSlipMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_generateSlipMouseClicked
+//        int appointmentId = Session.getInstance().getAppointmentId();
+//
+//        if (appointmentId != -1) {
+//           try {
+//               Connection conn = new ConnectDB().getConnection();
+//
+//               String statusQuery = "SELECT a_status FROM appointments WHERE appointment_id = ?";
+//               PreparedStatement statusStmt = conn.prepareStatement(statusQuery);
+//               statusStmt.setInt(1, appointmentId);
+//               ResultSet rs = statusStmt.executeQuery();
+//
+//               if (rs.next()) {
+//                   String status = rs.getString("a_status");
+//
+//                   if ("Confirmed".equalsIgnoreCase(status)) {
+//                       new AppointmentSlip(appointmentId).setVisible(true); // ✅ Correct
+//                   } else {
+//                       JOptionPane.showMessageDialog(
+//                           this,
+//                           "<html><b>Cannot generate appointment slip.</b><br>Status is currently <b>" + status + "</b>.</html>",
+//                           "❌ Invalid Status",
+//                           JOptionPane.WARNING_MESSAGE
+//                       );
+//                   }
+//               } else {
+//                   JOptionPane.showMessageDialog(
+//                       this,
+//                       "<html><b>Appointment not found.</b></html>",
+//                       "❌ Error",
+//                       JOptionPane.ERROR_MESSAGE
+//                   );
+//               }
+//
+//                rs.close();
+//                statusStmt.close();
+//                conn.close();
+//
+//            } catch (SQLException e) {
+//                JOptionPane.showMessageDialog(
+//                    this,
+//                    "<html><b>Database error:</b><br>" + e.getMessage() + "</html>",
+//                    "❗ SQL Error",
+//                    JOptionPane.ERROR_MESSAGE
+//                );
+//                e.printStackTrace();
+//            }
+//        } else {
+//            JOptionPane.showMessageDialog(
+//                this,
+//                "<html><b>Appointment ID not found.</b><br>Unable to generate appointment slip.</html>",
+//                "❌ Missing Data",
+//                JOptionPane.WARNING_MESSAGE
+//            );
+//        }
 
-    private void phoneMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_phoneMouseReleased
-        // TODO add your handling code here:
-    }//GEN-LAST:event_phoneMouseReleased
+        int appointmentId = Session.getInstance().getAppointmentId();
 
-    private void phoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_phoneActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_phoneActionPerformed
+           if (appointmentId != -1) {
+               // Check the appointment status (optional)
+               try (Connection conn = new ConnectDB().getConnection()) {
+                   String statusQuery = "SELECT a_status FROM appointments WHERE appointment_id = ?";
+                   try (PreparedStatement statusStmt = conn.prepareStatement(statusQuery)) {
+                       statusStmt.setInt(1, appointmentId);
+                       try (ResultSet rs = statusStmt.executeQuery()) {
+                           if (rs.next()) {
+                               String status = rs.getString("a_status");
 
-    private void printPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_printPanelMouseClicked
-        Appointment app = new Appointment();
-        app.setVisible(true);
-    }//GEN-LAST:event_printPanelMouseClicked
+                               // Only allow slip generation for confirmed appointments
+                               if ("Confirmed".equalsIgnoreCase(status)) {
+                                    GenerateSlip slipFrame = new GenerateSlip(appointmentId);
+                                    slipFrame.setVisible(true);
+                               } else {
+                                   // Using HTML formatting in JOptionPane
+                                   JOptionPane.showMessageDialog(this,
+                                       "<html><b>Cannot generate appointment slip.</b><br>" +
+                                       "The appointment status is currently: <span style='color:red;'>" + status + "</span></html>",
+                                       "❌ Invalid Status", JOptionPane.WARNING_MESSAGE);
+                               }
+                           }
+                       }
+                   }
+
+               } catch (SQLException e) {
+                   // Using HTML formatting in JOptionPane for errors
+                   JOptionPane.showMessageDialog(this,
+                       "<html><b>Error checking appointment status:</b><br>" + e.getMessage() + "</html>",
+                       "❌ Error", JOptionPane.ERROR_MESSAGE);
+               }
+           } else {
+               // Using HTML formatting for missing appointment ID
+               JOptionPane.showMessageDialog(this,
+                   "<html><b>Appointment ID not found.</b><br>Unable to generate appointment slip.</html>",
+                   "❌ Missing Data", JOptionPane.WARNING_MESSAGE);
+           }
+    }//GEN-LAST:event_generateSlipMouseClicked
 
     private void approvePanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_approvePanelMouseEntered
         approvePanel.setBackground(Hover);
@@ -637,13 +666,288 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         updatePanel.setBackground(Nav);
     }//GEN-LAST:event_updatePanelMouseExited
 
-    private void printPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_printPanelMouseEntered
-        printPanel.setBackground(Hover);
-    }//GEN-LAST:event_printPanelMouseEntered
+    private void generateSlipMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_generateSlipMouseEntered
+        generateSlip.setBackground(Hover);
+    }//GEN-LAST:event_generateSlipMouseEntered
 
-    private void printPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_printPanelMouseExited
-        printPanel.setBackground(Nav);
-    }//GEN-LAST:event_printPanelMouseExited
+    private void generateSlipMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_generateSlipMouseExited
+        generateSlip.setBackground(Nav);
+    }//GEN-LAST:event_generateSlipMouseExited
+
+    private void genderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_genderActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_genderActionPerformed
+
+    private void genderMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_genderMouseReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_genderMouseReleased
+
+    private void genderFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_genderFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_genderFocusLost
+
+    private void timeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_timeActionPerformed
+
+    private void timeMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_timeMouseReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_timeMouseReleased
+
+    private void timeFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_timeFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_timeFocusLost
+
+    private void dentistActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dentistActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_dentistActionPerformed
+
+    private void dentistMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dentistMouseReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_dentistMouseReleased
+
+    private void dentistFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_dentistFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_dentistFocusLost
+
+    private void dateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_dateFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_dateFocusLost
+
+    private void dateMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dateMouseReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_dateMouseReleased
+
+    private void dateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dateActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_dateActionPerformed
+
+    private void phoneFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_phoneFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_phoneFocusLost
+
+    private void phoneMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_phoneMouseReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_phoneMouseReleased
+
+    private void phoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_phoneActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_phoneActionPerformed
+
+    private void approvePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_approvePanelMouseClicked
+        int appointmentId = Session.getInstance().getAppointmentId();
+
+        if (appointmentId != -1) {
+            int confirmation = JOptionPane.showConfirmDialog(
+                this,
+                "<html><b>Are you sure you want to approve this appointment?</b><br>Status will be updated to <b>Confirmed</b>.</html>",
+                "✅ Confirm Approval",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+            );
+
+            if (confirmation == JOptionPane.YES_OPTION) {
+                try {
+                    Connection conn = new ConnectDB().getConnection();
+
+                    // Check current appointment status first
+                    String checkStatusQuery = "SELECT a_status FROM appointments WHERE appointment_id = ?";
+                    PreparedStatement checkStmt = conn.prepareStatement(checkStatusQuery);
+                    checkStmt.setInt(1, appointmentId);
+                    ResultSet statusRs = checkStmt.executeQuery();
+
+                    if (statusRs.next()) {
+                        String currentStatus = statusRs.getString("a_status");
+
+                        if (!"Pending".equalsIgnoreCase(currentStatus)) {
+                            JOptionPane.showMessageDialog(
+                                this,
+                                "<html><b>Cannot approve this appointment.</b><br>Status is already <b>" + currentStatus + "</b>.</html>",
+                                "❌ Approval Blocked",
+                                JOptionPane.WARNING_MESSAGE
+                            );
+                            statusRs.close();
+                            checkStmt.close();
+                            conn.close();
+                            return;
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "<html><b>Appointment not found.</b></html>",
+                            "❌ Error",
+                            JOptionPane.ERROR_MESSAGE
+                        );
+                        statusRs.close();
+                        checkStmt.close();
+                        conn.close();
+                        return;
+                    }
+
+                    statusRs.close();
+                    checkStmt.close();
+
+                    // Proceed with update
+                    String updateQuery = "UPDATE appointments SET a_status = 'Confirmed' WHERE appointment_id = ?";
+                    PreparedStatement pstmt = conn.prepareStatement(updateQuery);
+                    pstmt.setInt(1, appointmentId);
+
+                    int rowsUpdated = pstmt.executeUpdate();
+                    pstmt.close();
+
+                    if (rowsUpdated > 0) {
+                        // Get appointment and patient info
+                        String infoQuery = "SELECT u.u_email, u.u_fullname, a.a_date, a.a_time " +
+                                           "FROM appointments a " +
+                                           "JOIN users u ON a.patient_id = u.user_id " +
+                                           "WHERE a.appointment_id = ?";
+                        PreparedStatement infoStmt = conn.prepareStatement(infoQuery);
+                        infoStmt.setInt(1, appointmentId);
+                        ResultSet rs = infoStmt.executeQuery();
+
+                        if (rs.next()) {
+                            String toEmail = rs.getString("u_email");
+                            String patientName = rs.getString("u_fullname");
+                            String appointmentDate = rs.getString("a_date");
+                            String appointmentTime = rs.getString("a_time");
+
+                            try {
+                                EmailSender.sendAppointmentApproval(toEmail, patientName, appointmentDate, appointmentTime);
+                            } catch (MessagingException e) {
+                                e.printStackTrace();
+                                JOptionPane.showMessageDialog(
+                                    this,
+                                    "<html><b>Appointment approved, but failed to send email:</b><br>" + e.getMessage() + "</html>",
+                                    "✉️ Email Error",
+                                    JOptionPane.WARNING_MESSAGE
+                                );
+                            }
+                        }
+
+                        rs.close();
+                        infoStmt.close();
+
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "<html><b>Appointment approved successfully!</b><br>Status is now <b>Confirmed</b>.</html>",
+                            "✅ Approved",
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
+                    } else {
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "<html><b>Approval failed.</b><br>Unable to update appointment.</html>",
+                            "Update Failed",
+                            JOptionPane.WARNING_MESSAGE
+                        );
+                    }
+
+                    conn.close();
+
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "<html><b>Database error:</b><br>" + e.getMessage() + "</html>",
+                        "❗ SQL Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>Appointment ID not found.</b><br>Unable to proceed with approval.</html>",
+                "Missing ID",
+                JOptionPane.WARNING_MESSAGE
+            );
+        }
+    }//GEN-LAST:event_approvePanelMouseClicked
+
+    private void declinePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_declinePanelMouseClicked
+        int appointmentId = Session.getInstance().getAppointmentId();
+
+        if (appointmentId != -1) {
+            int confirmation = JOptionPane.showConfirmDialog(
+                this,
+                "<html><b>Are you sure you want to decline this appointment?</b><br>You will be asked to provide a reason.</html>",
+                "Confirm Decline",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+            );
+
+            if (confirmation == JOptionPane.YES_OPTION) {
+                try {
+                    Connection conn = new ConnectDB().getConnection();
+
+                    // 🔍 First check current status
+                    String statusQuery = "SELECT a_status FROM appointments WHERE appointment_id = ?";
+                    PreparedStatement statusStmt = conn.prepareStatement(statusQuery);
+                    statusStmt.setInt(1, appointmentId);
+                    ResultSet statusRs = statusStmt.executeQuery();
+
+                    if (statusRs.next()) {
+                        String currentStatus = statusRs.getString("a_status");
+
+                        if ("Cancelled".equalsIgnoreCase(currentStatus) || "Completed".equalsIgnoreCase(currentStatus)) {
+                            JOptionPane.showMessageDialog(
+                                this,
+                                "<html><b>Cannot decline this appointment.</b><br>Status is already <b>" + currentStatus + "</b>.</html>",
+                                "❌ Decline Blocked",
+                                JOptionPane.WARNING_MESSAGE
+                            );
+                            statusRs.close();
+                            statusStmt.close();
+                            conn.close();
+                            return;
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(this, "<html><b>Appointment not found.</b></html>", "❌ Error", JOptionPane.ERROR_MESSAGE);
+                        statusRs.close();
+                        statusStmt.close();
+                        conn.close();
+                        return;
+                    }
+
+                    statusRs.close();
+                    statusStmt.close();
+
+                    // 🔄 Update appointment status to "Cancelled"
+                    String updateQuery = "UPDATE appointments SET a_status = ? WHERE appointment_id = ?";
+                    PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
+                    updateStmt.setString(1, "Cancelled");
+                    updateStmt.setInt(2, appointmentId);
+                    updateStmt.executeUpdate();
+                    updateStmt.close();
+
+                    // 👤 Fetch patient name
+                    String fetchQuery = "SELECT p.p_fname, p.p_lname FROM appointments a JOIN patients p ON a.patient_id = p.patient_id WHERE a.appointment_id = ?";
+                    PreparedStatement fetchStmt = conn.prepareStatement(fetchQuery);
+                    fetchStmt.setInt(1, appointmentId);
+                    ResultSet rs = fetchStmt.executeQuery();
+
+                    if (rs.next()) {
+                        String fullName = rs.getString("p_fname") + " " + rs.getString("p_lname");
+
+                        // Pass data to Decline_Reason panel
+                        Decline_Reason declineReasonPanel = new Decline_Reason(String.valueOf(appointmentId), fullName);
+                        declineReasonPanel.setVisible(true);
+                        this.setVisible(false);
+                    }
+
+                    rs.close();
+                    fetchStmt.close();
+                    conn.close();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "<html><b>Error:</b><br>" + e.getMessage() + "</html>", "❗ Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "<html><b>Appointment ID not found.</b></html>", "⚠️ Missing ID", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_declinePanelMouseClicked
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -687,7 +991,6 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
     private javax.swing.JLabel appointment13;
     private javax.swing.JLabel appointment2;
     private javax.swing.JLabel appointment3;
-    private javax.swing.JLabel appointment4;
     private javax.swing.JLabel appointment5;
     private javax.swing.JLabel appointment6;
     private javax.swing.JLabel appointment7;
@@ -697,12 +1000,12 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
     private javax.swing.JPanel appointment_header;
     private javax.swing.JPanel approvePanel;
     private javax.swing.JLabel back;
-    private javax.swing.JComboBox<String> category;
     private javax.swing.JTextField date;
     private javax.swing.JPanel declinePanel;
-    private javax.swing.JComboBox<String> dentist;
+    private javax.swing.JTextField dentist;
     private javax.swing.JTextField fullName;
     private javax.swing.JTextField gender;
+    private javax.swing.JPanel generateSlip;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
@@ -711,13 +1014,13 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel9;
-    private javax.swing.JTextField notes;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextArea notes;
     private javax.swing.JTextField patientID;
     private javax.swing.JTextField phone;
-    private javax.swing.JPanel printPanel;
-    private javax.swing.JComboBox<String> services;
+    private javax.swing.JTextArea services;
     private javax.swing.JTextField time;
-    private javax.swing.JTextField time3;
     private javax.swing.JPanel updatePanel;
     // End of variables declaration//GEN-END:variables
 }

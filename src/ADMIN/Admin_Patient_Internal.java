@@ -89,7 +89,13 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
                         int patientId = Integer.parseInt(patients.getValueAt(selectedRow, 0).toString());
                         new Admin_Update_Patient(patientId).setVisible(true);
                     } else {
-                        JOptionPane.showMessageDialog(null, "Please select a patient.");
+                         // Modify the message dialog with HTML formatting
+                        JOptionPane.showMessageDialog(
+                            null,
+                            "<html><b>No row selected.</b><br>Please select a patient before double-clicking.</html>",
+                            "⚠ Selection Required",
+                            JOptionPane.WARNING_MESSAGE
+                        );
                     }
                 }
             }
@@ -213,7 +219,12 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
             conn.close();
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error searching patients: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>Error searching patients:</b><br>" + e.getMessage() + "<br><br>Please try again later or contact support if the issue persists.</html>",
+                "❌ Error",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }
     
@@ -462,8 +473,8 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
         if (selectedPatientId != -1) {
             int confirmation = JOptionPane.showConfirmDialog(
                 this,
-                "Are you sure you want to archive this patient's information?",
-                "Confirm Archive",
+                "<html><b>Are you sure you want to archive this patient's information?</b><br><br>This action is irreversible.</html>",
+                "⚠ Confirm Archive",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE
             );
@@ -495,9 +506,19 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
                         Session sess = Session.getInstance();
                         sess.logEvent("ARCHIVED PATIENT", "Admin archived patient: " + patientName + " (ID: " + selectedPatientId + ")");
 
-                        JOptionPane.showMessageDialog(this, "✅ Patient archived successfully!");
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "<html><b>Patient archived successfully!</b><br><br>The patient's information has been archived.</html>",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
                     } else {
-                        JOptionPane.showMessageDialog(this, "⚠️ Failed to archive patient.");
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "<html><b>Failed to archive patient.</b><br><br>There was an issue with archiving the patient's information.</html>",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                        );
                     }
 
                     rs.close();
@@ -506,11 +527,21 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
                     conn.close();
 
                 } catch (SQLException e) {
-                    JOptionPane.showMessageDialog(this, "❌ Database error: " + e.getMessage());
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "<html><b>Database error:</b> " + e.getMessage() + "<br><br>Please check your database connection and try again.</html>",
+                        "Database Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
                 }
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Please select a patient to archive.");
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>Please select a patient to archive.</b><br><br>You must choose a patient from the list before attempting to archive their information.</html>",
+                "Selection Required",
+                JOptionPane.WARNING_MESSAGE
+            );
         }
     }//GEN-LAST:event_archivePanelMouseClicked
 
@@ -542,15 +573,24 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
        int selectedRow = patients.getSelectedRow(); // Get selected row from the table
 
         if (selectedRow != -1) {
-            int patientId = (int) patients.getValueAt(selectedRow, 0); // Assuming patient ID is in column 0
+            int patientId = (int) patients.getValueAt(selectedRow, 0); // Assume ID is in column 0
 
-            // Optionally load patient data into session
-            Session.getInstance().setPatientId(patientId);
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "<html><b>Would you like to book an appointment for this patient?</b></html>",
+                "📅 Confirm Booking",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+            );
 
-            Admin_Appointment_Add ad = new Admin_Appointment_Add();
-            ad.setVisible(true);
-            this.dispose();
+            if (confirm == JOptionPane.YES_OPTION) {
+                Session.getInstance().setPatientId(patientId); // Optional, if you're using session data
+                Admin_Appointment_Add appointmentForm = new Admin_Appointment_Add();
+                appointmentForm.setPatientId(patientId); // Set the patient ID field
+                appointmentForm.setVisible(true);        // Show the form
+            }
         } else {
+            // Show warning if no patient is selected
             JOptionPane.showMessageDialog(
                 this,
                 "<html><b>Please select a patient first before booking an appointment.</b></html>",

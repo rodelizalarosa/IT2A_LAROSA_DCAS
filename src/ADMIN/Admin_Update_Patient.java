@@ -444,7 +444,12 @@ public class Admin_Update_Patient extends javax.swing.JFrame {
          // Step 1: Validate all fields
         if (firstName.getText().trim().isEmpty() || lastName.getText().trim().isEmpty() ||
             phone.getText().trim().isEmpty() || birth.getDate() == null) {
-            JOptionPane.showMessageDialog(this, "Please fill all fields before proceeding.");
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>⚠ Please complete all required fields.</b><br>First name, Last name, Phone, and Birthdate are mandatory.</html>",
+                "Incomplete Form",
+                JOptionPane.WARNING_MESSAGE
+            );
             return;
         }
 
@@ -472,12 +477,22 @@ public class Admin_Update_Patient extends javax.swing.JFrame {
                 // Add this logging section
                 Session sess = Session.getInstance();
                 sess.logEvent("UPDATED PATIENT DETAILS", "Admin updated patient details.");
+                
+                JOptionPane.showMessageDialog(
+                    this,
+                    "<html><b>✅ Patient updated successfully!</b></html>",
+                    "Update Successful",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
 
-                // ✅ Show success message
-                JOptionPane.showMessageDialog(this, "Patient updated successfully!");
-            } else {
-                JOptionPane.showMessageDialog(this, "Patient not found or no changes made.");
-            }
+                } else {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "<html><b>⚠ Patient not found or no changes made.</b></html>",
+                        "No Update",
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                }
             updateStmt.close();
             conn.close();
 
@@ -485,7 +500,12 @@ public class Admin_Update_Patient extends javax.swing.JFrame {
 
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "❌ Error: " + e.getMessage());
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>❌ An unexpected error occurred:</b><br>" + e.getMessage() + "</html>",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }//GEN-LAST:event_savePatientMouseClicked
 
@@ -535,9 +555,6 @@ public class Admin_Update_Patient extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_patientIDActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

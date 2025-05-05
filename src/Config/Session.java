@@ -15,6 +15,8 @@ public class Session {
     private JDesktopPane mainDesktop;
     private JDesktopPane parentDesktop;
     private JDesktopPane desktopSettings;
+    
+    private String verificationPin;
 
     // Patient session fields (for appointment pre-fill)
     private int patientId = -1;
@@ -23,9 +25,22 @@ public class Session {
     private String patientGender;
     private String patientDob;
     private String patientContact;
+    private String patientEmail;
+
     
     private String staffFirstName;
     private String staffLastName;
+    
+    // APPOINTMENT DETAILS FIELDS
+    private int appointmentId = -1;
+    private String appointmentDate;
+    private String appointmentTime;
+    private String appointmentNotes;
+    private String appointmentStatus;
+
+    private String dentistFullName; // e.g. Dr. Juan Dela Cruz
+    private String serviceCategory;
+    private int serviceId = -1;
 
     private Session() {}
 
@@ -54,6 +69,14 @@ public class Session {
 
     public String getEmail() {
         return email;
+    }
+    
+    public void setVerificationPin(String pin) {
+        this.verificationPin = pin;
+    }
+
+    public String getVerificationPin() {
+        return verificationPin;
     }
 
     public void setDesktopPane(JDesktopPane desktopPane) {
@@ -111,6 +134,14 @@ public class Session {
     public String getPatientLastName() {
         return patientLastName;
     }
+    
+    public String getPatientFullName() {
+        if (patientFirstName != null && patientLastName != null) {
+            return patientFirstName + " " + patientLastName;
+        }
+        return "";
+    }
+
 
     public String getPatientGender() {
         return patientGender;
@@ -123,6 +154,15 @@ public class Session {
     public String getPatientContact() {
         return patientContact;
     }
+    
+    public void setPatientEmail(String email) {
+        this.patientEmail = email;
+    }
+
+    public String getPatientEmail() {
+        return patientEmail;
+    }
+
 
     public void clearPatient() {
         this.patientId = -1;
@@ -131,6 +171,7 @@ public class Session {
         this.patientGender = null;
         this.patientDob = null;
         this.patientContact = null;
+        this.patientEmail = null;
     }
     
     // Setters
@@ -148,6 +189,70 @@ public class Session {
         return staffLastName;
     }
 
+    // APPOINTMENT SETTERS
+    public void setAppointmentDetails(int appointmentId, String date, String time, String notes, String status) {
+        this.appointmentId = appointmentId;
+        this.appointmentDate = date;
+        this.appointmentTime = time;
+        this.appointmentNotes = notes;
+        this.appointmentStatus = status;
+    }
+    
+    public void setDentistFullName(String fullName) {
+        this.dentistFullName = fullName;
+    }
+
+    public void setServiceDetails(int serviceId, String category) {
+        this.serviceId = serviceId;
+        this.serviceCategory = category;
+    }
+
+    // APPOINTMENT GETTERS
+    public int getAppointmentId() {
+        return appointmentId;
+    }
+
+    public String getAppointmentDate() {
+        return appointmentDate;
+    }
+
+    public String getAppointmentTime() {
+        return appointmentTime;
+    }
+
+    public String getAppointmentNotes() {
+        return appointmentNotes;
+    }
+
+    public String getAppointmentStatus() {
+        return appointmentStatus;
+    }
+
+    public String getDentistFullName() {
+        return dentistFullName;
+    }
+
+    public String getServiceCategory() {
+        return serviceCategory;
+    }
+
+    public int getServiceId() {
+        return serviceId;
+    }
+
+    // Clear appointment info if needed
+    public void clearAppointmentDetails() {
+        this.appointmentId = -1;
+        this.appointmentDate = null;
+        this.appointmentTime = null;
+        this.appointmentNotes = null;
+        this.appointmentStatus = null;
+        this.dentistFullName = null;
+        this.serviceCategory = null;
+        this.serviceId = -1;
+    }
+    
+    
     public void logEvent(String event, String description) {
         if (userId == 0) {
             System.out.println("⚠ No user logged in. Skipping log event.");
@@ -168,4 +273,15 @@ public class Session {
             System.err.println("❌ Error logging event: " + e.getMessage());
         }
     }
+    
+    private String serviceNameList;
+
+    public void setServiceNameList(String serviceNames) {
+        this.serviceNameList = serviceNames;
+    }
+
+    public String getServiceNameList() {
+        return serviceNameList;
+    }
+
 }

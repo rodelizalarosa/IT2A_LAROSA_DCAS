@@ -106,6 +106,7 @@ public class Register extends javax.swing.JFrame {
         StringBuilder errorMessage = new StringBuilder();
         boolean isValid = true;
 
+        // Validate password length and content
         if (password.isEmpty()) {
             errorMessage.append("Password cannot be empty.\n");
             isValid = false;
@@ -131,21 +132,36 @@ public class Register extends javax.swing.JFrame {
             isValid = false;
         }
 
+        // If validation fails, display error message
         if (!isValid) {
-        try {
-            ImageIcon icon = new ImageIcon(getClass().getResource("/imgs/error.png"));
-            if (icon == null) {
-                System.err.println("Error: Image not found at /imgs/error.png");
+            try {
+                // Load custom error icon
+                ImageIcon icon = new ImageIcon(getClass().getResource("/imgs/error.png"));
+                if (icon == null) {
+                    System.err.println("Error: Image not found at /imgs/error.png");
+                }
+
+                // Show error message in JOptionPane
+                JOptionPane.showMessageDialog(
+                    this, 
+                    "<html>" + errorMessage.toString().replace("\n", "<br>") + "</html>", 
+                    "Validation Error", 
+                    JOptionPane.ERROR_MESSAGE, 
+                    icon
+                );
+            } catch (Exception e) {
+                System.err.println("Error loading image: " + e.getMessage());
+                JOptionPane.showMessageDialog(
+                    this, 
+                    "<html>" + errorMessage.toString().replace("\n", "<br>") + "</html>", 
+                    "Validation Error", 
+                    JOptionPane.ERROR_MESSAGE
+                );
             }
-            JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE, icon);
-        } catch (Exception e) {
-            System.err.println("Error loading image: " + e.getMessage());
-            JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
         }
-        }
+
         return isValid;
- }
-    
+    }
     
     
     private String hashPassword(String password) {
@@ -159,7 +175,13 @@ public class Register extends javax.swing.JFrame {
             }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            JOptionPane.showMessageDialog(this, "Hashing error", "Error", JOptionPane.ERROR_MESSAGE);
+            // Enhanced JOptionPane error message
+            JOptionPane.showMessageDialog(
+                this, 
+                "<html><b>Error hashing the password:</b><br>" + e.getMessage() + "</html>", 
+                "Hashing Error", 
+                JOptionPane.ERROR_MESSAGE
+            );
             return null;
         }
     }
@@ -303,7 +325,7 @@ public class Register extends javax.swing.JFrame {
             }
         });
         reg.add(ConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 370, 260, 40));
-        reg.add(errorConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 410, 170, 20));
+        reg.add(errorConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 410, 230, 20));
 
         showCon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         showCon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/show.png"))); // NOI18N
@@ -447,7 +469,24 @@ public class Register extends javax.swing.JFrame {
     }//GEN-LAST:event_PasswordFocusLost
 
     private void ConfirmPassFocusLost(java.awt.event.FocusEvent evt) {                                      
-        // TODO add your handling code here:
+        String confirmPass = new String(ConfirmPass.getPassword());
+        String password = new String(Password.getPassword());
+
+        // Check if the Confirm Password field is empty
+        if (confirmPass.isEmpty()) {
+            errorConfirmPass.setForeground(Color.RED);
+            errorConfirmPass.setText("Confirm Password is required");
+        }
+        // Check if Confirm Password does not match the Password
+        else if (!confirmPass.equals(password)) {
+            errorConfirmPass.setForeground(Color.RED);
+            errorConfirmPass.setText("Passwords do not match");
+        } else {
+            errorConfirmPass.setForeground(Color.BLACK);
+            errorConfirmPass.setText("");
+        }
+
+        ConfirmPass.repaint(); 
     }       
 
     private void showConMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_showConMousePressed
@@ -482,13 +521,14 @@ public class Register extends javax.swing.JFrame {
         String emailText = Email.getText().trim();
         String selectedRole = Role.getSelectedItem().toString().trim();
         char[] passwordChars = Password.getPassword();
+        char[] confirmPasswordChars = ConfirmPass.getPassword(); // Capture confirm password
         StringBuilder errorMessage = new StringBuilder();
 
         if (isAllFieldsEmpty()) {
             errorMessage.append("Please fill out the registration form.\n");
         } else {
             if (Role.getSelectedIndex() == 0) {
-                errorMessage.append("Please select a type.\n");
+                errorMessage.append("Please select a role.\n");
             }
             if (emailText.isEmpty()) {
                 errorMessage.append("Email cannot be empty.\n");
@@ -503,16 +543,24 @@ public class Register extends javax.swing.JFrame {
                 errorMessage.append("Username is already taken.\n");
             }
             if (!validatePassword(Password)) {
-                return;
+                return; // If password validation fails, return early
+            }
+            if (!new String(passwordChars).equals(new String(confirmPasswordChars))) {
+                errorMessage.append("Passwords do not match.\n");
             }
         }
+
+        // Show errors if validation fails
         if (errorMessage.length() > 0) {
-            JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "<html><b>Validation Error:</b><br>" + errorMessage.toString() + "</html>", 
+                                          "❌ Validation Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
         String passwordText = new String(passwordChars);
         String hashedPassword = hashPassword(passwordText);
         String sql = "INSERT INTO dcas_sys.users (u_username, u_email, u_role, u_status, u_password, u_image) VALUES (?, ?, ?, ?, ?, ?)";
+
         try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
             pst.setString(1, usernameText);
             pst.setString(2, emailText);
@@ -520,19 +568,28 @@ public class Register extends javax.swing.JFrame {
             pst.setString(4, "Pending");
             pst.setString(5, hashedPassword);
             pst.setString(6, destination);
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Registration Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
+            pst.executeUpdate();
+
+            // Success message with HTML for better styling
+            JOptionPane.showMessageDialog(this, "<html><b>Registration Successful!</b><br>You can now log in with your credentials once approved.</html>",
+                                          "✅ Success", JOptionPane.INFORMATION_MESSAGE);
+
+            // Clear fields
             userName.setText("");
             Email.setText("");
             Password.setText("");
+            ConfirmPass.setText(""); // Clear the confirm password field
 
+            // Redirect to login page
             LogIn loginPage = new LogIn();
             loginPage.setVisible(true);
             this.dispose();
 
         } catch (SQLException ex) {
-            Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, ex);
+            // Handle database errors
+            JOptionPane.showMessageDialog(this, "<html><b>Database Error:</b><br>" + ex.getMessage() + "</html>", 
+                                          "❗ SQL Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_create_buttonMouseClicked
 
@@ -543,9 +600,6 @@ public class Register extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_SignInMouseClicked
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

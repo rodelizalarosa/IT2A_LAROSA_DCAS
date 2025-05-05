@@ -1,6 +1,7 @@
 
 package ADMIN;
 
+import java.awt.Color;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 
@@ -14,6 +15,9 @@ public class Admin_Security extends javax.swing.JInternalFrame {
         BasicInternalFrameUI bi = (BasicInternalFrameUI)this.getUI();
         bi.setNorthPane(null);
     }
+    
+    Color hoverColor = new Color (204,204,204);
+    Color navColor = new Color (255, 255, 255);
 
 
     @SuppressWarnings("unchecked")
@@ -24,16 +28,13 @@ public class Admin_Security extends javax.swing.JInternalFrame {
         security_header = new javax.swing.JPanel();
         account1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        jPanel3 = new javax.swing.JPanel();
+        secure = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
         account = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        account2 = new javax.swing.JLabel();
-        jPanel5 = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        account3 = new javax.swing.JLabel();
+        account2 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
 
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -55,77 +56,82 @@ public class Admin_Security extends javax.swing.JInternalFrame {
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        secure.setBackground(new java.awt.Color(255, 255, 255));
+        secure.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                secureMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                secureMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                secureMouseExited(evt);
+            }
+        });
+        secure.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(153, 153, 153));
-        jLabel1.setText("to reset your password securely.");
-        jPanel3.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 70, 280, 40));
-
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/sms.png"))); // NOI18N
-        jPanel3.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 30, 60, 50));
+        jLabel1.setText("and enter your security code to reset your password.");
+        secure.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 70, 320, 30));
 
         account.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         account.setForeground(new java.awt.Color(55, 162, 153));
-        account.setText("SMS Code Protection");
-        jPanel3.add(account, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 20, 310, 50));
+        account.setText("Secure Account");
+        secure.add(account, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 10, 310, 50));
 
         jLabel5.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(153, 153, 153));
-        jLabel5.setText("Verify your identity with a code sent to your phone");
-        jPanel3.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 50, 280, 40));
+        jLabel5.setText("For added protection, you'll need to confirm your email address");
+        secure.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 40, 350, 40));
 
-        jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 190, 440, 110));
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock.png"))); // NOI18N
+        secure.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 60, 60));
+
+        jPanel2.add(secure, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 270, 460, 110));
 
         account2.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         account2.setForeground(new java.awt.Color(55, 162, 153));
         account2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         account2.setText("Account Security");
-        jPanel2.add(account2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 460, 50));
+        jPanel2.add(account2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 480, 50));
 
-        jPanel5.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/verify.png"))); // NOI18N
+        jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 70, 250, 190));
 
-        jLabel3.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        jLabel3.setForeground(new java.awt.Color(153, 153, 153));
-        jLabel3.setText("Manage your account's security.");
-        jPanel5.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 50, 250, 40));
-
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock.png"))); // NOI18N
-        jPanel5.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 30, 60, 50));
-
-        account3.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
-        account3.setForeground(new java.awt.Color(55, 162, 153));
-        account3.setText("Secure Account");
-        jPanel5.add(account3, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 20, 310, 50));
-
-        jPanel2.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 440, 110));
-
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 130, 460, 340));
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 100, 480, 400));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void secureMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_secureMouseClicked
+        
+    }//GEN-LAST:event_secureMouseClicked
+
+    private void secureMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_secureMouseEntered
+        secure.setBackground(hoverColor);
+    }//GEN-LAST:event_secureMouseEntered
+
+    private void secureMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_secureMouseExited
+        secure.setBackground(navColor);
+    }//GEN-LAST:event_secureMouseExited
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel account;
     private javax.swing.JLabel account1;
     private javax.swing.JLabel account2;
-    private javax.swing.JLabel account3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel secure;
     private javax.swing.JPanel security_header;
     // End of variables declaration//GEN-END:variables
 }

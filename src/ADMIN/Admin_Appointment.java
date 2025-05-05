@@ -2,10 +2,13 @@
 package ADMIN;
 
 import Config.ConnectDB;
+import Config.Session;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -49,12 +52,100 @@ public class Admin_Appointment extends javax.swing.JInternalFrame {
                 searchAppointment();
             }
         });  
+        
+        Appointment.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && Appointment.getSelectedRow() != -1) {
+                    int row = Appointment.getSelectedRow();
+                    int appointmentID = (int) Appointment.getValueAt(row, 0);
+                    openViewAppointmentFrame(appointmentID);
+                }
+            }
+        });
+
     }
     
-    private void loadAppointments(){ 
+    private void openViewAppointmentFrame(int appointmentID) {
+        try {
+            Connection conn = new ConnectDB().getConnection();
+
+            String query = "SELECT a.appointment_id, a.patient_id, a.pref_time, a.pref_date, a.notes, " +
+                "a.dentist_id, p.p_fname, p.p_lname, p.p_gender, p.p_contactNumber, " +
+                "s.service_name, d.d_fname, d.d_lname, a.a_status " +
+                "FROM appointments a " +
+                "JOIN patients p ON a.patient_id = p.patient_id " +
+                "JOIN treatment_services ts ON ts.appointment_id = a.appointment_id " +
+                "JOIN services s ON ts.service_id = s.service_id " +
+                "JOIN dentist d ON a.dentist_id = d.dentist_id " +
+                "WHERE a.appointment_id = ?";
+
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, appointmentID);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Session session = Session.getInstance();
+
+                // Store PATIENT info
+                session.setPatient(
+                    rs.getInt("patient_id"),
+                    rs.getString("p_fname"),
+                    rs.getString("p_lname"),
+                    rs.getString("p_gender"),
+                    "", // DOB not retrieved
+                    rs.getString("p_contactNumber")
+                );
+
+                // Store APPOINTMENT info
+                session.setAppointmentDetails(
+                    rs.getInt("appointment_id"),
+                    rs.getString("pref_date"),
+                    rs.getString("pref_time"),
+                    rs.getString("notes"),
+                    rs.getString("a_status")
+                );
+
+                // Store Dentist name
+                session.setDentistFullName(rs.getString("d_fname") + " " + rs.getString("d_lname"));
+
+                StringBuilder serviceNames = new StringBuilder();
+                serviceNames.append("• ").append(rs.getString("service_name")).append("\n");
+                while (rs.next()) {
+                    serviceNames.append("• ").append(rs.getString("service_name")).append("\n");
+                }
+                session.setServiceNameList(serviceNames.toString());
+
+                // Store the HTML formatted services list
+                session.setServiceNameList(serviceNames.toString());
+
+                // Open the view
+                Admin_View_Appointment view = new Admin_View_Appointment();
+                view.setVisible(true);
+            } else {
+                System.out.println("No appointment found with ID: " + appointmentID);
+            }
+
+            rs.close();
+            stmt.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+}
+
+  
+
+    private void loadAppointments() {
         ConnectDB connect = new ConnectDB();
 
-        DefaultTableModel model = new DefaultTableModel();
+        DefaultTableModel model = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make table non-editable
+            }
+        };
+
         model.addColumn("Appointment ID");
         model.addColumn("Patient ID");
         model.addColumn("Dentist ID");
@@ -70,15 +161,16 @@ public class Admin_Appointment extends javax.swing.JInternalFrame {
                 return;
             }
 
-            String query = "SELECT appointment_id, patient_id, dentist_id, pref_date, pref_time, notes, a_status FROM appointments"; // Corrected query
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
+            // Use PreparedStatement even if no parameters for consistency
+            String query = "SELECT appointment_id, patient_id, dentist_id, pref_date, pref_time, notes, a_status FROM appointments";
+            PreparedStatement stmt = conn.prepareStatement(query); // Changed from Statement to PreparedStatement
+            ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 model.addRow(new Object[]{
                     rs.getInt("appointment_id"),
                     rs.getInt("patient_id"),
-                    rs.getString("dentist_id"),
+                    rs.getInt("dentist_id"),
                     rs.getString("pref_date"),
                     rs.getString("pref_time"),
                     rs.getString("notes"),
@@ -98,6 +190,7 @@ public class Admin_Appointment extends javax.swing.JInternalFrame {
             ex.printStackTrace();
         }
     }
+
     
     private void searchAppointment() {
         String keyword = searchAppointment.getText().trim(); // JTextField for live search
@@ -106,30 +199,29 @@ public class Admin_Appointment extends javax.swing.JInternalFrame {
             ConnectDB connect = new ConnectDB();
             Connection conn = connect.getConnection();
 
-            // Build the SQL query
+            // Base query
             StringBuilder sql = new StringBuilder("SELECT appointment_id, patient_id, dentist_id, pref_date, pref_time, notes, a_status FROM appointments");
 
-            // Add search criteria if keyword is not empty
+            // Append WHERE clause if keyword exists
             if (!keyword.isEmpty()) {
                 sql.append(" WHERE pref_date LIKE ? OR pref_time LIKE ? OR notes LIKE ?");
             }
 
             PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 
-            // Set parameters for the query
             if (!keyword.isEmpty()) {
-                pstmt.setString(1, "%" + keyword + "%");
-                pstmt.setString(2, "%" + keyword + "%");
-                pstmt.setString(3, "%" + keyword + "%");
+                for (int i = 1; i <= 3; i++) {
+                    pstmt.setString(i, "%" + keyword + "%");
+                }
             }
 
             ResultSet rs = pstmt.executeQuery();
 
-            // Get the table model and clear previous rows
-            DefaultTableModel model = (DefaultTableModel) Appointment.getModel(); // your JTable for appointments
-            model.setRowCount(0); // clear old data
+            // Clear old data in table
+            DefaultTableModel model = (DefaultTableModel) Appointment.getModel();
+            model.setRowCount(0);
 
-            // Process result set
+            // Populate table with result set
             while (rs.next()) {
                 model.addRow(new Object[]{
                     rs.getInt("appointment_id"),
@@ -142,14 +234,21 @@ public class Admin_Appointment extends javax.swing.JInternalFrame {
                 });
             }
 
+            // Close resources
             rs.close();
             pstmt.close();
             conn.close();
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error searching appointments: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>Failed to search appointments.</b><br>" + e.getMessage() + "</html>",
+                "❌ Search Error",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }
+
 
 
     
@@ -166,12 +265,12 @@ public class Admin_Appointment extends javax.swing.JInternalFrame {
         jLabel3 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        bookPanel = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
         archivePanel = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         updatePanel = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
+        viewPanel = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         Appointment = new javax.swing.JTable();
         refreshPanel = new javax.swing.JPanel();
@@ -206,29 +305,6 @@ public class Admin_Appointment extends javax.swing.JInternalFrame {
         jPanel3.setBackground(new java.awt.Color(55, 162, 153));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        bookPanel.setBackground(new java.awt.Color(0, 51, 51));
-        bookPanel.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                bookPanelMouseClicked(evt);
-            }
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                bookPanelMouseEntered(evt);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                bookPanelMouseExited(evt);
-            }
-        });
-        bookPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/book.png"))); // NOI18N
-        jLabel1.setText("  BOOK AN APPOINTMENT");
-        bookPanel.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 230, 30));
-
-        jPanel3.add(bookPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 250, 30));
-
         archivePanel.setBackground(new java.awt.Color(0, 51, 51));
         archivePanel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
@@ -246,7 +322,7 @@ public class Admin_Appointment extends javax.swing.JInternalFrame {
         jLabel2.setText("ARCHIVE");
         archivePanel.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 70, 30));
 
-        jPanel3.add(archivePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 10, 90, -1));
+        jPanel3.add(archivePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 10, 90, -1));
 
         updatePanel.setBackground(new java.awt.Color(0, 51, 51));
         updatePanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -265,7 +341,29 @@ public class Admin_Appointment extends javax.swing.JInternalFrame {
         jLabel5.setText("UPDATE");
         updatePanel.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 70, 30));
 
-        jPanel3.add(updatePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 10, 90, -1));
+        jPanel3.add(updatePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 10, 90, -1));
+
+        viewPanel.setBackground(new java.awt.Color(0, 51, 51));
+        viewPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                viewPanelMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                viewPanelMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                viewPanelMouseExited(evt);
+            }
+        });
+        viewPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel6.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel6.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel6.setText("VIEW");
+        viewPanel.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 70, 30));
+
+        jPanel3.add(viewPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 90, -1));
 
         jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 860, 50));
 
@@ -322,20 +420,6 @@ public class Admin_Appointment extends javax.swing.JInternalFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void bookPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bookPanelMouseClicked
-        Admin_Appointment_Add ad = new Admin_Appointment_Add();
-        ad.setVisible(true);
-        this.dispose();
-    }//GEN-LAST:event_bookPanelMouseClicked
-
-    private void bookPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bookPanelMouseEntered
-        bookPanel.setBackground(hoverColor);
-    }//GEN-LAST:event_bookPanelMouseEntered
-
-    private void bookPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bookPanelMouseExited
-        bookPanel.setBackground(navColor);
-    }//GEN-LAST:event_bookPanelMouseExited
-
     private void updatePanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_updatePanelMouseEntered
         updatePanel.setBackground(hoverColor);
     }//GEN-LAST:event_updatePanelMouseEntered
@@ -368,18 +452,30 @@ public class Admin_Appointment extends javax.swing.JInternalFrame {
         loadAppointments();
     }//GEN-LAST:event_refreshPanelMouseClicked
 
+    private void viewPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_viewPanelMouseEntered
+        viewPanel.setBackground(hoverColor);
+    }//GEN-LAST:event_viewPanelMouseEntered
+
+    private void viewPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_viewPanelMouseExited
+        viewPanel.setBackground(navColor);
+    }//GEN-LAST:event_viewPanelMouseExited
+
+    private void viewPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_viewPanelMouseClicked
+        Admin_View_Appointment view = new Admin_View_Appointment();
+        view.setVisible(true);
+    }//GEN-LAST:event_viewPanelMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable Appointment;
     private javax.swing.JLabel appointment;
     private javax.swing.JPanel appointment_header;
     private javax.swing.JPanel archivePanel;
-    private javax.swing.JPanel bookPanel;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -387,5 +483,6 @@ public class Admin_Appointment extends javax.swing.JInternalFrame {
     private javax.swing.JPanel refreshPanel;
     private javax.swing.JTextField searchAppointment;
     private javax.swing.JPanel updatePanel;
+    private javax.swing.JPanel viewPanel;
     // End of variables declaration//GEN-END:variables
 }

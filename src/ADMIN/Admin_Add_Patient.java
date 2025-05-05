@@ -401,10 +401,18 @@ public class Admin_Add_Patient extends javax.swing.JFrame {
     }//GEN-LAST:event_savePatientMouseExited
 
     private void savePatientMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_savePatientMouseClicked
-         // Step 1: Validate all fields
-        if (firstName.getText().trim().isEmpty() || lastName.getText().trim().isEmpty() ||
-            phone.getText().trim().isEmpty() || birth.getDate() == null) {
-            JOptionPane.showMessageDialog(this, "Please fill all fields before proceeding.");
+         // Step 1: Validate required fields
+        if (firstName.getText().trim().isEmpty() ||
+            lastName.getText().trim().isEmpty() ||
+            phone.getText().trim().isEmpty() ||
+            birth.getDate() == null) {
+
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>Please fill in all required fields.</b><br>First name, last name, contact number, and birth date are required.</html>",
+                "⚠️ Missing Fields",
+                JOptionPane.WARNING_MESSAGE
+            );
             return;
         }
 
@@ -412,7 +420,7 @@ public class Admin_Add_Patient extends javax.swing.JFrame {
             ConnectDB connect = new ConnectDB();
             Connection conn = connect.getConnection();
 
-            // Step 2: Check for duplicate patients (same fname, lname, birthdate and active status)
+            // Step 2: Check for existing patient
             String checkQuery = "SELECT patient_id FROM patients WHERE p_fname = ? AND p_lname = ? AND p_dob = ? AND p_status = 'Active'";
             PreparedStatement checkStmt = conn.prepareStatement(checkQuery);
             checkStmt.setString(1, firstName.getText().trim());
@@ -424,10 +432,8 @@ public class Admin_Add_Patient extends javax.swing.JFrame {
 
             int patientId = -1;
             if (rs.next()) {
-                // Patient already exists
+                // Existing patient
                 patientId = rs.getInt("patient_id");
-
-                // Save patient info into session
                 Session.getInstance().setPatient(
                     patientId,
                     firstName.getText().trim(),
@@ -437,27 +443,30 @@ public class Admin_Add_Patient extends javax.swing.JFrame {
                     phone.getText().trim()
                 );
 
-                JOptionPane.showMessageDialog(this, "Patient already exists.");
+                JOptionPane.showMessageDialog(
+                    this,
+                    "<html><b>Patient already exists.</b><br>You can now proceed to make an appointment.</html>",
+                    "ℹ️ Existing Patient",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
             } else {
-                // Step 3: Insert new patient (status defaults to 'Active')
+                // Step 3: Insert new patient
                 String insertQuery = "INSERT INTO patients (p_fname, p_mname, p_lname, p_gender, p_dob, p_contactNumber, p_email, p_status) VALUES (?, ?, ?, ?, ?, ?, ?, 'Active')";
                 PreparedStatement insertStmt = conn.prepareStatement(insertQuery, PreparedStatement.RETURN_GENERATED_KEYS);
 
                 insertStmt.setString(1, firstName.getText().trim());
-                insertStmt.setString(2, middleName.getText().trim().isEmpty() ? null : middleName.getText().trim()); // optional
+                insertStmt.setString(2, middleName.getText().trim().isEmpty() ? null : middleName.getText().trim());
                 insertStmt.setString(3, lastName.getText().trim());
                 insertStmt.setString(4, (String) gender.getSelectedItem());
                 insertStmt.setDate(5, dob);
                 insertStmt.setString(6, phone.getText().trim());
-                insertStmt.setString(7, emailAdd.getText().trim().isEmpty() ? null : emailAdd.getText().trim()); // optional
+                insertStmt.setString(7, emailAdd.getText().trim().isEmpty() ? null : emailAdd.getText().trim());
 
                 int inserted = insertStmt.executeUpdate();
                 if (inserted > 0) {
                     ResultSet generatedKeys = insertStmt.getGeneratedKeys();
                     if (generatedKeys.next()) {
                         patientId = generatedKeys.getInt(1);
-
-                        // Save new patient info into session
                         Session.getInstance().setPatient(
                             patientId,
                             firstName.getText().trim(),
@@ -467,11 +476,15 @@ public class Admin_Add_Patient extends javax.swing.JFrame {
                             phone.getText().trim()
                         );
 
-                        // 🔥 Log Event
                         Session.getInstance().logEvent("ADDED NEW PATIENT", "Admin added patient ID: " + patientId);
-
-                        JOptionPane.showMessageDialog(this, "New patient added successfully.");
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "<html><b>New patient added successfully!</b></html>",
+                            "✅ Success",
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
                     }
+                    generatedKeys.close();
                 }
                 insertStmt.close();
             }
@@ -483,21 +496,25 @@ public class Admin_Add_Patient extends javax.swing.JFrame {
             // Step 4: Ask to proceed with booking
             int confirm = JOptionPane.showConfirmDialog(
                 this,
-                "Proceed with booking this patient's appointment?",
-                "Confirm Booking",
+                "<html><b>Proceed to booking?</b><br>Do you want to set an appointment for this patient now?</html>",
+                "📅 Confirm Booking",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
             );
 
             if (confirm == JOptionPane.YES_OPTION) {
-                Admin_Appointment_Add appointmentForm = new Admin_Appointment_Add();
-                appointmentForm.setVisible(true);
-                this.dispose(); // Close the current form
+                new Admin_Appointment_Add().setVisible(true);
+                this.dispose();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "❌ Error: " + e.getMessage());
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>❌ Error occurred:</b><br>" + e.getMessage() + "</html>",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }//GEN-LAST:event_savePatientMouseClicked
 

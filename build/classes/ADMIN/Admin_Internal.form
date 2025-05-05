@@ -408,7 +408,7 @@
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                  <AbsoluteConstraints x="40" y="0" width="90" height="40"/>
+                  <AbsoluteConstraints x="0" y="0" width="170" height="40"/>
                 </Constraint>
               </Constraints>
             </Component>
@@ -780,7 +780,7 @@
                 </Constraint>
               </Constraints>
 
-              <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout"/>
+              <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
             </Container>
             <Container class="javax.swing.JPanel" name="jPanel19">
               <Properties>
@@ -898,7 +898,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Arial" size="12" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Consultations"/>
+                <Property name="text" type="java.lang.String" value="Consultation"/>
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
@@ -911,7 +911,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Arial" size="12" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Cleanings"/>
+                <Property name="text" type="java.lang.String" value="Cleaning"/>
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
@@ -924,7 +924,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Arial" size="12" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Tooth Extractions"/>
+                <Property name="text" type="java.lang.String" value="Tooth Extraction"/>
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
@@ -937,7 +937,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Arial" size="12" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Root Canals"/>
+                <Property name="text" type="java.lang.String" value="Root Canal"/>
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">

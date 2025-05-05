@@ -121,46 +121,53 @@ public class Admin_Add_User extends javax.swing.JFrame {
         boolean isValid = true;
 
         if (password.isEmpty()) {
-            errorMessage.append("Password cannot be empty.\n");
+            errorMessage.append("• Password cannot be empty.<br>");
             isValid = false;
         }
         if (password.length() < 8) {
-            errorMessage.append("Password must be at least 8 characters long.\n");
+            errorMessage.append("• At least 8 characters required.<br>");
             isValid = false;
         }
         if (!password.matches(".*[A-Z].*")) {
-            errorMessage.append("Password must contain at least one uppercase letter.\n");
+            errorMessage.append("• Include at least one uppercase letter.<br>");
             isValid = false;
         }
         if (!password.matches(".*[a-z].*")) {
-            errorMessage.append("Password must contain at least one lowercase letter.\n");
+            errorMessage.append("• Include at least one lowercase letter.<br>");
             isValid = false;
         }
         if (!password.matches(".*\\d.*")) {
-            errorMessage.append("Password must contain at least one digit.\n");
+            errorMessage.append("• Include at least one digit.<br>");
             isValid = false;
         }
         if (!password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
-            errorMessage.append("Password must contain at least one special character.\n");
+            errorMessage.append("• Include at least one special character.<br>");
             isValid = false;
         }
 
         if (!isValid) {
-        try {
-            ImageIcon icon = new ImageIcon(getClass().getResource("/imgs/error.png"));
-            if (icon == null) {
-                System.err.println("Error: Image not found at /imgs/error.png");
+            try {
+                ImageIcon icon = new ImageIcon(getClass().getResource("/imgs/error.png"));
+                JOptionPane.showMessageDialog(
+                    this,
+                    "<html><b>Password Requirements:</b><br>" + errorMessage.toString() + "</html>",
+                    "⚠️ Password Validation Failed",
+                    JOptionPane.ERROR_MESSAGE,
+                    icon
+                );
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "<html><b>Password Requirements:</b><br>" + errorMessage.toString() + "</html>",
+                    "⚠️ Password Validation Failed",
+                    JOptionPane.ERROR_MESSAGE
+                );
             }
-            JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE, icon);
-        } catch (Exception e) {
-            System.err.println("Error loading image: " + e.getMessage());
-            JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
         }
-        }
+
         return isValid;
- }
+    }
     
-      
     private String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -172,11 +179,28 @@ public class Admin_Add_User extends javax.swing.JFrame {
             }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            JOptionPane.showMessageDialog(this, "Hashing error", "Error", JOptionPane.ERROR_MESSAGE);
+            try {
+                ImageIcon icon = new ImageIcon(getClass().getResource("/imgs/error.png"));
+                JOptionPane.showMessageDialog(
+                    this,
+                    "<html><b>Hashing error:</b><br>Unable to process password securely.</html>",
+                    "❌ Error",
+                    JOptionPane.ERROR_MESSAGE,
+                    icon
+                );
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "<html><b>Hashing error:</b><br>Unable to process password securely.</html>",
+                    "❌ Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
             return null;
         }
     }
-    
+
+
     private boolean isAllFieldsEmpty() {
         return userName.getText().trim().isEmpty() && Role.getSelectedIndex() == 0 && Email.getText().trim().isEmpty()
                 && Password.getPassword().length == 0;
@@ -517,7 +541,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
 
     private void create_buttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_create_buttonMouseClicked
 
-         ConnectDB connect = new ConnectDB();
+        ConnectDB connect = new ConnectDB();
 
         String usernameText = userName.getText().trim();
         String emailText = Email.getText().trim();
@@ -526,22 +550,22 @@ public class Admin_Add_User extends javax.swing.JFrame {
         StringBuilder errorMessage = new StringBuilder();
 
         if (isAllFieldsEmpty()) {
-            errorMessage.append("Please fill out the registration form.\n");
+            errorMessage.append("• Please fill out the registration form.<br>");
         } else {
             if (Role.getSelectedIndex() == 0) {
-                errorMessage.append("Please select a type.\n");
+                errorMessage.append("• Please select a type.<br>");
             }
             if (emailText.isEmpty()) {
-                errorMessage.append("Email cannot be empty.\n");
+                errorMessage.append("• Email cannot be empty.<br>");
             } else if (!isValidEmail(emailText)) {
-                errorMessage.append("Invalid email format.\n");
+                errorMessage.append("• Invalid email format.<br>");
             } else if (isEmailTaken(emailText)) {
-                errorMessage.append("Email is already taken.\n");
+                errorMessage.append("• Email is already taken.<br>");
             }
             if (usernameText.isEmpty()) {
-                errorMessage.append("Username cannot be empty.\n");
+                errorMessage.append("• Username cannot be empty.<br>");
             } else if (isUsernameTaken(usernameText)) {
-                errorMessage.append("Username is already taken.\n");
+                errorMessage.append("• Username is already taken.<br>");
             }
             if (!validatePassword(Password)) {
                 return;
@@ -549,7 +573,12 @@ public class Admin_Add_User extends javax.swing.JFrame {
         }
 
         if (errorMessage.length() > 0) {
-            JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>Please fix the following issues:</b><br>" + errorMessage.toString() + "</html>",
+                "❌ Validation Error",
+                JOptionPane.ERROR_MESSAGE
+            );
             return;
         }
 
@@ -559,18 +588,20 @@ public class Admin_Add_User extends javax.swing.JFrame {
         // Determine image path
         String imagePath;
         if (selectedImagePath != null) {
-            // Copy image to /src/u_images/
             File source = new File(selectedImagePath);
             File dest = new File("src/u_images/" + source.getName());
             try {
                 Files.copy(source.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Failed to save image: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                    "<html><b>Failed to save image:</b><br>" + e.getMessage() + "</html>",
+                    "❌ Image Error",
+                    JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            imagePath = "src/u_images/" + source.getName(); // This is the saved path
+            imagePath = "src/u_images/" + source.getName();
         } else {
-            imagePath = "src/default/u_blank.jpg"; // Default image
+            imagePath = "src/default/u_blank.jpg";
         }
 
         String sql = "INSERT INTO dcas_sys.users (u_username, u_email, u_role, u_password, u_status, u_image) VALUES (?, ?, ?, ?, ?, ?)";
@@ -580,21 +611,32 @@ public class Admin_Add_User extends javax.swing.JFrame {
             pst.setString(3, selectedRole);
             pst.setString(4, hashedPassword);
             pst.setString(5, "Pending");
-            pst.setString(6, imagePath); // Set image path
+            pst.setString(6, imagePath);
             pst.executeUpdate();
 
             Session.getInstance().logEvent("ADDED USER ACCOUNT", "Admin added user account.");
-            JOptionPane.showMessageDialog(this, "Added User Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>User successfully added!</b><br>The account is now pending approval.</html>",
+                "✅ Success",
+                JOptionPane.INFORMATION_MESSAGE
+            );
 
             // Reset form
             userName.setText("");
             Email.setText("");
             Password.setText("");
+            confirmPassword.setText(""); // <-- Clear confirmation password field
             selectedImagePath = null;
-            add_prof.setIcon(null); // clear image preview (optional)
+            add_prof.setIcon(null); // clear image preview
 
         } catch (SQLException ex) {
             Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this,
+                "<html><b>Database error occurred.</b><br>Please try again later.</html>",
+                "❌ Error",
+                JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_create_buttonMouseClicked
 

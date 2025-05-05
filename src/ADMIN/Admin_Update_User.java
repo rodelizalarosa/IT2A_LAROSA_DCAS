@@ -210,7 +210,12 @@ public class Admin_Update_User extends javax.swing.JFrame {
                 Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 return destinationFile.getPath();
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Error saving image: " + e.getMessage());
+                JOptionPane.showMessageDialog(
+                    this,
+                    "<html><b>❌ Error saving image:</b><br>" + e.getMessage() + "</html>",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
             }
             return null;
         }
@@ -229,9 +234,17 @@ public class Admin_Update_User extends javax.swing.JFrame {
                     System.out.println("No user found with the specified ID.");
                 }
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, "Error updating image path: " + ex.getMessage());
+                JOptionPane.showMessageDialog(
+                    this,
+                    "<html><b>❌ Error updating image path:</b><br>" + ex.getMessage() + "</html>",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
             }
         }
+        
+    Color Hover = new Color (55,162,153);
+    Color Nav = new Color (0,51,51);
 
     
     @SuppressWarnings("unchecked")
@@ -239,7 +252,6 @@ public class Admin_Update_User extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        back = new javax.swing.JLabel();
         logs_header = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         logs = new javax.swing.JLabel();
@@ -253,9 +265,7 @@ public class Admin_Update_User extends javax.swing.JFrame {
         Email = new javax.swing.JTextField();
         role1 = new javax.swing.JLabel();
         Role = new javax.swing.JComboBox<>();
-        update_button = new javax.swing.JLabel();
         errorUser = new javax.swing.JLabel();
-        errorEmail = new javax.swing.JLabel();
         errorRole = new javax.swing.JLabel();
         errorPassword = new javax.swing.JLabel();
         errorConfirmPass = new javax.swing.JLabel();
@@ -266,21 +276,18 @@ public class Admin_Update_User extends javax.swing.JFrame {
         add_prof = new javax.swing.JLabel();
         username2 = new javax.swing.JLabel();
         userID = new javax.swing.JLabel();
+        cancelPanel = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        updatePanel = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        errorEmail = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        back.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        back.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/back.png"))); // NOI18N
-        back.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                backMouseClicked(evt);
-            }
-        });
-        jPanel1.add(back, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 60, 50));
 
         logs_header.setBackground(new java.awt.Color(55, 162, 153));
         logs_header.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
@@ -289,12 +296,12 @@ public class Admin_Update_User extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(204, 204, 204));
         jLabel1.setText("Update a user's account.");
-        logs_header.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 0, 190, 50));
+        logs_header.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 0, 190, 50));
 
         logs.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         logs.setForeground(new java.awt.Color(255, 255, 255));
         logs.setText("Update User Account");
-        logs_header.add(logs, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 0, 210, 50));
+        logs_header.add(logs, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 0, 210, 50));
 
         jPanel1.add(logs_header, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 50));
 
@@ -340,7 +347,7 @@ public class Admin_Update_User extends javax.swing.JFrame {
         email2.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         email2.setForeground(new java.awt.Color(51, 51, 51));
         email2.setText("Email");
-        jPanel2.add(email2, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 220, 80, 30));
+        jPanel2.add(email2, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 210, 80, 30));
 
         Email.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
         Email.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -353,12 +360,12 @@ public class Admin_Update_User extends javax.swing.JFrame {
                 EmailActionPerformed(evt);
             }
         });
-        jPanel2.add(Email, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 250, 270, 40));
+        jPanel2.add(Email, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 240, 270, 40));
 
         role1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         role1.setForeground(new java.awt.Color(51, 51, 51));
         role1.setText("Role");
-        jPanel2.add(role1, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 310, 60, 30));
+        jPanel2.add(role1, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 290, 60, 30));
 
         Role.setFont(new java.awt.Font("Tw Cen MT", 0, 15)); // NOI18N
         Role.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select a role", "Admin", "Patient", "Dentist" }));
@@ -372,23 +379,9 @@ public class Admin_Update_User extends javax.swing.JFrame {
                 RoleActionPerformed(evt);
             }
         });
-        jPanel2.add(Role, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 340, 270, 40));
-
-        update_button.setBackground(new java.awt.Color(0, 153, 153));
-        update_button.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        update_button.setForeground(new java.awt.Color(255, 255, 255));
-        update_button.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        update_button.setText("UPDATE");
-        update_button.setOpaque(true);
-        update_button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                update_buttonMouseClicked(evt);
-            }
-        });
-        jPanel2.add(update_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 320, 160, 40));
-        jPanel2.add(errorUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 200, 210, 20));
-        jPanel2.add(errorEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 290, 220, 20));
-        jPanel2.add(errorRole, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 380, 200, 20));
+        jPanel2.add(Role, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 320, 270, 40));
+        jPanel2.add(errorUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 200, 210, 20));
+        jPanel2.add(errorRole, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 360, 220, 20));
         jPanel2.add(errorPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 330, 210, 20));
         jPanel2.add(errorConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 330, 170, 20));
 
@@ -439,30 +432,59 @@ public class Admin_Update_User extends javax.swing.JFrame {
         userID.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
         jPanel2.add(userID, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 80, 90, 40));
 
+        cancelPanel.setBackground(new java.awt.Color(0, 51, 51));
+        cancelPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                cancelPanelMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                cancelPanelMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                cancelPanelMouseExited(evt);
+            }
+        });
+        cancelPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel3.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel3.setText("CANCEL");
+        cancelPanel.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 100, 30));
+
+        jPanel2.add(cancelPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 380, 120, -1));
+
+        updatePanel.setBackground(new java.awt.Color(0, 51, 51));
+        updatePanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                updatePanelMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                updatePanelMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                updatePanelMouseExited(evt);
+            }
+        });
+        updatePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel4.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel4.setText("UPDATE");
+        updatePanel.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 100, 30));
+
+        jPanel2.add(updatePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 380, 120, -1));
+        jPanel2.add(errorEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 280, 220, 20));
+
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 70, 560, 420));
+        jPanel1.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 440, 100, 30));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 510));
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void backMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_backMouseClicked
-
-        Session session = Session.getInstance();
-        JDesktopPane parentDesktop = new JDesktopPane();  // Create the parent desktop
-        session.setParentPane(parentDesktop);
-
-        if (parentDesktop != null) {
-            // Create a new internal frame
-            Admin_User_Internal userInternal = new Admin_User_Internal();
-            parentDesktop.add(userInternal);
-            userInternal.setVisible(true);
-            this.dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "Error: Parent Desktop is not initialized.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }//GEN-LAST:event_backMouseClicked
 
     private void userNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_userNameFocusLost
 
@@ -489,12 +511,12 @@ public class Admin_Update_User extends javax.swing.JFrame {
         String em = Email.getText();
 
         if (em.isEmpty()) {
-            errorEmail.setForeground(Color.RED);
-            errorEmail.setText("Email is required");
-            errorEmail.setForeground(Color.RED);
+            errorRole.setForeground(Color.RED);
+            errorRole.setText("Email is required");
+            errorRole.setForeground(Color.RED);
         } else {
-            errorEmail.setForeground(Color.BLACK);
-            errorEmail.setText("");
+            errorRole.setForeground(Color.BLACK);
+            errorRole.setText("");
         }
 
         Email.repaint();
@@ -522,69 +544,6 @@ public class Admin_Update_User extends javax.swing.JFrame {
     private void RoleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RoleActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_RoleActionPerformed
-
-    private void update_buttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_update_buttonMouseClicked
-        ConnectDB connect = new ConnectDB();
-
-       String usernameText = userName.getText().trim();
-       String emailText = Email.getText().trim();
-       String selectedRole = Role.getSelectedItem().toString().trim();
-       StringBuilder errorMessage = new StringBuilder();
-
-       // Parse current user ID
-       int currentUserId;
-       try {
-           currentUserId = Integer.parseInt(userID.getText().trim());
-       } catch (NumberFormatException e) {
-           JOptionPane.showMessageDialog(this, "Invalid User ID.", "Error", JOptionPane.ERROR_MESSAGE);
-           return;
-       }
-
-       // Validation
-       if (isAllFieldsEmpty()) {
-           errorMessage.append("Please fill out the registration form.\n");
-       } else {
-           if (Role.getSelectedIndex() == 0) {
-               errorMessage.append("Please select a type.\n");
-           }
-           if (emailText.isEmpty()) {
-               errorMessage.append("Email cannot be empty.\n");
-           } else if (!isValidEmail(emailText)) {
-               errorMessage.append("Invalid email format.\n");
-           } else if (isEmailTaken(emailText, currentUserId)) {
-               errorMessage.append("Email is already taken.\n");
-           }
-
-            if (usernameText.isEmpty()) {
-                errorMessage.append("Username cannot be empty.\n");
-            } else if (isUsernameTaken(usernameText, currentUserId)) {
-                errorMessage.append("Username is already taken.\n");
-            }
-        }
-
-        if (errorMessage.length() > 0) {
-            JOptionPane.showMessageDialog(this, errorMessage.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        // Update the user in the database
-        String sql = "UPDATE dcas_sys.users SET u_username = ?, u_email = ?, u_role = ? WHERE user_id = ?";
-        try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
-            pst.setString(1, usernameText);
-            pst.setString(2, emailText);
-            pst.setString(3, selectedRole);
-            pst.setInt(4, currentUserId);
-
-            pst.executeUpdate();
-
-            Session sess = Session.getInstance();
-            sess.logEvent("UPDATED USER ACCOUNT", "Admin updated user account.");
-            JOptionPane.showMessageDialog(this, "Updated User Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-
-        } catch (SQLException ex) {
-            Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_update_buttonMouseClicked
 
     private void add_profMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_add_profMouseClicked
         JFileChooser chooser = new JFileChooser();
@@ -616,7 +575,12 @@ public class Admin_Update_User extends javax.swing.JFrame {
 
     private void del_profMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_del_profMouseClicked
          if (selectedImagePath == null || selectedImagePath.equals(defaultImagePath)) {
-            JOptionPane.showMessageDialog(this, "Profile picture is already set to default.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>ℹ️ Profile picture is already set to default.</b><br>No changes were made.</html>",
+                "Information",
+                JOptionPane.INFORMATION_MESSAGE
+            );
             return;
         }
 
@@ -651,9 +615,122 @@ public class Admin_Update_User extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_del_profMouseClicked
 
-    /**
-     * @param args the command line arguments
-     */
+    private void updatePanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_updatePanelMouseEntered
+        updatePanel.setBackground(Hover);
+    }//GEN-LAST:event_updatePanelMouseEntered
+
+    private void updatePanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_updatePanelMouseExited
+        updatePanel.setBackground(Nav);
+    }//GEN-LAST:event_updatePanelMouseExited
+
+    private void updatePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_updatePanelMouseClicked
+        ConnectDB connect = new ConnectDB();
+
+       String usernameText = userName.getText().trim();
+       String emailText = Email.getText().trim();
+       String selectedRole = Role.getSelectedItem().toString().trim();
+       StringBuilder errorMessage = new StringBuilder();
+
+       // Parse current user ID
+       int currentUserId;
+       try {
+           currentUserId = Integer.parseInt(userID.getText().trim());
+       } catch (NumberFormatException e) {
+           JOptionPane.showMessageDialog(
+                this,
+                "<html><b>❌ Invalid User ID.</b><br>Please make sure the entered ID is a valid number.</html>",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+           return;
+       }
+
+       // Validation
+       if (isAllFieldsEmpty()) {
+           errorMessage.append("Please fill out the registration form.\n");
+       } else {
+           if (Role.getSelectedIndex() == 0) {
+               errorMessage.append("Please select a type.\n");
+           }
+           if (emailText.isEmpty()) {
+               errorMessage.append("Email cannot be empty.\n");
+           } else if (!isValidEmail(emailText)) {
+               errorMessage.append("Invalid email format.\n");
+           } else if (isEmailTaken(emailText, currentUserId)) {
+               errorMessage.append("Email is already taken.\n");
+           }
+
+            if (usernameText.isEmpty()) {
+                errorMessage.append("Username cannot be empty.\n");
+            } else if (isUsernameTaken(usernameText, currentUserId)) {
+                errorMessage.append("Username is already taken.\n");
+            }
+        }
+
+        if (errorMessage.length() > 0) {
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>⚠️ Validation Error:</b><br>" + errorMessage.toString() + "</html>",
+                "Validation Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        // Update the user in the database
+        String sql = "UPDATE dcas_sys.users SET u_username = ?, u_email = ?, u_role = ? WHERE user_id = ?";
+        try (PreparedStatement pst = connect.getConnection().prepareStatement(sql)) {
+            pst.setString(1, usernameText);
+            pst.setString(2, emailText);
+            pst.setString(3, selectedRole);
+            pst.setInt(4, currentUserId);
+
+            pst.executeUpdate();
+
+            Session sess = Session.getInstance();
+            sess.logEvent("UPDATED USER ACCOUNT", "Admin updated user account.");
+            JOptionPane.showMessageDialog(
+                this, 
+                "<html><b>✅ Updated User Successfully!</b><br>Your changes have been saved.</html>", 
+                "Success", 
+                JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_updatePanelMouseClicked
+
+    private void cancelPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelPanelMouseEntered
+        cancelPanel.setBackground(Hover);
+    }//GEN-LAST:event_cancelPanelMouseEntered
+
+    private void cancelPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelPanelMouseExited
+       cancelPanel.setBackground(Nav);
+    }//GEN-LAST:event_cancelPanelMouseExited
+
+    private void cancelPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelPanelMouseClicked
+        Session session = Session.getInstance();
+        JDesktopPane parentDesktop = new JDesktopPane();  // Create the parent desktop
+        session.setParentPane(parentDesktop);
+
+        if (parentDesktop != null) {
+            // Create a new internal frame
+            Admin_User_Internal userInternal = new Admin_User_Internal();
+            parentDesktop.add(userInternal);
+            userInternal.setVisible(true);
+            this.dispose();
+        } else {
+            JOptionPane.showMessageDialog(
+                this, 
+                "<html><b>Error:</b> Parent Desktop is not initialized.<br>Please check your configuration and try again.</html>", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }//GEN-LAST:event_cancelPanelMouseClicked
+
+   
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -690,7 +767,7 @@ public class Admin_Update_User extends javax.swing.JFrame {
     private javax.swing.JTextField Email;
     private javax.swing.JComboBox<String> Role;
     private javax.swing.JLabel add_prof;
-    private javax.swing.JLabel back;
+    private javax.swing.JPanel cancelPanel;
     private javax.swing.JPanel delPanel;
     private javax.swing.JLabel del_prof;
     private javax.swing.JLabel email2;
@@ -702,15 +779,18 @@ public class Admin_Update_User extends javax.swing.JFrame {
     private javax.swing.JLabel image;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JLabel logs;
     private javax.swing.JLabel logs1;
     private javax.swing.JPanel logs_header;
     private javax.swing.JLabel role1;
-    private javax.swing.JLabel update_button;
+    private javax.swing.JPanel updatePanel;
     private javax.swing.JLabel userID;
     private javax.swing.JTextField userName;
     private javax.swing.JLabel username1;
