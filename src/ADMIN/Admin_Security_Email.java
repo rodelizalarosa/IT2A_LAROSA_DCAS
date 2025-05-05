@@ -4,6 +4,7 @@ package ADMIN;
 import AUTHENTICATION.EmailSender;
 import Config.ConnectDB;
 import Config.Session;
+import java.awt.Color;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,6 +16,11 @@ public class Admin_Security_Email extends javax.swing.JFrame {
     public Admin_Security_Email() {
         initComponents();
     }
+    
+    
+    Color hoverColor = new Color (55,162,153);
+    Color navColor = new Color (0,51,51);
+
 
 
     @SuppressWarnings("unchecked")
@@ -30,6 +36,8 @@ public class Admin_Security_Email extends javax.swing.JFrame {
         delete1 = new javax.swing.JLabel();
         security_header = new javax.swing.JPanel();
         account1 = new javax.swing.JLabel();
+        cancel = new javax.swing.JPanel();
+        delete2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -87,7 +95,7 @@ public class Admin_Security_Email extends javax.swing.JFrame {
         delete1.setText("SEND");
         send.add(delete1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 110, 30));
 
-        jPanel1.add(send, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 400, 130, 30));
+        jPanel1.add(send, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 400, 130, 30));
 
         security_header.setBackground(new java.awt.Color(255, 255, 255));
         security_header.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
@@ -101,9 +109,32 @@ public class Admin_Security_Email extends javax.swing.JFrame {
 
         jPanel1.add(security_header, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, 560, 50));
 
+        cancel.setBackground(new java.awt.Color(0, 51, 51));
+        cancel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                cancelMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                cancelMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                cancelMouseExited(evt);
+            }
+        });
+        cancel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        delete2.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        delete2.setForeground(new java.awt.Color(255, 255, 255));
+        delete2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        delete2.setText("CANCEL");
+        cancel.add(delete2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 110, 30));
+
+        jPanel1.add(cancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 400, 130, 30));
+
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 550, 450));
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void EmailFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_EmailFocusLost
@@ -117,6 +148,18 @@ public class Admin_Security_Email extends javax.swing.JFrame {
     private void sendMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sendMouseClicked
         String emailInputValue = Email.getText().trim(); // Replace with your actual JTextField variable
 
+        // Step 1: Validate email format using regular expression
+        if (!emailInputValue.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>⚠ Invalid email format.</b><br>Please enter a valid email address.</html>",
+                "Input Error",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return; // Exit if the email is not valid
+        }
+
+        // Step 2: Check if email input is empty
         if (emailInputValue.isEmpty()) {
             JOptionPane.showMessageDialog(
                 this,
@@ -124,7 +167,7 @@ public class Admin_Security_Email extends javax.swing.JFrame {
                 "Input Error",
                 JOptionPane.WARNING_MESSAGE
             );
-            return;
+            return; // Exit if the email is empty
         }
 
         try {
@@ -139,9 +182,10 @@ public class Admin_Security_Email extends javax.swing.JFrame {
             if (rs.next()) {
                 String username = rs.getString("u_username");
 
+                // Set the user session
                 Session.getInstance().setUser(0, username, emailInputValue);
 
-                // Send verification PIN
+                // Send the verification PIN
                 String pin = EmailSender.sendVerificationPin(emailInputValue, username);
                 Session.getInstance().setVerificationPin(pin);
 
@@ -153,7 +197,7 @@ public class Admin_Security_Email extends javax.swing.JFrame {
                 );
 
                 // Redirect to Verify frame
-                new Verify().setVisible(true);
+                new Admin_Security_Verify().setVisible(true);
                 this.dispose();
 
             } else {
@@ -186,6 +230,19 @@ public class Admin_Security_Email extends javax.swing.JFrame {
     private void sendMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sendMouseExited
         send.setBackground(navColor);
     }//GEN-LAST:event_sendMouseExited
+
+    private void cancelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelMouseClicked
+        Admin_Security sec = new Admin_Security();
+        sec.setVisible(true);
+    }//GEN-LAST:event_cancelMouseClicked
+
+    private void cancelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelMouseEntered
+        cancel.setBackground(hoverColor);
+    }//GEN-LAST:event_cancelMouseEntered
+
+    private void cancelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelMouseExited
+        cancel.setBackground(navColor);
+    }//GEN-LAST:event_cancelMouseExited
 
     /**
      * @param args the command line arguments
@@ -225,7 +282,9 @@ public class Admin_Security_Email extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField Email;
     private javax.swing.JLabel account1;
+    private javax.swing.JPanel cancel;
     private javax.swing.JLabel delete1;
+    private javax.swing.JLabel delete2;
     private javax.swing.JLabel email2;
     private javax.swing.JLabel email3;
     private javax.swing.JLabel jLabel1;

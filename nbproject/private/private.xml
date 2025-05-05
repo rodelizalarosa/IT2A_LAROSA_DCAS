@@ -3,16 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/PC4/Desktop/LA%20ROSA/IT2A_LAROSA_DCAS/src/ADMIN/Admin_Security.java</file>
-            <file>file:/C:/Users/PC4/Desktop/LA%20ROSA/IT2A_LAROSA_DCAS/src/PRINT/GenerateSlip.java</file>
-            <file>file:/C:/Users/PC4/Desktop/LA%20ROSA/IT2A_LAROSA_DCAS/src/ADMIN/Admin_Appointment.java</file>
-            <file>file:/C:/Users/PC4/Desktop/LA%20ROSA/IT2A_LAROSA_DCAS/src/ADMIN/Admin_View_Appointment.java</file>
-            <file>file:/C:/Users/PC4/Desktop/LA%20ROSA/IT2A_LAROSA_DCAS/src/ADMIN/Admin_Settings.java</file>
-            <file>file:/C:/Users/PC4/Desktop/LA%20ROSA/IT2A_LAROSA_DCAS/src/AUTHENTICATION/Forgot_Password.java</file>
-            <file>file:/C:/Users/PC4/Desktop/LA%20ROSA/IT2A_LAROSA_DCAS/src/ADMIN/Admin_Appointment_Add.java</file>
-            <file>file:/C:/Users/PC4/Desktop/LA%20ROSA/IT2A_LAROSA_DCAS/src/AUTHENTICATION/Verify.java</file>
-            <file>file:/C:/Users/PC4/Desktop/LA%20ROSA/IT2A_LAROSA_DCAS/src/ADMIN/Admin_Security_Email.java</file>
-            <file>file:/C:/Users/PC4/Desktop/LA%20ROSA/IT2A_LAROSA_DCAS/src/PRINT/AppointmentSlip.java</file>
+            <file>file:/C:/Users/Asus/Desktop/LAROSA/FINAL/IT2A_LAROSA_DCAS/src/ADMIN/Admin_Update_User.java</file>
+            <file>file:/C:/Users/Asus/Desktop/LAROSA/FINAL/IT2A_LAROSA_DCAS/src/Config/Session.java</file>
+            <file>file:/C:/Users/Asus/Desktop/LAROSA/FINAL/IT2A_LAROSA_DCAS/src/ADMIN/Admin_Profile_Edit.java</file>
+            <file>file:/C:/Users/Asus/Desktop/LAROSA/FINAL/IT2A_LAROSA_DCAS/src/ADMIN/Admin_Add_User.java</file>
+            <file>file:/C:/Users/Asus/Desktop/LAROSA/FINAL/IT2A_LAROSA_DCAS/src/ADMIN/Admin_Profile.java</file>
+            <file>file:/C:/Users/Asus/Desktop/LAROSA/FINAL/IT2A_LAROSA_DCAS/src/PRINT/AppointmentSlip.java</file>
         </group>
     </open-files>
 </project-private>

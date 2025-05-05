@@ -5,6 +5,7 @@ import AUTHENTICATION.*;
 import Config.*;
 import java.awt.Color;
 import java.awt.Image;
+import javax.swing.ImageIcon;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -33,7 +34,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
   
     public Admin_Profile() {
         initComponents();
-       
+      
         
         //remove border
         this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0,0,0,0));
@@ -41,7 +42,18 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         bi.setNorthPane(null);
         
         formInternalFrameActivated(null); 
+        
+        addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
+            @Override
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameActivated(evt);
+            }
+        });
     }
+    
+        private String selectedImagePath = null;
+        private String currentImageFromDB = null; // the image path from database
+        private final String defaultImagePath = "src/default/u_blank.jpg"; // constant
     
     private void editProfile(){
         Admin_Profile_Edit edit = new Admin_Profile_Edit();
@@ -49,6 +61,21 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         desktop.add(edit);
         edit.setVisible(true);
     }
+    
+     private void loadDefaultImage() {
+        String defaultImagePath = "src/default/u_blank.jpg";
+        ImageIcon icon = new ImageIcon(defaultImagePath);
+
+        int width = image.getWidth() > 0 ? image.getWidth() : 120;
+        int height = image.getHeight() > 0 ? image.getHeight() : 120;
+
+        Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        image.setIcon(new ImageIcon(img));
+
+        selectedImagePath = defaultImagePath;
+        currentImageFromDB = defaultImagePath;
+    }
+      
 
 
 
@@ -79,7 +106,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         Gender = new javax.swing.JLabel();
         userID = new javax.swing.JLabel();
         email7 = new javax.swing.JLabel();
-        image = new javax.swing.JPanel();
+        image = new javax.swing.JLabel();
 
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
             public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
@@ -211,10 +238,8 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         email7.setText("Account ID:");
         jPanel2.add(email7, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 80, 100, 30));
 
-        image.setBackground(new java.awt.Color(255, 255, 255));
         image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
-        image.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 200, 180));
+        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 200, 190));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 830, 380));
 
@@ -228,52 +253,62 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_edit_profileMouseClicked
 
     private void formInternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameActivated
-        Session sess = Session.getInstance();
+         Session sess = Session.getInstance();
 
-        if (sess.getUserId() == 0) {
-            JOptionPane.showMessageDialog(null, "No Account, Log in First!", "Notice", JOptionPane.ERROR_MESSAGE);
-            LogIn lgf = new LogIn();
-            lgf.setVisible(true);
-            this.dispose();
-        } else {
-            try {
-                ConnectDB dbc = new ConnectDB();
-                ResultSet rs = dbc.getData("SELECT * FROM users WHERE user_id = '" + sess.getUserId() + "'");
+    if (sess.getUserId() == 0) {
+        JOptionPane.showMessageDialog(null, "No Account, Log in First!", "Notice", JOptionPane.ERROR_MESSAGE);
+        LogIn lgf = new LogIn();
+        lgf.setVisible(true);
+        this.dispose();
+    } else {
+        try {
+            ConnectDB dbc = new ConnectDB();
+            ResultSet rs = dbc.getData("SELECT * FROM users WHERE user_id = '" + sess.getUserId() + "'");
 
-                if (rs.next()) {
-                    int id = sess.getUserId();
-                    String username = rs.getString("u_username");
-                    String email = rs.getString("u_email");
-                    String role = rs.getString("u_role");
-                    String imagePath = rs.getString("u_image");
+            if (rs.next()) {
+                int id = sess.getUserId();
+                String username = rs.getString("u_username");
+                String email = rs.getString("u_email");
+                String role = rs.getString("u_role");
+                String imagePath = rs.getString("u_image");
 
-                    // Set user ID
-                    userID.setText(String.valueOf(id)); // Make sure you have a JLabel named userID
+                userID.setText(String.valueOf(id));
+                User.setText("@" + username);
+                Email.setText(email);
+                Role.setText(role);
 
-                    // Try to get full name and gender from staff table
-                    ResultSet rsStaff = dbc.getData("SELECT CONCAT(s_fname, ' ', s_lname) AS fullname, s_gender FROM staff WHERE staff_id = '" + id + "'");
+                // Get full name and gender from staff table
+                ResultSet rsStaff = dbc.getData("SELECT CONCAT(s_fname, ' ', s_lname) AS fullname, s_gender FROM staff WHERE staff_id = '" + id + "'");
+                String fullName = "Account not yet updated.";
+                String genderText = "Account not yet updated.";
 
-                    String fullName = "Account not yet updated.";
-                    String genderText = "Account not yet updated.";
+                if (rsStaff.next()) {
+                    fullName = rsStaff.getString("fullname");
+                    genderText = rsStaff.getString("s_gender");
+                }
 
-                    if (rsStaff.next()) {
-                        fullName = rsStaff.getString("fullname");
-                        genderText = rsStaff.getString("s_gender");
+                fullname.setText(fullName);
+                Gender.setText(genderText);
+
+                // Load and display user image
+                if (imagePath != null && !imagePath.trim().isEmpty()) {
+                    File imageFile = new File(imagePath);
+                    if (imageFile.exists()) {
+                        ImageIcon icon = new ImageIcon(imagePath);
+                        Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
+                        image.setIcon(new ImageIcon(img));
+                    } else {
+                        loadDefaultImage();
                     }
-
-                    fullname.setText(fullName);
-                    Gender.setText(genderText); 
-                    User.setText("@" + username);
-                    Email.setText(email);
-                    Role.setText(role);
-
-                  
+                } else {
+                    loadDefaultImage();
+                }
             }
 
         } catch (SQLException ex) {
             System.out.println("Error: " + ex);
         }
-        }
+    }
     }//GEN-LAST:event_formInternalFrameActivated
 
     private void edit_profileMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_edit_profileMouseEntered
@@ -299,7 +334,7 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
     private javax.swing.JLabel email6;
     private javax.swing.JLabel email7;
     private javax.swing.JLabel fullname;
-    private javax.swing.JPanel image;
+    private javax.swing.JLabel image;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
