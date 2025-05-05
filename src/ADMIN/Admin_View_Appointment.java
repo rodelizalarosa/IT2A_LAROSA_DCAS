@@ -546,100 +546,100 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
     }//GEN-LAST:event_backMouseEntered
 
     private void generateSlipMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_generateSlipMouseClicked
-//        int appointmentId = Session.getInstance().getAppointmentId();
-//
-//        if (appointmentId != -1) {
-//           try {
-//               Connection conn = new ConnectDB().getConnection();
-//
-//               String statusQuery = "SELECT a_status FROM appointments WHERE appointment_id = ?";
-//               PreparedStatement statusStmt = conn.prepareStatement(statusQuery);
-//               statusStmt.setInt(1, appointmentId);
-//               ResultSet rs = statusStmt.executeQuery();
-//
-//               if (rs.next()) {
-//                   String status = rs.getString("a_status");
-//
-//                   if ("Confirmed".equalsIgnoreCase(status)) {
-//                       new AppointmentSlip(appointmentId).setVisible(true); // ✅ Correct
-//                   } else {
-//                       JOptionPane.showMessageDialog(
-//                           this,
-//                           "<html><b>Cannot generate appointment slip.</b><br>Status is currently <b>" + status + "</b>.</html>",
-//                           "❌ Invalid Status",
-//                           JOptionPane.WARNING_MESSAGE
-//                       );
-//                   }
-//               } else {
-//                   JOptionPane.showMessageDialog(
-//                       this,
-//                       "<html><b>Appointment not found.</b></html>",
-//                       "❌ Error",
-//                       JOptionPane.ERROR_MESSAGE
-//                   );
-//               }
-//
-//                rs.close();
-//                statusStmt.close();
-//                conn.close();
-//
-//            } catch (SQLException e) {
-//                JOptionPane.showMessageDialog(
-//                    this,
-//                    "<html><b>Database error:</b><br>" + e.getMessage() + "</html>",
-//                    "❗ SQL Error",
-//                    JOptionPane.ERROR_MESSAGE
-//                );
-//                e.printStackTrace();
-//            }
-//        } else {
-//            JOptionPane.showMessageDialog(
-//                this,
-//                "<html><b>Appointment ID not found.</b><br>Unable to generate appointment slip.</html>",
-//                "❌ Missing Data",
-//                JOptionPane.WARNING_MESSAGE
-//            );
-//        }
-
         int appointmentId = Session.getInstance().getAppointmentId();
 
-           if (appointmentId != -1) {
-               // Check the appointment status (optional)
-               try (Connection conn = new ConnectDB().getConnection()) {
-                   String statusQuery = "SELECT a_status FROM appointments WHERE appointment_id = ?";
-                   try (PreparedStatement statusStmt = conn.prepareStatement(statusQuery)) {
-                       statusStmt.setInt(1, appointmentId);
-                       try (ResultSet rs = statusStmt.executeQuery()) {
-                           if (rs.next()) {
-                               String status = rs.getString("a_status");
+        if (appointmentId != -1) {
+           try {
+               Connection conn = new ConnectDB().getConnection();
 
-                               // Only allow slip generation for confirmed appointments
-                               if ("Confirmed".equalsIgnoreCase(status)) {
-                                    GenerateSlip slipFrame = new GenerateSlip(appointmentId);
-                                    slipFrame.setVisible(true);
-                               } else {
-                                   // Using HTML formatting in JOptionPane
-                                   JOptionPane.showMessageDialog(this,
-                                       "<html><b>Cannot generate appointment slip.</b><br>" +
-                                       "The appointment status is currently: <span style='color:red;'>" + status + "</span></html>",
-                                       "❌ Invalid Status", JOptionPane.WARNING_MESSAGE);
-                               }
-                           }
-                       }
+               String statusQuery = "SELECT a_status FROM appointments WHERE appointment_id = ?";
+               PreparedStatement statusStmt = conn.prepareStatement(statusQuery);
+               statusStmt.setInt(1, appointmentId);
+               ResultSet rs = statusStmt.executeQuery();
+
+               if (rs.next()) {
+                   String status = rs.getString("a_status");
+
+                   if ("Confirmed".equalsIgnoreCase(status)) {
+                       new AppointmentSlip(appointmentId).setVisible(true); // ✅ Correct
+                   } else {
+                       JOptionPane.showMessageDialog(
+                           this,
+                           "<html><b>Cannot generate appointment slip.</b><br>Status is currently <b>" + status + "</b>.</html>",
+                           "❌ Invalid Status",
+                           JOptionPane.WARNING_MESSAGE
+                       );
                    }
-
-               } catch (SQLException e) {
-                   // Using HTML formatting in JOptionPane for errors
-                   JOptionPane.showMessageDialog(this,
-                       "<html><b>Error checking appointment status:</b><br>" + e.getMessage() + "</html>",
-                       "❌ Error", JOptionPane.ERROR_MESSAGE);
+               } else {
+                   JOptionPane.showMessageDialog(
+                       this,
+                       "<html><b>Appointment not found.</b></html>",
+                       "❌ Error",
+                       JOptionPane.ERROR_MESSAGE
+                   );
                }
-           } else {
-               // Using HTML formatting for missing appointment ID
-               JOptionPane.showMessageDialog(this,
-                   "<html><b>Appointment ID not found.</b><br>Unable to generate appointment slip.</html>",
-                   "❌ Missing Data", JOptionPane.WARNING_MESSAGE);
-           }
+
+                rs.close();
+                statusStmt.close();
+                conn.close();
+
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "<html><b>Database error:</b><br>" + e.getMessage() + "</html>",
+                    "❗ SQL Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                e.printStackTrace();
+            }
+        } else {
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>Appointment ID not found.</b><br>Unable to generate appointment slip.</html>",
+                "❌ Missing Data",
+                JOptionPane.WARNING_MESSAGE
+            );
+        }
+
+//                    int appointmentId = Session.getInstance().getAppointmentId();
+//
+//                       if (appointmentId != -1) {
+//                           // Check the appointment status (optional)
+//                           try (Connection conn = new ConnectDB().getConnection()) {
+//                               String statusQuery = "SELECT a_status FROM appointments WHERE appointment_id = ?";
+//                               try (PreparedStatement statusStmt = conn.prepareStatement(statusQuery)) {
+//                                   statusStmt.setInt(1, appointmentId);
+//                                   try (ResultSet rs = statusStmt.executeQuery()) {
+//                                       if (rs.next()) {
+//                                           String status = rs.getString("a_status");
+//
+//                                           // Only allow slip generation for confirmed appointments
+//                                           if ("Confirmed".equalsIgnoreCase(status)) {
+//                                                GenerateSlip slipFrame = new GenerateSlip(appointmentId);
+//                                                slipFrame.setVisible(true);
+//                                           } else {
+//                                               // Using HTML formatting in JOptionPane
+//                                               JOptionPane.showMessageDialog(this,
+//                                                   "<html><b>Cannot generate appointment slip.</b><br>" +
+//                                                   "The appointment status is currently: <span style='color:red;'>" + status + "</span></html>",
+//                                                   "❌ Invalid Status", JOptionPane.WARNING_MESSAGE);
+//                                           }
+//                                       }
+//                                   }
+//                               }
+//
+//                           } catch (SQLException e) {
+//                               // Using HTML formatting in JOptionPane for errors
+//                               JOptionPane.showMessageDialog(this,
+//                                   "<html><b>Error checking appointment status:</b><br>" + e.getMessage() + "</html>",
+//                                   "❌ Error", JOptionPane.ERROR_MESSAGE);
+//                           }
+//                       } else {
+//                           // Using HTML formatting for missing appointment ID
+//                           JOptionPane.showMessageDialog(this,
+//                               "<html><b>Appointment ID not found.</b><br>Unable to generate appointment slip.</html>",
+//                               "❌ Missing Data", JOptionPane.WARNING_MESSAGE);
+//                       }
     }//GEN-LAST:event_generateSlipMouseClicked
 
     private void approvePanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_approvePanelMouseEntered

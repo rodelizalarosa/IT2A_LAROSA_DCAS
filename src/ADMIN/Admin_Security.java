@@ -73,21 +73,21 @@ public class Admin_Security extends javax.swing.JInternalFrame {
         jLabel1.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(153, 153, 153));
         jLabel1.setText("and enter your security code to reset your password.");
-        secure.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 70, 320, 30));
+        secure.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 60, 320, 30));
 
         account.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         account.setForeground(new java.awt.Color(55, 162, 153));
-        account.setText("Secure Account");
-        secure.add(account, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 10, 310, 50));
+        account.setText("Change Password");
+        secure.add(account, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 0, 310, 50));
 
         jLabel5.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(153, 153, 153));
         jLabel5.setText("For added protection, you'll need to confirm your email address");
-        secure.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 40, 350, 40));
+        secure.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 30, 350, 40));
 
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock.png"))); // NOI18N
-        secure.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 60, 60));
+        secure.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 70, 60));
 
         jPanel2.add(secure, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 270, 460, 110));
 
@@ -109,7 +109,8 @@ public class Admin_Security extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void secureMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_secureMouseClicked
-        
+        Admin_Security_Email em = new Admin_Security_Email();
+        em.setVisible(true);
     }//GEN-LAST:event_secureMouseClicked
 
     private void secureMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_secureMouseEntered

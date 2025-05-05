@@ -8,6 +8,14 @@ import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.pdf.PdfDocument;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import java.awt.event.ActionEvent;
+import javax.swing.JButton;
+import javax.swing.SwingUtilities;
 
 public class AppointmentSlip extends javax.swing.JFrame {
 
@@ -25,116 +33,191 @@ public class AppointmentSlip extends javax.swing.JFrame {
     }
 
     
-     private void populateAppointmentSlip(int appointmentId) {
-    ConnectDB connect = new ConnectDB();
+   // Method to populate the Appointment Slip with data
+    private void populateAppointmentSlip(int appointmentId) {
+        ConnectDB connect = new ConnectDB();
 
-    // Swing label arrays
-    JLabel[] serviceLabels = { service1, service2, service3, service4, service5, service6 };
-    JLabel[] costLabels = { serviceCost1, serviceCost2, serviceCost3, serviceCost4, serviceCost5, serviceCost6 };
+        // Swing label arrays for services and costs
+        JLabel[] serviceLabels = {service1, service2, service3, service4, service5, service6};
+        JLabel[] costLabels = {serviceCost1, serviceCost2, serviceCost3, serviceCost4, serviceCost5, serviceCost6};
 
-    // Clear previous values
-    for (int i = 0; i < serviceLabels.length; i++) {
-        serviceLabels[i].setText("");
-        costLabels[i].setText("");
-    }
-
-    try (Connection conn = connect.getConnection()) {
-        if (conn == null) {
-            JOptionPane.showMessageDialog(this, "❌ Database connection failed.");
-            return;
+        // Clear previous values
+        for (int i = 0; i < serviceLabels.length; i++) {
+            serviceLabels[i].setText("");
+            costLabels[i].setText("");
         }
 
-        // Check appointment status
-        String statusQuery = "SELECT a_status FROM appointments WHERE appointment_id = ?";
-        try (PreparedStatement statusStmt = conn.prepareStatement(statusQuery)) {
-            statusStmt.setInt(1, appointmentId);
-            try (ResultSet statusRs = statusStmt.executeQuery()) {
-                if (statusRs.next()) {
-                    String status = statusRs.getString("a_status");
-                    if (!"Confirmed".equalsIgnoreCase(status)) {
-                        JOptionPane.showMessageDialog(this,
-                            "<html><b>Slip generation is only allowed for <span style='color:green'>Confirmed</span> appointments.</b><br>" +
-                            "This appointment is currently: <b>" + status + "</b></html>",
-                            "❌ Cannot Generate Slip",
-                            JOptionPane.WARNING_MESSAGE
-                        );
+        try (Connection conn = connect.getConnection()) {
+            if (conn == null) {
+                JOptionPane.showMessageDialog(this, "❌ Database connection failed.");
+                return;
+            }
+
+            // Check appointment status first
+            String statusQuery = "SELECT a_status FROM appointments WHERE appointment_id = ?";
+            try (PreparedStatement statusStmt = conn.prepareStatement(statusQuery)) {
+                statusStmt.setInt(1, appointmentId);
+                try (ResultSet statusRs = statusStmt.executeQuery()) {
+                    if (statusRs.next()) {
+                        String status = statusRs.getString("a_status");
+                        if (!"Confirmed".equalsIgnoreCase(status)) {
+                            JOptionPane.showMessageDialog(this,
+                                    "<html><b>Slip generation is only allowed for <span style='color:green'>Confirmed</span> appointments.</b><br>" +
+                                            "This appointment is currently: <b>" + status + "</b></html>",
+                                    "❌ Cannot Generate Slip",
+                                    JOptionPane.WARNING_MESSAGE
+                            );
+                            return;
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(this, "❌ Appointment not found.");
                         return;
                     }
-                } else {
-                    JOptionPane.showMessageDialog(this, "❌ Appointment not found.");
-                    return;
                 }
             }
-        }
 
-        // New Corrected Query
-        String query =
-            "SELECT " +
-            "  a.appointment_id, a.pref_time, a.pref_date, " +
-            "  p.patient_id, CONCAT(p.p_fname, ' ', p.p_lname) AS patient_name, p.p_contactNumber, " +
-            "  CONCAT(d.d_fname, ' ', d.d_lname) AS dentist_name, d.specialization, " +
-            "  s.service_name, s.service_cost, ts.quantity " +
-            "FROM treatment_services ts " +
-            "JOIN appointments a ON ts.appointment_id = a.appointment_id " +
-            "JOIN patients p ON a.patient_id = p.patient_id " +
-            "JOIN dentist d ON a.dentist_id = d.user_id " +
-            "JOIN services s ON ts.service_id = s.service_id " +
-            "WHERE ts.appointment_id = ?";
+            // Main query to fetch appointment and service details
+            String query =
+                    "SELECT " +
+                            "  a.appointment_id, a.patient_id, a.pref_time, a.pref_date, a.notes, " +
+                            "  a.dentist_id, p.p_fname, p.p_lname, p.p_gender, p.p_contactNumber, " +
+                            "  s.service_name, CONCAT(d.d_fname, ' ', d.d_lname) AS dentist_name, " +
+                            "  a.a_status, s.service_cost, ts.quantity " +
+                            "FROM appointments a " +
+                            "JOIN patients p ON a.patient_id = p.patient_id " +
+                            "JOIN treatment_services ts ON ts.appointment_id = a.appointment_id " +
+                            "JOIN services s ON ts.service_id = s.service_id " +
+                            "JOIN dentist d ON a.dentist_id = d.dentist_id " +
+                            "WHERE a.appointment_id = ?";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, appointmentId);
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setInt(1, appointmentId);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    boolean dataFound = false;
+                    int index = 0;
+                    double total = 0.0;
 
-            try (ResultSet rs = pstmt.executeQuery()) {
-                int index = 0;
-                double total = 0.0;
-                boolean dataLoaded = false;
+                    // Iterate through the result set for multiple services
+                    while (rs.next()) {
+                        dataFound = true;  // Found data for the appointment
 
-                while (rs.next()) {
-                    if (!dataLoaded) {
-                        // Set appointment/patient/dentist info only once
-                        userID.setText(String.valueOf(rs.getInt("patient_id")));
-                        appID.setText(String.valueOf(rs.getInt("appointment_id")));
-                        appTime.setText(rs.getString("pref_time"));
-                        appDate.setText(rs.getString("pref_date"));
-                        patientFNAME.setText(rs.getString("patient_name"));
-                        patientNUMBER.setText(rs.getString("p_contactNumber"));
-                        dentistFNAME.setText(rs.getString("dentist_name"));
-                        specialization.setText(rs.getString("specialization"));
-                        dataLoaded = true;
+                        // Set general information only once (first row)
+                        if (index == 0) {
+                            userID.setText("Patient ID: " + rs.getInt("patient_id"));
+                            appID.setText("Appointment ID: " + rs.getInt("appointment_id"));
+                            appTime.setText("Preferred Time: " + rs.getString("pref_time"));
+                            appDate.setText("Preferred Date: " + rs.getString("pref_date"));
+                            patientFNAME.setText("Patient Name: " + rs.getString("p_fname") + " " + rs.getString("p_lname"));
+                            patientNUMBER.setText("Contact Number: " + rs.getString("p_contactNumber"));
+                            dentistFNAME.setText("Dentist: " + rs.getString("dentist_name"));
+                        }
+
+                        // Populate services
+                        if (index < serviceLabels.length) {
+                            String serviceName = rs.getString("service_name");
+                            double serviceCost = rs.getDouble("service_cost");
+                            int quantity = rs.getInt("quantity");
+                            double subtotal = serviceCost * quantity;
+
+                            serviceLabels[index].setText("Service: " + serviceName);
+                            costLabels[index].setText("Cost: " + String.format("%.2f", subtotal));
+                            total += subtotal;
+                            index++;
+                        }
                     }
 
-                    if (index < serviceLabels.length) {
-                        String serviceName = rs.getString("service_name");
-                        double unitCost = rs.getDouble("service_cost");
-                        int qty = rs.getInt("quantity");
-                        double subtotal = unitCost * qty;
-
-                        serviceLabels[index].setText(serviceName);
-                        costLabels[index].setText(String.format("%.2f", subtotal));
-                        total += subtotal;
-                        index++;
-                    }
-                    }
-
-                    if (!dataLoaded) {
+                    // If no data was found for this appointment
+                    if (!dataFound) {
                         JOptionPane.showMessageDialog(this, "❌ No treatment services found for this appointment.");
                     }
 
-                    totalCost.setText(String.format("%.2f", total));
+                    // Display total cost
+                    totalCost.setText("Total Cost: " + String.format("%.2f", total));
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "❌ Failed to load appointment slip: " + ex.getMessage());
                 }
             }
 
         } catch (SQLException ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                "<html><b>❌ Failed to load appointment slip:</b><br>" + ex.getMessage() + "</html>",
-                "SQL Error",
-                JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, "❌ Database connection failed: " + ex.getMessage());
         }
     }
 
+     // Method to generate PDF of the appointment slip
+    private void generatePdf(String filePath) {
+        try {
+            // Initialize PdfWriter (iText 7 requires PdfWriter to write the PDF to the given path)
+            PdfWriter writer = new PdfWriter(filePath);
 
+            // Create PdfDocument using the PdfWriter
+            PdfDocument pdfDoc = new PdfDocument(writer);
+
+            // Create Document (iText 7 Document is used to add elements to the PDF)
+            Document document = new Document(pdfDoc);
+
+            // Title for the Appointment Slip
+            document.add(new Paragraph("Appointment Slip")
+                    .setBold()
+                    .setFontSize(18));
+
+            // Patient and Appointment Information
+            document.add(new Paragraph("Appointment ID: " + appID.getText()));
+            document.add(new Paragraph("Patient ID: " + userID.getText()));
+            document.add(new Paragraph("Patient Name: " + patientFNAME.getText()));
+            document.add(new Paragraph("Contact Number: " + patientNUMBER.getText()));
+            document.add(new Paragraph("Preferred Time: " + appTime.getText()));
+            document.add(new Paragraph("Preferred Date: " + appDate.getText()));
+            document.add(new Paragraph("Dentist: " + dentistFNAME.getText()));
+
+            // Table for services
+            float[] columnWidths = {1, 2, 2}; // Adjust width to your preference
+            Table serviceTable = new Table(columnWidths);
+            serviceTable.addHeaderCell("Service Name");
+            serviceTable.addHeaderCell("Cost");
+            serviceTable.addHeaderCell("Quantity");
+
+            // Add service data to table from the labels
+            int index = 0;
+            while (index < serviceLabels.length && !serviceLabels[index].getText().isEmpty()) {
+                serviceTable.addCell(serviceLabels[index].getText()); // Service name
+                serviceTable.addCell(costLabels[index].getText()); // Cost
+                serviceTable.addCell("1"); // Quantity (or use your logic for quantity)
+                index++;
+            }
+
+            // Add the table to the document
+            document.add(serviceTable);
+
+            // Total cost
+            document.add(new Paragraph("Total Cost: " + totalCost.getText()).setBold());
+
+            // Close the document
+            document.close();
+
+            // Notify user
+            JOptionPane.showMessageDialog(this, "PDF generated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "❌ Error generating PDF: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Action to trigger PDF generation
+    private void exportToPdfButtonActionPerformed(ActionEvent evt) {
+        String filePath = "appointmentSlip.pdf"; // Specify the desired path
+        generatePdf(filePath); // Call the method to generate the PDF
+    }
+
+    // Initialize the Swing components (GUI components like buttons, labels)
+    private void initComponents() {
+        // Initialize your components here (labels, buttons, text fields etc.)
+        JButton exportButton = new JButton("Export to PDF");
+        exportButton.addActionListener(this::exportToPdfButtonActionPerformed);
+        // Add other buttons and setup components
+    }
 
 
 
