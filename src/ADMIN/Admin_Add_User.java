@@ -151,7 +151,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(
                     this,
                     "<html><b>Password Requirements:</b><br>" + errorMessage.toString() + "</html>",
-                    "⚠️ Password Validation Failed",
+                    "Password Validation Failed",
                     JOptionPane.ERROR_MESSAGE,
                     icon
                 );
@@ -159,7 +159,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(
                     this,
                     "<html><b>Password Requirements:</b><br>" + errorMessage.toString() + "</html>",
-                    "⚠️ Password Validation Failed",
+                    "Password Validation Failed",
                     JOptionPane.ERROR_MESSAGE
                 );
             }
@@ -184,7 +184,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(
                     this,
                     "<html><b>Hashing error:</b><br>Unable to process password securely.</html>",
-                    "❌ Error",
+                    "Error",
                     JOptionPane.ERROR_MESSAGE,
                     icon
                 );
@@ -192,7 +192,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(
                     this,
                     "<html><b>Hashing error:</b><br>Unable to process password securely.</html>",
-                    "❌ Error",
+                    "Error",
                     JOptionPane.ERROR_MESSAGE
                 );
             }
@@ -433,7 +433,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
         jPanel2.add(errorConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 330, 170, 20));
 
         image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
-        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 200, 160));
+        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 200, 170));
 
         jPanel4.setBackground(new java.awt.Color(255, 255, 255));
         jPanel4.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
@@ -450,7 +450,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
         });
         jPanel4.add(add_prof, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 40));
 
-        jPanel2.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 240, 100, 40));
+        jPanel2.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 260, 100, 40));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 860, 420));
 
@@ -635,7 +635,7 @@ public class Admin_Add_User extends javax.swing.JFrame {
             Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this,
                 "<html><b>Database error occurred.</b><br>Please try again later.</html>",
-                "❌ Error",
+                "Error",
                 JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_create_buttonMouseClicked

@@ -410,7 +410,7 @@ public class Admin_Add_Patient extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(
                 this,
                 "<html><b>Please fill in all required fields.</b><br>First name, last name, contact number, and birth date are required.</html>",
-                "⚠️ Missing Fields",
+                "Missing Fields",
                 JOptionPane.WARNING_MESSAGE
             );
             return;

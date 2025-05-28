@@ -386,7 +386,7 @@ public class Admin_Update_User extends javax.swing.JFrame {
         jPanel2.add(errorConfirmPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 330, 170, 20));
 
         image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
-        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 90, 200, 160));
+        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, 200, 180));
 
         delPanel.setBackground(new java.awt.Color(255, 255, 255));
         delPanel.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
@@ -577,7 +577,7 @@ public class Admin_Update_User extends javax.swing.JFrame {
          if (selectedImagePath == null || selectedImagePath.equals(defaultImagePath)) {
             JOptionPane.showMessageDialog(
                 this,
-                "<html><b>ℹ️ Profile picture is already set to default.</b><br>No changes were made.</html>",
+                "<html><b>Profile picture is already set to default.</b><br>No changes were made.</html>",
                 "Information",
                 JOptionPane.INFORMATION_MESSAGE
             );

@@ -453,7 +453,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
                                 JOptionPane.showMessageDialog(
                                     this,
                                     "<html><b>User activated, but failed to send email:</b><br>" + me.getMessage() + "</html>",
-                                    "✉️ Email Error",
+                                    "✉ Email Error",
                                     JOptionPane.WARNING_MESSAGE
                                 );
                             }
@@ -464,10 +464,11 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
 
                         JOptionPane.showMessageDialog(
                             this,
-                            "<html><b>User account activated successfully!</b><br>The user can now access the system.</html>",
+                            "<html><b>User account activated successfully!</b><br>The user can now access the system.<br>An email notification has been sent to the user.</html>",
                             "Activation Successful",
                             JOptionPane.INFORMATION_MESSAGE
                         );
+
                     } else {
                         JOptionPane.showMessageDialog(
                             this,
@@ -554,7 +555,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
             int confirmation = JOptionPane.showConfirmDialog(
                 this,
                 "<html><b>Are you sure you want to archive this user?</b><br>This action will not delete any records.</html>",
-                "⚠ Confirm Archive",
+                "Confirm Archive",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
             );
@@ -573,7 +574,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
                         JOptionPane.showMessageDialog(
                             this,
                             "<html><b>User archived successfully!</b><br>The account is now hidden from the active user list.</html>",
-                            "✅ Archive Successful",
+                            "Archive Successful",
                             JOptionPane.INFORMATION_MESSAGE
                         );
                     } else {
@@ -592,7 +593,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
                     JOptionPane.showMessageDialog(
                         this,
                         "<html><b>Database error:</b><br>" + e.getMessage() + "</html>",
-                        "❗ SQL Error",
+                        "SQL Error",
                         JOptionPane.ERROR_MESSAGE
                     );
                 }
@@ -601,7 +602,7 @@ public class Admin_User_Internal extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(
                 this,
                 "<html><b>Please select a user to archive.</b></html>",
-                "🔍 No User Selected",
+                "No User Selected",
                 JOptionPane.WARNING_MESSAGE
             );
         }

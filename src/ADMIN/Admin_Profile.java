@@ -4,6 +4,7 @@ package ADMIN;
 import AUTHENTICATION.*;
 import Config.*;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Image;
 import javax.swing.ImageIcon;
 import java.awt.image.BufferedImage;
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,15 +36,19 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
   
     public Admin_Profile() {
         initComponents();
-      
-        
-        //remove border
-        this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0,0,0,0));
-        BasicInternalFrameUI bi = (BasicInternalFrameUI)this.getUI();
+        this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        BasicInternalFrameUI bi = (BasicInternalFrameUI) this.getUI();
         bi.setNorthPane(null);
-        
-        formInternalFrameActivated(null); 
-        
+
+        // Load profile on frame activation
+        formInternalFrameActivated(null);
+
+         // Delay the image loading until UI is ready
+        SwingUtilities.invokeLater(() -> {
+            formInternalFrameActivated(null);
+        });
+
+        // Still useful for when the frame is re-activated later
         addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
             @Override
             public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
@@ -50,6 +56,64 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
             }
         });
     }
+    
+    private void loadAdminProfile() {
+        int userId = Session.getInstance().getUserId();
+
+        try (Connection con = ConnectDB.getConnection()) {
+            // Load from users table
+            String userSql = "SELECT u_username, u_email, u_role, u_image FROM users WHERE user_id = ?";
+            try (PreparedStatement pst = con.prepareStatement(userSql)) {
+                pst.setInt(1, userId);
+                ResultSet rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    String username = rs.getString("u_username");
+                    String email = rs.getString("u_email");
+                    String role = rs.getString("u_role");
+                    String imagePath = rs.getString("u_image");
+
+                    userID.setText(String.valueOf(userId));
+                    User.setText("@" + username);
+                    Email.setText(email);
+                    Role.setText(role);
+
+                    if (imagePath != null && !imagePath.isEmpty()) {
+                        File imageFile = new File(imagePath);
+                        if (imageFile.exists()) {
+                            ImageIcon icon = new ImageIcon(imagePath);
+                            Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
+                            image.setIcon(new ImageIcon(img));
+                        } else {
+                            loadDefaultImage();
+                        }
+                    } else {
+                        loadDefaultImage();
+                    }
+                }
+            }
+
+            // Load from staff table using user_id (✅ fixed)
+            String staffSql = "SELECT CONCAT(s_fname, ' ', s_lname) AS fullname, s_gender FROM staff WHERE user_id = ?";
+            try (PreparedStatement pst = con.prepareStatement(staffSql)) {
+                pst.setInt(1, userId);
+                ResultSet rsStaff = pst.executeQuery();
+
+                if (rsStaff.next()) {
+                    fullname.setText(rsStaff.getString("fullname"));
+                    Gender.setText(rsStaff.getString("s_gender"));
+                } else {
+                    fullname.setText("Account not yet updated.");
+                    Gender.setText("Account not yet updated.");
+                }
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error loading admin profile: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     
         private String selectedImagePath = null;
         private String currentImageFromDB = null; // the image path from database
@@ -62,21 +126,30 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
         edit.setVisible(true);
     }
     
-     private void loadDefaultImage() {
-        String defaultImagePath = "src/default/u_blank.jpg";
-        ImageIcon icon = new ImageIcon(defaultImagePath);
+    private void loadDefaultImage() {
+        SwingUtilities.invokeLater(() -> {
+            String defaultImagePath = "src/default/u_blank.jpg";
+            File file = new File(defaultImagePath);
 
-        int width = image.getWidth() > 0 ? image.getWidth() : 120;
-        int height = image.getHeight() > 0 ? image.getHeight() : 120;
+            if (!file.exists()) {
+                System.err.println("⚠️ Default image file not found: " + defaultImagePath);
+                return;
+            }
 
-        Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        image.setIcon(new ImageIcon(img));
+            ImageIcon icon = new ImageIcon(defaultImagePath);
+            int width = image.getWidth();
+            int height = image.getHeight();
 
-        selectedImagePath = defaultImagePath;
-        currentImageFromDB = defaultImagePath;
+            if (width <= 0 || height <= 0) {
+                Dimension size = image.getPreferredSize();
+                width = (size.width > 0) ? size.width : 120;
+                height = (size.height > 0) ? size.height : 120;
+            }
+
+            Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            image.setIcon(new ImageIcon(img));
+        });
     }
-      
-
 
 
     Color hover = new Color (0,51,51);
@@ -253,62 +326,13 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_edit_profileMouseClicked
 
     private void formInternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameActivated
-         Session sess = Session.getInstance();
-
-    if (sess.getUserId() == 0) {
-        JOptionPane.showMessageDialog(null, "No Account, Log in First!", "Notice", JOptionPane.ERROR_MESSAGE);
-        LogIn lgf = new LogIn();
-        lgf.setVisible(true);
-        this.dispose();
-    } else {
-        try {
-            ConnectDB dbc = new ConnectDB();
-            ResultSet rs = dbc.getData("SELECT * FROM users WHERE user_id = '" + sess.getUserId() + "'");
-
-            if (rs.next()) {
-                int id = sess.getUserId();
-                String username = rs.getString("u_username");
-                String email = rs.getString("u_email");
-                String role = rs.getString("u_role");
-                String imagePath = rs.getString("u_image");
-
-                userID.setText(String.valueOf(id));
-                User.setText("@" + username);
-                Email.setText(email);
-                Role.setText(role);
-
-                // Get full name and gender from staff table
-                ResultSet rsStaff = dbc.getData("SELECT CONCAT(s_fname, ' ', s_lname) AS fullname, s_gender FROM staff WHERE staff_id = '" + id + "'");
-                String fullName = "Account not yet updated.";
-                String genderText = "Account not yet updated.";
-
-                if (rsStaff.next()) {
-                    fullName = rsStaff.getString("fullname");
-                    genderText = rsStaff.getString("s_gender");
-                }
-
-                fullname.setText(fullName);
-                Gender.setText(genderText);
-
-                // Load and display user image
-                if (imagePath != null && !imagePath.trim().isEmpty()) {
-                    File imageFile = new File(imagePath);
-                    if (imageFile.exists()) {
-                        ImageIcon icon = new ImageIcon(imagePath);
-                        Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
-                        image.setIcon(new ImageIcon(img));
-                    } else {
-                        loadDefaultImage();
-                    }
-                } else {
-                    loadDefaultImage();
-                }
-            }
-
-        } catch (SQLException ex) {
-            System.out.println("Error: " + ex);
-        }
-    }
+        if (Session.getInstance().getUserId() == 0) {
+           JOptionPane.showMessageDialog(null, "No Account, Log in First!", "Notice", JOptionPane.ERROR_MESSAGE);
+           new LogIn().setVisible(true);
+           this.dispose();
+       } else {
+           loadAdminProfile(); // ✅ call the clean method
+       }
     }//GEN-LAST:event_formInternalFrameActivated
 
     private void edit_profileMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_edit_profileMouseEntered

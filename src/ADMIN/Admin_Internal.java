@@ -28,32 +28,47 @@ import org.jfree.data.general.DefaultPieDataset;
 
 public class Admin_Internal extends javax.swing.JInternalFrame {
 
-    public Admin_Internal() {
-        initComponents();
-        loadDashboardStats();
-        showPieChart();
+   public Admin_Internal() {
+    initComponents();
+    loadDashboardStats();
+    showPieChart();
 
         // Get session info
         Session sess = Session.getInstance();
         String username = sess.getUsername();
         int userId = sess.getUserId();
-        String fname = sess.getStaffFirstName();
-        String lname = sess.getStaffLastName();
+
+        String fname = "", lname = "";
+
+        // 🔥 Fetch from DB instead of session to ensure latest data
+        try (Connection con = ConnectDB.getConnection()) {
+            String sql = "SELECT s_fname, s_lname FROM staff WHERE user_id = ?";
+            try (PreparedStatement pst = con.prepareStatement(sql)) {
+                pst.setInt(1, userId);
+                ResultSet rs = pst.executeQuery();
+                if (rs.next()) {
+                    fname = rs.getString("s_fname");
+                    lname = rs.getString("s_lname");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (fname == null || lname == null || fname.isEmpty() || lname.isEmpty()) {
             admin.setText("Update your profile");
         } else {
             admin.setText(fname + " " + lname);
         }
+
         dashboard.setText(username + "'s Dashboard");
-        
-        
 
         // UI tweaks
         this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0,0,0,0));
         BasicInternalFrameUI bi = (BasicInternalFrameUI)this.getUI();
         bi.setNorthPane(null);
     }
+
     
 
    private void loadDashboardStats() {
@@ -108,13 +123,6 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         rs.close();
         stmt.close();
         return count;
-    }
-    
-    private void showProfile() {
-        Admin_Profile prof = new Admin_Profile();
-        JDesktopPane desktop = Session.getInstance().getDesktopPane();
-        desktop.add(prof);
-        prof.setVisible(true);
     }
     
     private void showLogs(){
@@ -214,8 +222,6 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         refresh = new javax.swing.JLabel();
         picture = new javax.swing.JLabel();
         admin1 = new javax.swing.JLabel();
-        profilePanel = new javax.swing.JPanel();
-        refresh1 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         activeUsers = new javax.swing.JLabel();
         jPanel6 = new javax.swing.JPanel();
@@ -340,7 +346,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         refresh.setText("System Logs");
         logsPanel.add(refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 140, 30));
 
-        jPanel2.add(logsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 140, 160, 30));
+        jPanel2.add(logsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 160, 30));
 
         picture.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         picture.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/mother.png"))); // NOI18N
@@ -349,28 +355,6 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         admin1.setFont(new java.awt.Font("Tahoma", 0, 15)); // NOI18N
         admin1.setText("Admin");
         jPanel2.add(admin1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 150, 30));
-
-        profilePanel.setBackground(new java.awt.Color(0, 51, 51));
-        profilePanel.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                profilePanelMouseClicked(evt);
-            }
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                profilePanelMouseEntered(evt);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                profilePanelMouseExited(evt);
-            }
-        });
-        profilePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        refresh1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        refresh1.setForeground(new java.awt.Color(255, 255, 255));
-        refresh1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        refresh1.setText("View Profile");
-        profilePanel.add(refresh1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 140, 30));
-
-        jPanel2.add(profilePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 160, 30));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 850, 190));
 
@@ -663,29 +647,17 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_usernameActionPerformed
 
-    private void logsPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logsPanelMouseClicked
-        showLogs();
-    }//GEN-LAST:event_logsPanelMouseClicked
+    private void logsPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logsPanelMouseExited
+        logsPanel.setBackground(navColor);
+    }//GEN-LAST:event_logsPanelMouseExited
 
     private void logsPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logsPanelMouseEntered
         logsPanel.setBackground(hoverColor);
     }//GEN-LAST:event_logsPanelMouseEntered
 
-    private void logsPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logsPanelMouseExited
-        logsPanel.setBackground(navColor);
-    }//GEN-LAST:event_logsPanelMouseExited
-
-    private void profilePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseClicked
-        showProfile();
-    }//GEN-LAST:event_profilePanelMouseClicked
-
-    private void profilePanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseEntered
-        profilePanel.setBackground(hoverColor);
-    }//GEN-LAST:event_profilePanelMouseEntered
-
-    private void profilePanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseExited
-       profilePanel.setBackground(navColor);
-    }//GEN-LAST:event_profilePanelMouseExited
+    private void logsPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logsPanelMouseClicked
+        showLogs();
+    }//GEN-LAST:event_logsPanelMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -739,9 +711,7 @@ public class Admin_Internal extends javax.swing.JInternalFrame {
     private javax.swing.JLabel pendingUsers;
     private javax.swing.JLabel picture;
     private javax.swing.JPanel pieChart;
-    private javax.swing.JPanel profilePanel;
     private javax.swing.JLabel refresh;
-    private javax.swing.JLabel refresh1;
     private javax.swing.JLabel totalAppointments;
     private javax.swing.JLabel totalServices;
     private javax.swing.JTextField username;

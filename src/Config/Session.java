@@ -15,6 +15,8 @@ public class Session {
     private JDesktopPane mainDesktop;
     private JDesktopPane parentDesktop;
     private JDesktopPane desktopSettings;
+    private JDesktopPane firstDesktop;
+    private JDesktopPane secondDesktop;
     
     private String verificationPin;
 
@@ -102,6 +104,22 @@ public class Session {
     public JDesktopPane getDesktopSettings() {
         return desktopSettings;
     }
+    
+     public void setDesktopFirst(JDesktopPane desktopPane) {
+        this.firstDesktop = desktopPane;
+    }
+
+    public JDesktopPane getDesktopFirst() {
+        return firstDesktop;
+    }
+    
+    public void setDesktopSecond(JDesktopPane desktopPane) {
+        this.secondDesktop = desktopPane;
+    }
+
+    public JDesktopPane getDesktopSecond() {
+        return secondDesktop;
+    }
 
     // Patient setters and getters
     public void setPatient(int id, String fname, String lname, String gender, String dob, String contact) {
@@ -141,7 +159,11 @@ public class Session {
         }
         return "";
     }
-
+    
+    public void setPatientName(String firstName, String lastName) {
+        this.patientFirstName = firstName;
+        this.patientLastName = lastName;
+    }
 
     public String getPatientGender() {
         return patientGender;

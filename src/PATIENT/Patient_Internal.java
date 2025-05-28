@@ -1,7 +1,12 @@
 
 package PATIENT;
 
+import Config.ConnectDB;
+import Config.Session;
 import java.awt.Color;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 
@@ -14,6 +19,47 @@ public class Patient_Internal extends javax.swing.JInternalFrame {
         this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0,0,0,0));
         BasicInternalFrameUI bi = (BasicInternalFrameUI)this.getUI();
         bi.setNorthPane(null);
+        
+         loadPatientInfo();  // Method to load patient info after initialization
+
+        // Update the patient label with the latest full name
+        Session sess = Session.getInstance();
+        String patientFullName = sess.getPatientFullName();
+
+        // Set the label to the full name
+        patient.setText(patientFullName);
+    }
+    
+    private void loadPatientInfo() {
+        Session sess = Session.getInstance();
+        int userId = sess.getUserId();
+        String fname = "", lname = "";
+
+        // Fetch patient info from the database to ensure latest data
+        try (Connection con = ConnectDB.getConnection()) {
+            String sql = "SELECT p_fname, p_lname FROM patients WHERE user_id = ?";
+            try (PreparedStatement pst = con.prepareStatement(sql)) {
+                pst.setInt(1, userId);
+                ResultSet rs = pst.executeQuery();
+                if (rs.next()) {
+                    fname = rs.getString("p_fname");
+                    lname = rs.getString("p_lname");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (fname == null || lname == null || fname.isEmpty() || lname.isEmpty()) {
+            // If no data found, set default text
+            patient.setText("Update your profile");
+        } else {
+            // Set the patient full name to session
+            sess.setPatientName(fname, lname);
+
+            // Set the label text with the updated full name
+            patient.setText(fname + " " + lname);
+        }
     }
     
     Color hoverColor = new Color (55,162,153);

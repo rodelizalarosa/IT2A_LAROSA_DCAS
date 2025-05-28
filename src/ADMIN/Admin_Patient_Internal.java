@@ -3,7 +3,6 @@ package ADMIN;
 
 import Config.ConnectDB;
 import Config.Session;
-import Validations.Bind_Patient;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;

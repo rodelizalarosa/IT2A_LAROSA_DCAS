@@ -310,10 +310,11 @@ public class LogIn extends javax.swing.JFrame {
                     if ("Pending".equalsIgnoreCase(status)) {
                         JOptionPane.showMessageDialog(
                             this,
-                            "<html><b>Your account is pending approval.</b><br>Please contact the administrator.</html>",
-                            "⏳ Login Pending",
+                            "<html><b>Your account is pending approval.</b><br>Please wait for the account activation email confirmation.</html>",
+                            "Login Pending",
                             JOptionPane.WARNING_MESSAGE
                         );
+
                     } else {
                         sess.setUser(userId, user, roleFromDB);
                         sess.logEvent("LOGIN", "User logged in");
@@ -321,7 +322,7 @@ public class LogIn extends javax.swing.JFrame {
                         JOptionPane.showMessageDialog(
                             this,
                             "<html><b>Login successful!</b><br>You are logged in as <b>" + roleFromDB + "</b>.</html>",
-                            "✅ Login Success",
+                            "Login Success",
                             JOptionPane.INFORMATION_MESSAGE
                         );
 
@@ -340,7 +341,7 @@ public class LogIn extends javax.swing.JFrame {
                     JOptionPane.showMessageDialog(
                         this,
                         "<html><b>Invalid username or password.</b><br>Please try again.</html>",
-                        "❌ Login Failed",
+                        "Login Failed",
                         JOptionPane.ERROR_MESSAGE
                     );
                 }

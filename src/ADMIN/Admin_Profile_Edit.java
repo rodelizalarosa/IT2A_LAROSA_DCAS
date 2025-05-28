@@ -1,10 +1,12 @@
 
 package ADMIN;
 
+import AUTHENTICATION.LogIn;
 import AUTHENTICATION.Register;
 import Config.*;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
@@ -33,12 +35,15 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
+    private int userId;
+    
     public Admin_Profile_Edit() {
         initComponents();
         borderField();
@@ -48,6 +53,19 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         this.setBorder(javax.swing.BorderFactory.createEmptyBorder(0,0,0,0));
         BasicInternalFrameUI bi = (BasicInternalFrameUI)this.getUI();
         bi.setNorthPane(null);
+        
+        // Delay the image loading until UI is ready
+        SwingUtilities.invokeLater(() -> {
+            formInternalFrameActivated(null);
+        });
+
+        // Still useful for when the frame is re-activated later
+        addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
+            @Override
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameActivated(evt);
+            }
+        });
     }
     
     private void borderField(){
@@ -129,8 +147,15 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         return false;
     }
     
+
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        return email.matches(emailRegex);
+    }
+    
     private void loadAdminProfile() {
         int userId = Session.getInstance().getUserId();
+        System.out.println("Loading profile for user ID: " + userId);
 
         try (Connection con = ConnectDB.getConnection()) {
 
@@ -140,16 +165,40 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 pst.setInt(1, userId);
                 ResultSet rs = pst.executeQuery();
                 if (rs.next()) {
-                    userName.setText(rs.getString("u_username"));
-                    Email.setText(rs.getString("u_email"));
-
-                    // Handle image
+                    String username = rs.getString("u_username");
+                    String email = rs.getString("u_email");
                     String img = rs.getString("u_image");
+
+                    userName.setText(username);
+                    Email.setText(email);
+
+                    String imagePath;
                     if (img == null || img.isEmpty()) {
-                        image.setIcon(new ImageIcon("src/default/u_blank.jpg"));
+                        imagePath = "src/default/u_blank.jpg";
                     } else {
-                        image.setIcon(new ImageIcon("src/u_images/" + img));
+                        imagePath = "src/u_images/" + img;
                     }
+
+                    String finalImagePath = imagePath; // required for use in lambda
+
+                    SwingUtilities.invokeLater(() -> {
+                        ImageIcon icon = new ImageIcon(finalImagePath);
+
+                        int width = image.getWidth();
+                        int height = image.getHeight();
+
+                        if (width <= 0 || height <= 0) {
+                            Dimension size = image.getPreferredSize();
+                            width = size.width > 0 ? size.width : 120;
+                            height = size.height > 0 ? size.height : 120;
+                        }
+
+                        Image scaledImage = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                        image.setIcon(new ImageIcon(scaledImage));
+
+                        selectedImagePath = finalImagePath;
+                        currentImageFromDB = img;
+                    });
                 }
             }
 
@@ -159,33 +208,54 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 pst.setInt(1, userId);
                 ResultSet rs = pst.executeQuery();
                 if (rs.next()) {
-                    firstName.setText(rs.getString("s_fname"));
-                    middleName.setText(rs.getString("s_mname"));
-                    lastName.setText(rs.getString("s_lname"));
-                    Gender.setSelectedItem(rs.getString("s_gender"));
+                    String fname = rs.getString("s_fname");
+                    String mname = rs.getString("s_mname");
+                    String lname = rs.getString("s_lname");
+                    String gender = rs.getString("s_gender");
+
+                    System.out.println("Staff Name: " + fname + " " + lname);
+
+                    firstName.setText(fname);
+                    middleName.setText(mname);
+                    lastName.setText(lname);
+                    Gender.setSelectedItem(gender);
+
+                    // 🔄 Update session with latest names
+                    Session.getInstance().setStaffName(fname, lname);
+                } else {
+                    System.out.println("No staff profile found for user ID: " + userId);
                 }
             }
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "❌ Error loading admin profile: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Error loading admin profile: " + e.getMessage());
+            e.printStackTrace();
         }
     }
-
-
-    private boolean isValidEmail(String email) {
-        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-        return email.matches(emailRegex);
-    }
     
-      private void loadDefaultImage() {
-        String defaultImagePath = "src/default/u_blank.jpg";
-        ImageIcon icon = new ImageIcon(defaultImagePath);
-        Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
-        image.setIcon(new ImageIcon(img));
+     private void loadDefaultImage() {
+        SwingUtilities.invokeLater(() -> {
+            String defaultImagePath = "src/default/u_blank.jpg";
+            ImageIcon icon = new ImageIcon(defaultImagePath);
 
-        selectedImagePath = defaultImagePath; // 🔥 important!
-        currentImageFromDB = defaultImagePath; // 🔥 important!
+            int width = image.getWidth();
+            int height = image.getHeight();
+
+            // Fallback if width or height is not valid
+            if (width <= 0 || height <= 0) {
+                Dimension size = image.getPreferredSize();
+                width = size.width > 0 ? size.width : 120;
+                height = size.height > 0 ? size.height : 120;
+            }
+
+            Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            image.setIcon(new ImageIcon(img));
+
+            selectedImagePath = defaultImagePath;
+            currentImageFromDB = defaultImagePath;
+        });
     }
+
 
       
     private boolean isAllFieldsEmpty() {
@@ -238,7 +308,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(
                     this,
-                    "<html><b>❌ Error updating image path:</b><br>" + ex.getMessage() + "</html>",
+                    "<html><b>Error updating image path:</b><br>" + ex.getMessage() + "</html>",
                     "Error",
                     JOptionPane.ERROR_MESSAGE
                 );
@@ -282,6 +352,23 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         errorEmail = new javax.swing.JLabel();
         image = new javax.swing.JLabel();
 
+        addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameActivated(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
@@ -360,7 +447,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 save_buttonMouseClicked(evt);
             }
         });
-        jPanel2.add(save_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 340, 210, 40));
+        jPanel2.add(save_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 350, 210, 40));
         jPanel2.add(errorGender, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 320, 220, 20));
 
         delPanel.setBackground(new java.awt.Color(255, 255, 255));
@@ -480,7 +567,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         jPanel2.add(errorEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 230, 220, 20));
 
         image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
-        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 200, 180));
+        jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 200, 190));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, 860, 410));
 
@@ -502,12 +589,12 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         String em = Email.getText();
 
         if (em.isEmpty()) {
-            errorGender.setForeground(Color.RED);
-            errorGender.setText("Email is required");
-            errorGender.setForeground(Color.RED);
+            errorEmail.setForeground(Color.RED);
+            errorEmail.setText("Email is required");
+            errorEmail.setForeground(Color.RED);
         } else {
-            errorGender.setForeground(Color.BLACK);
-            errorGender.setText("");
+            errorEmail.setForeground(Color.BLACK);
+            errorEmail.setText("");
         }
 
         Email.repaint();
@@ -519,121 +606,123 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
 
     private void save_buttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_save_buttonMouseClicked
        // Assuming userId is already set (from loadUser or other logic)
-    int selectedUserId = Session.getInstance().getUserId(); 
+        int selectedUserId = Session.getInstance().getUserId(); 
 
-    ConnectDB connect = new ConnectDB();
+        ConnectDB connect = new ConnectDB();
 
-    String usernameText = userName.getText().trim();
-    String emailText = Email.getText().trim();
-    String fName = firstName.getText().trim();
-    String mName = middleName.getText().trim();
-    String lName = lastName.getText().trim();
-    String genderValue = Gender.getSelectedItem().toString().trim();
-    
-    StringBuilder errorMessage = new StringBuilder();
+        String usernameText = userName.getText().trim();
+        String emailText = Email.getText().trim();
+        String fName = firstName.getText().trim();
+        String mName = middleName.getText().trim();
+        String lName = lastName.getText().trim();
+        String genderValue = Gender.getSelectedItem().toString().trim();
 
-    // Validation for fields
-    if (isAllFieldsEmpty()) {
-        errorMessage.append("Please fill out the registration form.\n");
-    } else {
-        if (emailText.isEmpty()) {
-            errorMessage.append("Email cannot be empty.\n");
-        } else if (!isValidEmail(emailText)) {
-            errorMessage.append("Invalid email format.\n");
-        } else if (isEmailTaken(emailText, selectedUserId)) {
-            errorMessage.append("Email is already taken.\n");
-        }
+        StringBuilder errorMessage = new StringBuilder();
 
-        if (usernameText.isEmpty()) {
-            errorMessage.append("Username cannot be empty.\n");
-        } else if (isUsernameTaken(usernameText, selectedUserId)) {
-            errorMessage.append("Username is already taken.\n");
-        }
-    }
-
-    if (errorMessage.length() > 0) {
-        JOptionPane.showMessageDialog(this,
-            "<html><b>⚠️ Validation Error:</b><br>" + errorMessage.toString() + "</html>",
-            "Validation Error",
-            JOptionPane.ERROR_MESSAGE);
-        return;
-    }
-
-    // Assuming no file was selected for image update (if there's an image field, handle it like this)
-    String destinationImagePath = currentImageFromDB;  // Use the current image path from DB by default
-
-    // Update 'users' table with username, email, and image
-    String updateUserSql = "UPDATE dcas_sys.users SET u_username = ?, u_email = ?, u_image = ? WHERE user_id = ?";
-    try (Connection con = connect.getConnection(); PreparedStatement pst = con.prepareStatement(updateUserSql)) {
-        pst.setString(1, usernameText);
-        pst.setString(2, emailText);
-        pst.setString(3, destinationImagePath);  // Assuming no image change, keeping the current path
-        pst.setInt(4, selectedUserId);
-        pst.executeUpdate();
-    } catch (SQLException ex) {
-        Logger.getLogger(Admin_Profile_Edit.class.getName()).log(Level.SEVERE, null, ex);
-        JOptionPane.showMessageDialog(this, "Error updating user data: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
-
-    // Update or insert into 'staff' table for profile data
-    String checkStaffSql = "SELECT COUNT(*) FROM staff WHERE user_id = ?";
-    try (Connection con = connect.getConnection(); PreparedStatement checkPst = con.prepareStatement(checkStaffSql)) {
-        checkPst.setInt(1, selectedUserId);
-        ResultSet rs = checkPst.executeQuery();
-        rs.next();
-        boolean staffExists = rs.getInt(1) > 0;
-
-        if (staffExists) {
-            String updateStaffSql = "UPDATE staff SET s_fname = ?, s_mname = ?, s_lname = ?, s_gender = ? WHERE user_id = ?";
-            try (PreparedStatement pst = con.prepareStatement(updateStaffSql)) {
-                pst.setString(1, fName);
-                pst.setString(2, mName);
-                pst.setString(3, lName);
-                pst.setString(4, genderValue);
-                pst.setInt(5, selectedUserId);
-                pst.executeUpdate();
-            }
+        // Validation for fields
+        if (isAllFieldsEmpty()) {
+            errorMessage.append("Please fill out the registration form.\n");
         } else {
-            String insertStaffSql = "INSERT INTO staff (user_id, s_fname, s_mname, s_lname, s_gender) VALUES (?, ?, ?, ?, ?)";
-            try (PreparedStatement pst = con.prepareStatement(insertStaffSql)) {
-                pst.setInt(1, selectedUserId);
-                pst.setString(2, fName);
-                pst.setString(3, mName);
-                pst.setString(4, lName);
-                pst.setString(5, genderValue);
-                pst.executeUpdate();
+            if (emailText.isEmpty()) {
+                errorMessage.append("Email cannot be empty.\n");
+            } else if (!isValidEmail(emailText)) {
+                errorMessage.append("Invalid email format.\n");
+            } else if (isEmailTaken(emailText, selectedUserId)) {
+                errorMessage.append("Email is already taken.\n");
+            }
+
+            if (usernameText.isEmpty()) {
+                errorMessage.append("Username cannot be empty.\n");
+            } else if (isUsernameTaken(usernameText, selectedUserId)) {
+                errorMessage.append("Username is already taken.\n");
             }
         }
-    } catch (SQLException ex) {
-        Logger.getLogger(Admin_Profile_Edit.class.getName()).log(Level.SEVERE, null, ex);
-        JOptionPane.showMessageDialog(this, "Error updating staff data: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
 
-    // ** Image Handling (same as your original method) **
-    // If the image exists, update the image on the UI
-    try {
-        File imgFile = new File(destinationImagePath);
-        if (imgFile.exists()) {
-            ImageIcon icon = new ImageIcon(destinationImagePath);
-            Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
-            image.setIcon(new ImageIcon(img));
-        } else {
-            loadDefaultImage();  // Load default image if file does not exist
+        if (errorMessage.length() > 0) {
+            JOptionPane.showMessageDialog(this,
+                "<html><b>⚠️ Validation Error:</b><br>" + errorMessage.toString() + "</html>",
+                "Validation Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
         }
-    } catch (Exception e) {
-        loadDefaultImage();
-        System.out.println("Error displaying image: " + e.getMessage());
-    }
 
-    // Log event and notify success
-    Session sess = Session.getInstance();
-    sess.logEvent("UPDATED USER PROFILE", "Admin updated a user profile.");
-    JOptionPane.showMessageDialog(this, 
-        "<html><b>✅ Updated User Successfully!</b><br>Your changes have been saved.</html>", 
-        "Success", 
-        JOptionPane.INFORMATION_MESSAGE);
+        // Assuming no file was selected for image update (if there's an image field, handle it like this)
+        String destinationImagePath = currentImageFromDB;  // Use the current image path from DB by default
+
+        // Update 'users' table with username, email, and image
+        String updateUserSql = "UPDATE dcas_sys.users SET u_username = ?, u_email = ?, u_image = ? WHERE user_id = ?";
+        try (Connection con = connect.getConnection(); PreparedStatement pst = con.prepareStatement(updateUserSql)) {
+            pst.setString(1, usernameText);
+            pst.setString(2, emailText);
+            pst.setString(3, destinationImagePath);  // Assuming no image change, keeping the current path
+            pst.setInt(4, selectedUserId);
+            pst.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(Admin_Profile_Edit.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "Error updating user data: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Update or insert into 'staff' table for profile data
+        String checkStaffSql = "SELECT COUNT(*) FROM staff WHERE user_id = ?";
+        try (Connection con = connect.getConnection(); PreparedStatement checkPst = con.prepareStatement(checkStaffSql)) {
+            checkPst.setInt(1, selectedUserId);
+            ResultSet rs = checkPst.executeQuery();
+            rs.next();
+            boolean staffExists = rs.getInt(1) > 0;
+
+            if (staffExists) {
+                String updateStaffSql = "UPDATE staff SET s_fname = ?, s_mname = ?, s_lname = ?, s_gender = ? WHERE user_id = ?";
+                try (PreparedStatement pst = con.prepareStatement(updateStaffSql)) {
+                    pst.setString(1, fName);
+                    pst.setString(2, mName);
+                    pst.setString(3, lName);
+                    pst.setString(4, genderValue);
+                    pst.setInt(5, selectedUserId);
+                    pst.executeUpdate();
+                }
+            } else {
+                String insertStaffSql = "INSERT INTO staff (user_id, s_fname, s_mname, s_lname, s_gender) VALUES (?, ?, ?, ?, ?)";
+                try (PreparedStatement pst = con.prepareStatement(insertStaffSql)) {
+                    pst.setInt(1, selectedUserId);
+                    pst.setString(2, fName);
+                    pst.setString(3, mName);
+                    pst.setString(4, lName);
+                    pst.setString(5, genderValue);
+                    pst.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Admin_Profile_Edit.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "Error updating staff data: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Session session = Session.getInstance();
+        session.setStaffName(fName, lName);
+
+
+        try {
+            File imgFile = new File(destinationImagePath);
+            if (imgFile.exists()) {
+                ImageIcon icon = new ImageIcon(destinationImagePath);
+                Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
+                image.setIcon(new ImageIcon(img));
+            } else {
+                loadDefaultImage();  // Load default image if file does not exist
+            }
+        } catch (Exception e) {
+            loadDefaultImage();
+            System.out.println("Error displaying image: " + e.getMessage());
+        }
+
+        // Log event and notify success
+        Session sess = Session.getInstance();
+        sess.logEvent("UPDATED USER PROFILE", "Admin updated a user profile.");
+        JOptionPane.showMessageDialog(this, 
+            "<html><b>Updated User Successfully!</b><br>Your changes have been saved.</html>", 
+            "Success", 
+            JOptionPane.INFORMATION_MESSAGE);
 
     }//GEN-LAST:event_save_buttonMouseClicked
 
@@ -747,7 +836,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
        if (selectedImagePath == null || selectedImagePath.equals(defaultImagePath)) {
             JOptionPane.showMessageDialog(
                 this,
-                "<html><b>ℹ️ Profile picture is already set to default.</b><br>No changes were made.</html>",
+                "<html><b>Profile picture is already set to default.</b><br>No changes were made.</html>",
                 "Information",
                 JOptionPane.INFORMATION_MESSAGE
             );
@@ -784,6 +873,16 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
             updateUserImagePath(userId, defaultImagePath);
         }
     }//GEN-LAST:event_delPanelMouseClicked
+
+    private void formInternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameActivated
+        if (Session.getInstance().getUserId() == 0) {
+           JOptionPane.showMessageDialog(null, "No Account, Log in First!", "Notice", JOptionPane.ERROR_MESSAGE);
+           new LogIn().setVisible(true);
+           this.dispose();
+       } else {
+           loadAdminProfile(); // ✅ call the clean method
+       }
+    }//GEN-LAST:event_formInternalFrameActivated
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

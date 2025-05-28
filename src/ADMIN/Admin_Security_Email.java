@@ -104,8 +104,8 @@ public class Admin_Security_Email extends javax.swing.JFrame {
         account1.setBackground(new java.awt.Color(55, 162, 153));
         account1.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         account1.setForeground(new java.awt.Color(55, 162, 153));
-        account1.setText("Security Settings");
-        security_header.add(account1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 0, 210, 50));
+        account1.setText("Admin Security Settings");
+        security_header.add(account1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 0, 270, 50));
 
         jPanel1.add(security_header, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, 560, 50));
 
@@ -234,6 +234,7 @@ public class Admin_Security_Email extends javax.swing.JFrame {
     private void cancelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelMouseClicked
         Admin_Security sec = new Admin_Security();
         sec.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_cancelMouseClicked
 
     private void cancelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelMouseEntered

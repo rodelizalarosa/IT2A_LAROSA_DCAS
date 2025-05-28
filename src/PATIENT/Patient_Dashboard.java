@@ -13,6 +13,8 @@ public class Patient_Dashboard extends javax.swing.JFrame {
     public Patient_Dashboard() {
         initComponents();
         showDashboard();
+        
+        Session.getInstance().setDesktopFirst(firstDesktop); // 
     }
     
      private void showDashboard(){
@@ -21,10 +23,10 @@ public class Patient_Dashboard extends javax.swing.JFrame {
         adm.setVisible(true);
     }
     
-    private void showProfile() {
-        Patient_Profile prof = new Patient_Profile();
-        firstDesktop.add(prof);
-        prof.setVisible(true);
+    private void showSettings() {
+        Patient_Settings set = new Patient_Settings();
+        set.setVisible(true);
+       
     }
     
     
@@ -45,11 +47,13 @@ public class Patient_Dashboard extends javax.swing.JFrame {
         dashboard = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        profilePanel = new javax.swing.JPanel();
+        settingsPanel = new javax.swing.JPanel();
         profile = new javax.swing.JLabel();
         logoutPanel = new javax.swing.JPanel();
         logout = new javax.swing.JLabel();
         logoutLogo = new javax.swing.JLabel();
+        appointmentPanel = new javax.swing.JPanel();
+        profile1 = new javax.swing.JLabel();
         firstDesktop = new javax.swing.JDesktopPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -98,27 +102,27 @@ public class Patient_Dashboard extends javax.swing.JFrame {
 
         navigation.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 220, 50));
 
-        profilePanel.setBackground(new java.awt.Color(55, 162, 153));
-        profilePanel.addMouseListener(new java.awt.event.MouseAdapter() {
+        settingsPanel.setBackground(new java.awt.Color(55, 162, 153));
+        settingsPanel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                profilePanelMouseClicked(evt);
+                settingsPanelMouseClicked(evt);
             }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                profilePanelMouseEntered(evt);
+                settingsPanelMouseEntered(evt);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                profilePanelMouseExited(evt);
+                settingsPanelMouseExited(evt);
             }
         });
-        profilePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        settingsPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         profile.setFont(new java.awt.Font("Arial", 1, 15)); // NOI18N
         profile.setForeground(new java.awt.Color(255, 255, 255));
-        profile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/user!.png"))); // NOI18N
-        profile.setText("  Profile");
-        profilePanel.add(profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 130, 40));
+        profile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/settings.png"))); // NOI18N
+        profile.setText("  Settings");
+        settingsPanel.add(profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 130, 40));
 
-        navigation.add(profilePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 160, -1));
+        navigation.add(settingsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 440, 160, -1));
 
         logoutPanel.setBackground(new java.awt.Color(0, 51, 51));
         logoutPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -142,6 +146,28 @@ public class Patient_Dashboard extends javax.swing.JFrame {
         logoutPanel.add(logoutLogo, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 30, 30));
 
         navigation.add(logoutPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 510, 140, 30));
+
+        appointmentPanel.setBackground(new java.awt.Color(55, 162, 153));
+        appointmentPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                appointmentPanelMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                appointmentPanelMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                appointmentPanelMouseExited(evt);
+            }
+        });
+        appointmentPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        profile1.setFont(new java.awt.Font("Arial", 1, 15)); // NOI18N
+        profile1.setForeground(new java.awt.Color(255, 255, 255));
+        profile1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/appointments.png"))); // NOI18N
+        profile1.setText("   Appointment");
+        appointmentPanel.add(profile1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 130, 40));
+
+        navigation.add(appointmentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 160, -1));
 
         jPanel1.add(navigation, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 220, 560));
 
@@ -167,17 +193,17 @@ public class Patient_Dashboard extends javax.swing.JFrame {
         dashPanel.setBackground(navColor);
     }//GEN-LAST:event_dashPanelMouseExited
 
-    private void profilePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseClicked
-        showProfile();
-    }//GEN-LAST:event_profilePanelMouseClicked
+    private void settingsPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_settingsPanelMouseClicked
+        showSettings();
+    }//GEN-LAST:event_settingsPanelMouseClicked
 
-    private void profilePanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseEntered
-        profilePanel.setBackground(hoverColor);
-    }//GEN-LAST:event_profilePanelMouseEntered
+    private void settingsPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_settingsPanelMouseEntered
+        settingsPanel.setBackground(hoverColor);
+    }//GEN-LAST:event_settingsPanelMouseEntered
 
-    private void profilePanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profilePanelMouseExited
-        profilePanel.setBackground(navColor);
-    }//GEN-LAST:event_profilePanelMouseExited
+    private void settingsPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_settingsPanelMouseExited
+        settingsPanel.setBackground(navColor);
+    }//GEN-LAST:event_settingsPanelMouseExited
 
     private void logoutPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutPanelMouseClicked
 
@@ -209,6 +235,18 @@ public class Patient_Dashboard extends javax.swing.JFrame {
     private void logoutPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutPanelMouseExited
         logoutPanel.setBackground(logoutNav);
     }//GEN-LAST:event_logoutPanelMouseExited
+
+    private void appointmentPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_appointmentPanelMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_appointmentPanelMouseClicked
+
+    private void appointmentPanelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_appointmentPanelMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_appointmentPanelMouseEntered
+
+    private void appointmentPanelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_appointmentPanelMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_appointmentPanelMouseExited
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -243,6 +281,7 @@ public class Patient_Dashboard extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel appointmentPanel;
     private javax.swing.JPanel dashPanel;
     private javax.swing.JLabel dashboard;
     private javax.swing.JDesktopPane firstDesktop;
@@ -254,6 +293,7 @@ public class Patient_Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel logoutPanel;
     private javax.swing.JPanel navigation;
     private javax.swing.JLabel profile;
-    private javax.swing.JPanel profilePanel;
+    private javax.swing.JLabel profile1;
+    private javax.swing.JPanel settingsPanel;
     // End of variables declaration//GEN-END:variables
 }
