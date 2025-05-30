@@ -643,7 +643,18 @@ public class Admin_Appointment_Add extends javax.swing.JFrame {
         }
 
         int dentistId = selectedDentistItem.getValue(); // ComboItem holds the dentist ID
-        int patientId = Integer.parseInt(patientIdStr);
+        int patientId;
+        try {
+            patientId = Integer.parseInt(patientIdStr);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(
+                this,
+                "<html><b>Invalid Patient ID. Please enter a valid number.</b></html>",
+                "Validation Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
 
         // Strip time from date for validation
         Date today = stripTime(new Date());
@@ -681,7 +692,7 @@ public class Admin_Appointment_Add extends javax.swing.JFrame {
         }
 
         try (Connection conn = ConnectDB.getConnection()) {
-            // Check for existing appointment conflict
+            // Check for existing appointment conflict for the dentist and time
             String checkTimeQuery = "SELECT appointment_id FROM appointments WHERE dentist_id = ? AND pref_date = ? AND pref_time = ?";
             try (PreparedStatement checkStmt = conn.prepareStatement(checkTimeQuery)) {
                 checkStmt.setInt(1, dentistId);
@@ -694,6 +705,23 @@ public class Admin_Appointment_Add extends javax.swing.JFrame {
                         this,
                         "<html><b>This time slot is already booked for the selected dentist.</b></html>",
                         "Time Conflict",
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                    return;
+                }
+            }
+
+            // Check for any ongoing appointment for the patient (Pending or Confirmed)
+            String checkOngoingQuery = "SELECT appointment_id FROM appointments WHERE patient_id = ? AND a_status IN ('Pending', 'Confirmed')";
+            try (PreparedStatement checkOngoingStmt = conn.prepareStatement(checkOngoingQuery)) {
+                checkOngoingStmt.setInt(1, patientId);
+
+                ResultSet ongoingRs = checkOngoingStmt.executeQuery();
+                if (ongoingRs.next()) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "<html><b>You have an ongoing appointment (Pending or Confirmed). Please complete or cancel it before booking a new one.</b></html>",
+                        "Ongoing Appointment",
                         JOptionPane.WARNING_MESSAGE
                     );
                     return;

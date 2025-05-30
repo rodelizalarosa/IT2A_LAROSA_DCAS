@@ -2,7 +2,6 @@
 package ADMIN;
 
 import AUTHENTICATION.LogIn;
-import AUTHENTICATION.Register;
 import Config.*;
 import java.awt.Color;
 import java.awt.Component;
@@ -90,6 +89,10 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         Email.setBackground(new Color(0, 0, 0, 0));
         Email.setBorder(new LineBorder(Color.BLACK, 1));
         
+        // Make contact transparent with a border
+        contact.setBackground(new Color(0, 0, 0, 0));
+        contact.setBorder(new LineBorder(Color.BLACK, 1));
+        
         // Make role transparent with a border
         Gender.setBackground(new Color(0, 0, 0, 0));
         Gender.setBorder(new LineBorder(Color.BLACK, 1));
@@ -154,15 +157,15 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
     }
     
     private void loadAdminProfile() {
-        int userId = Session.getInstance().getUserId();
-        System.out.println("Loading profile for user ID: " + userId);
+        this.userId = Session.getInstance().getUserId();
+        System.out.println("Loading profile for user ID: " + this.userId);
 
         try (Connection con = ConnectDB.getConnection()) {
 
             // --- Get from users table ---
             String userSql = "SELECT u_username, u_email, u_image FROM users WHERE user_id = ?";
             try (PreparedStatement pst = con.prepareStatement(userSql)) {
-                pst.setInt(1, userId);
+                pst.setInt(1, this.userId);
                 ResultSet rs = pst.executeQuery();
                 if (rs.next()) {
                     String username = rs.getString("u_username");
@@ -351,6 +354,8 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         email = new javax.swing.JLabel();
         errorEmail = new javax.swing.JLabel();
         image = new javax.swing.JLabel();
+        email1 = new javax.swing.JLabel();
+        contact = new javax.swing.JTextField();
 
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
             public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
@@ -421,7 +426,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         gender.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         gender.setForeground(new java.awt.Color(51, 51, 51));
         gender.setText("Gender");
-        jPanel2.add(gender, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 250, 80, 30));
+        jPanel2.add(gender, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 340, 80, 30));
 
         Email.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
         Email.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -447,7 +452,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 save_buttonMouseClicked(evt);
             }
         });
-        jPanel2.add(save_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 350, 210, 40));
+        jPanel2.add(save_button, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 350, 210, 40));
         jPanel2.add(errorGender, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 320, 220, 20));
 
         delPanel.setBackground(new java.awt.Color(255, 255, 255));
@@ -558,7 +563,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 GenderActionPerformed(evt);
             }
         });
-        jPanel2.add(Gender, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 280, 270, 40));
+        jPanel2.add(Gender, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 370, 270, 40));
 
         email.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         email.setForeground(new java.awt.Color(51, 51, 51));
@@ -569,7 +574,25 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         image.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
         jPanel2.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 200, 190));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, 860, 410));
+        email1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        email1.setForeground(new java.awt.Color(51, 51, 51));
+        email1.setText("Phone Number");
+        jPanel2.add(email1, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 250, 140, 30));
+
+        contact.setFont(new java.awt.Font("Trebuchet MS", 0, 15)); // NOI18N
+        contact.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                contactFocusLost(evt);
+            }
+        });
+        contact.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                contactActionPerformed(evt);
+            }
+        });
+        jPanel2.add(contact, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 280, 270, 40));
+
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, 860, 430));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 560));
 
@@ -615,6 +638,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
         String fName = firstName.getText().trim();
         String mName = middleName.getText().trim();
         String lName = lastName.getText().trim();
+        String phone = contact.getText().trim();
         String genderValue = Gender.getSelectedItem().toString().trim();
 
         StringBuilder errorMessage = new StringBuilder();
@@ -671,24 +695,26 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
             rs.next();
             boolean staffExists = rs.getInt(1) > 0;
 
-            if (staffExists) {
-                String updateStaffSql = "UPDATE staff SET s_fname = ?, s_mname = ?, s_lname = ?, s_gender = ? WHERE user_id = ?";
+                if (staffExists) {
+                String updateStaffSql = "UPDATE staff SET s_fname = ?, s_mname = ?, s_lname = ?, s_gender = ?, s_contact = ? WHERE user_id = ?";
                 try (PreparedStatement pst = con.prepareStatement(updateStaffSql)) {
                     pst.setString(1, fName);
                     pst.setString(2, mName);
                     pst.setString(3, lName);
                     pst.setString(4, genderValue);
-                    pst.setInt(5, selectedUserId);
+                    pst.setString(5, phone);
+                    pst.setInt(6, selectedUserId);
                     pst.executeUpdate();
                 }
             } else {
-                String insertStaffSql = "INSERT INTO staff (user_id, s_fname, s_mname, s_lname, s_gender) VALUES (?, ?, ?, ?, ?)";
+                String insertStaffSql = "INSERT INTO staff (user_id, s_fname, s_mname, s_lname, s_gender, s_contact) VALUES (?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement pst = con.prepareStatement(insertStaffSql)) {
                     pst.setInt(1, selectedUserId);
                     pst.setString(2, fName);
                     pst.setString(3, mName);
                     pst.setString(4, lName);
                     pst.setString(5, genderValue);
+                    pst.setString(6, phone);
                     pst.executeUpdate();
                 }
             }
@@ -827,12 +853,12 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
                 currentImageFromDB = newImagePath;
 
                 // Update database
-                updateUserImagePath(userId, newImagePath);
+                updateUserImagePath(this.userId, newImagePath);
             }
         }
     }//GEN-LAST:event_addProfMouseClicked
 
-    private void delPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_delPanelMouseClicked
+    private void delPanelMouseClicked(java.awt.event.MouseEvent evt) {                                      
        if (selectedImagePath == null || selectedImagePath.equals(defaultImagePath)) {
             JOptionPane.showMessageDialog(
                 this,
@@ -872,7 +898,7 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
             // Update database
             updateUserImagePath(userId, defaultImagePath);
         }
-    }//GEN-LAST:event_delPanelMouseClicked
+    }                                     
 
     private void formInternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameActivated
         if (Session.getInstance().getUserId() == 0) {
@@ -884,6 +910,14 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
        }
     }//GEN-LAST:event_formInternalFrameActivated
 
+    private void contactFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_contactFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_contactFocusLost
+
+    private void contactActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_contactActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_contactActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField Email;
@@ -891,9 +925,11 @@ public class Admin_Profile_Edit extends javax.swing.JInternalFrame {
     private javax.swing.JLabel account;
     private javax.swing.JPanel addProf;
     private javax.swing.JLabel add_prof;
+    private javax.swing.JTextField contact;
     private javax.swing.JPanel delPanel;
     private javax.swing.JLabel del_prof1;
     private javax.swing.JLabel email;
+    private javax.swing.JLabel email1;
     private javax.swing.JLabel email3;
     private javax.swing.JLabel errorEmail;
     private javax.swing.JLabel errorFirst;

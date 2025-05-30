@@ -78,18 +78,25 @@ public class Admin_Profile extends javax.swing.JInternalFrame {
                     Email.setText(email);
                     Role.setText(role);
 
-                    if (imagePath != null && !imagePath.isEmpty()) {
-                        File imageFile = new File(imagePath);
-                        if (imageFile.exists()) {
-                            ImageIcon icon = new ImageIcon(imagePath);
-                            Image img = icon.getImage().getScaledInstance(image.getWidth(), image.getHeight(), Image.SCALE_SMOOTH);
-                            image.setIcon(new ImageIcon(img));
-                        } else {
-                            loadDefaultImage();
-                        }
-                    } else {
-                        loadDefaultImage();
-                    }
+if (imagePath != null && !imagePath.isEmpty()) {
+    File imageFile = new File(imagePath);
+    if (imageFile.exists()) {
+        ImageIcon icon = new ImageIcon(imagePath);
+        int width = image.getWidth();
+        int height = image.getHeight();
+        if (width <= 0 || height <= 0) {
+            Dimension size = image.getPreferredSize();
+            width = (size.width > 0) ? size.width : 120;
+            height = (size.height > 0) ? size.height : 120;
+        }
+        Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        image.setIcon(new ImageIcon(img));
+    } else {
+        loadDefaultImage();
+    }
+} else {
+    loadDefaultImage();
+}
                 }
             }
 

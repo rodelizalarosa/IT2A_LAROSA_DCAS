@@ -583,6 +583,32 @@ public class Admin_Patient_Internal extends javax.swing.JInternalFrame {
             );
 
             if (confirm == JOptionPane.YES_OPTION) {
+                // Check for ongoing appointments before opening booking form
+                try (Connection conn = ConnectDB.getConnection()) {
+                    String checkOngoingQuery = "SELECT appointment_id FROM appointments WHERE patient_id = ? AND a_status IN ('Pending', 'Confirmed')";
+                    try (PreparedStatement checkOngoingStmt = conn.prepareStatement(checkOngoingQuery)) {
+                        checkOngoingStmt.setInt(1, patientId);
+                        ResultSet ongoingRs = checkOngoingStmt.executeQuery();
+                        if (ongoingRs.next()) {
+                            JOptionPane.showMessageDialog(
+                                this,
+                                "<html><b>This patient has an ongoing appointment (Pending or Confirmed). Please complete or cancel it before booking a new one.</b></html>",
+                                "Ongoing Appointment",
+                                JOptionPane.WARNING_MESSAGE
+                            );
+                            return;
+                        }
+                    }
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "<html><b>Database error while checking appointments:</b><br>" + e.getMessage() + "</html>",
+                        "Database Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
                 Session.getInstance().setPatientId(patientId); // Optional, if you're using session data
                 Admin_Appointment_Add appointmentForm = new Admin_Appointment_Add();
                 appointmentForm.setPatientId(patientId); // Set the patient ID field
