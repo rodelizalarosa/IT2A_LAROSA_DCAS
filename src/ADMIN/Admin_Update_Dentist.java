@@ -47,7 +47,20 @@ public class Admin_Update_Dentist extends javax.swing.JFrame {
                         middleName.setText(mname != null ? mname : "");
                         lastName.setText(lname);
                         gender.setSelectedItem(genderVal);
-                        specilizationBox.setSelectedItem(specializationVal);
+
+                        // Add specialization to JComboBox if not present
+                        boolean found = false;
+                        for (int i = 0; i < specializationBox.getItemCount(); i++) {
+                            if (specializationBox.getItemAt(i).equals(specializationVal)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found && specializationVal != null && !specializationVal.trim().isEmpty()) {
+                            specializationBox.addItem(specializationVal);
+                        }
+                        specializationBox.setSelectedItem(specializationVal);
+
                         phone.setText(contact);
                     } else {
                         JOptionPane.showMessageDialog(this,
@@ -99,7 +112,7 @@ public class Admin_Update_Dentist extends javax.swing.JFrame {
         dentistID = new javax.swing.JTextField();
         appointment4 = new javax.swing.JLabel();
         specilization = new javax.swing.JLabel();
-        specilizationBox = new javax.swing.JComboBox<>();
+        specializationBox = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -336,21 +349,21 @@ public class Admin_Update_Dentist extends javax.swing.JFrame {
         specilization.setText("Specialization");
         jPanel2.add(specilization, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 350, 160, 30));
 
-        specilizationBox.setBackground(new java.awt.Color(204, 204, 204));
-        specilizationBox.setFont(new java.awt.Font("Tw Cen MT", 0, 15)); // NOI18N
-        specilizationBox.setForeground(new java.awt.Color(51, 51, 51));
-        specilizationBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Specialization", "General", "Orthodontist" }));
-        specilizationBox.addFocusListener(new java.awt.event.FocusAdapter() {
+        specializationBox.setBackground(new java.awt.Color(204, 204, 204));
+        specializationBox.setFont(new java.awt.Font("Tw Cen MT", 0, 15)); // NOI18N
+        specializationBox.setForeground(new java.awt.Color(51, 51, 51));
+        specializationBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Specialization", "General", "Orthodontist" }));
+        specializationBox.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
-                specilizationBoxFocusLost(evt);
+                specializationBoxFocusLost(evt);
             }
         });
-        specilizationBox.addActionListener(new java.awt.event.ActionListener() {
+        specializationBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                specilizationBoxActionPerformed(evt);
+                specializationBoxActionPerformed(evt);
             }
         });
-        jPanel2.add(specilizationBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 350, 250, 30));
+        jPanel2.add(specializationBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 350, 250, 30));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 80, 560, 450));
 
@@ -423,9 +436,9 @@ public class Admin_Update_Dentist extends javax.swing.JFrame {
             lastName.getText().trim().isEmpty() || 
             phone.getText().trim().isEmpty() ||
             gender.getSelectedItem() == null || 
-            specilizationBox.getSelectedItem() == null ||
+            specializationBox.getSelectedItem() == null ||
             gender.getSelectedItem().toString().equals("Select") || 
-            specilizationBox.getSelectedItem().toString().equals("Select")) {
+            specializationBox.getSelectedItem().toString().equals("Select Specialization")) {
 
             JOptionPane.showMessageDialog(this, "Please fill all required fields before proceeding.");
             return;
@@ -444,7 +457,7 @@ public class Admin_Update_Dentist extends javax.swing.JFrame {
             updateStmt.setString(2, middleName.getText().trim().isEmpty() ? null : middleName.getText().trim()); // optional
             updateStmt.setString(3, lastName.getText().trim());
             updateStmt.setString(4, gender.getSelectedItem().toString());
-            updateStmt.setString(5, specilizationBox.getSelectedItem().toString());
+            updateStmt.setString(5, specializationBox.getSelectedItem().toString().trim());
             updateStmt.setString(6, phone.getText().trim());
             updateStmt.setInt(7, dentistId);
 
@@ -519,13 +532,13 @@ public class Admin_Update_Dentist extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_dentistIDActionPerformed
 
-    private void specilizationBoxFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_specilizationBoxFocusLost
+    private void specializationBoxFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_specializationBoxFocusLost
         // TODO add your handling code here:
-    }//GEN-LAST:event_specilizationBoxFocusLost
+    }//GEN-LAST:event_specializationBoxFocusLost
 
-    private void specilizationBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_specilizationBoxActionPerformed
+    private void specializationBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_specializationBoxActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_specilizationBoxActionPerformed
+    }//GEN-LAST:event_specializationBoxActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -584,7 +597,7 @@ public class Admin_Update_Dentist extends javax.swing.JFrame {
     private javax.swing.JTextField middleName;
     private javax.swing.JTextField phone;
     private javax.swing.JPanel saveDentist;
+    private javax.swing.JComboBox<String> specializationBox;
     private javax.swing.JLabel specilization;
-    private javax.swing.JComboBox<String> specilizationBox;
     // End of variables declaration//GEN-END:variables
 }

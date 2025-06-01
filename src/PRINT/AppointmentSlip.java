@@ -141,7 +141,19 @@ public class AppointmentSlip extends javax.swing.JFrame {
             if (index == 0) {
                 userID.setText(String.valueOf(rs.getInt("patient_id")));
                 appID.setText(String.valueOf(rs.getInt("appointment_id")));
-                appTime.setText(rs.getString("pref_time"));
+                // Format the time string from "HH:mm:ss" to "hh:mm a" (e.g., 11:00 AM)
+                String rawTime = rs.getString("pref_time");
+                String formattedTime = rawTime;
+                try {
+                    java.text.SimpleDateFormat inputFormat = new java.text.SimpleDateFormat("HH:mm:ss");
+                    java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("hh:mm a");
+                    java.util.Date date = inputFormat.parse(rawTime);
+                    formattedTime = outputFormat.format(date);
+                } catch (Exception e) {
+                    // If parsing fails, keep the original time string
+                    e.printStackTrace();
+                }
+                appTime.setText(formattedTime);
                 appDate.setText(rs.getString("pref_date"));
                 patientFNAME.setText(rs.getString("p_fname") + " " + rs.getString("p_lname"));
                 patientNUMBER.setText(rs.getString("p_contactNumber"));

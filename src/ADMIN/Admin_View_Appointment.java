@@ -797,17 +797,18 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
 
                     if (rowsUpdated > 0) {
                         // Get appointment and patient info
-                        String infoQuery = "SELECT u.u_email, u.u_fullname, a.a_date, a.a_time " +
-                                           "FROM appointments a " +
-                                           "JOIN users u ON a.patient_id = u.user_id " +
-                                           "WHERE a.appointment_id = ?";
+String infoQuery = "SELECT u.u_email, CONCAT(p.p_fname, ' ', p.p_lname) AS full_name, a.pref_date AS a_date, a.pref_time AS a_time " +
+                   "FROM appointments a " +
+                   "JOIN patients p ON a.patient_id = p.patient_id " +
+                   "JOIN users u ON p.user_id = u.user_id " +
+                   "WHERE a.appointment_id = ?";
                         PreparedStatement infoStmt = conn.prepareStatement(infoQuery);
                         infoStmt.setInt(1, appointmentId);
                         ResultSet rs = infoStmt.executeQuery();
 
                         if (rs.next()) {
                             String toEmail = rs.getString("u_email");
-                            String patientName = rs.getString("u_fullname");
+                            String patientName = rs.getString("full_name");
                             String appointmentDate = rs.getString("a_date");
                             String appointmentTime = rs.getString("a_time");
 
@@ -864,7 +865,7 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_approvePanelMouseClicked
 
-    private void declinePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_declinePanelMouseClicked
+private void declinePanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_declinePanelMouseClicked
         int appointmentId = Session.getInstance().getAppointmentId();
 
         if (appointmentId != -1) {
@@ -889,10 +890,10 @@ public class Admin_View_Appointment extends javax.swing.JFrame {
                     if (statusRs.next()) {
                         String currentStatus = statusRs.getString("a_status");
 
-                        if ("Cancelled".equalsIgnoreCase(currentStatus) || "Completed".equalsIgnoreCase(currentStatus)) {
+                        if (!"Pending".equalsIgnoreCase(currentStatus)) {
                             JOptionPane.showMessageDialog(
                                 this,
-                                "<html><b>Cannot decline this appointment.</b><br>Status is already <b>" + currentStatus + "</b>.</html>",
+                                "<html><b>Cannot decline this appointment.</b><br>Status is <b>" + currentStatus + "</b>. Only pending appointments can be declined.</html>",
                                 "❌ Decline Blocked",
                                 JOptionPane.WARNING_MESSAGE
                             );
